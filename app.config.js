@@ -1,0 +1,14 @@
+module.exports = ({ config }) => {
+  // You can access the static configuration from app.json via the `config` object
+  // console.log("🚀 ~ name:", config.name);
+
+  // Modify or extend the configuration as needed
+  return {
+    ...config,
+    // Add or override configuration values here
+    foo: "bar",
+    extra: {
+      clerkPublishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
+    },
+  };
+};
