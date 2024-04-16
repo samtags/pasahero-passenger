@@ -26,7 +26,10 @@ export default function Locations() {
 
   function handleOnTransitValuesChange() {
     if (pickup && dropoff) {
-      // todo: navigate to ride
+      router.navigate("/preview", {
+        pickup,
+        dropoff,
+      });
     }
   }
 
