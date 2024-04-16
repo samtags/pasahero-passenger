@@ -8,7 +8,13 @@ export default function Page() {
       <SafeAreaView style={styles.full}>
         <View style={styles.main}>
           <Link href="/locations">
-            <Text style={styles.text}>Where are we going?</Text>
+            <Text style={styles.text}>Search</Text>
+          </Link>
+          <Link href="/messaging">
+            <Text style={styles.text}>Messaging</Text>
+          </Link>
+          <Link href="/topup">
+            <Text style={styles.text}>Top-up</Text>
           </Link>
         </View>
       </SafeAreaView>
@@ -25,6 +31,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     position: "relative",
+    gap: 16,
   },
   text: {
     fontSize: 24,
