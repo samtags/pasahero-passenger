@@ -19,6 +19,8 @@ import { router } from "expo-router";
  * @property {boolean} [isActive]
  * @property {() => unknown} [onClear]
  * @property {string} [overwriteValue]
+ * @property {boolean} [showPinOption]
+ * @property {() => void} [onPressPin]
  *
  * @param {Props} props
  * @returns
@@ -31,6 +33,8 @@ export default function TransitItem(props) {
     isActive,
     onClear,
     overwriteValue,
+    showPinOption,
+    onPressPin,
   } = props;
 
   const [value, setValue] = useState("");
@@ -85,8 +89,8 @@ export default function TransitItem(props) {
             </TouchableOpacity>
           </Optional>
         </View>
-        <Optional condition={isActive}>
-          <TouchableOpacity onPress={() => router.navigate("/pin")}>
+        <Optional condition={showPinOption}>
+          <TouchableOpacity onPress={() => onPressPin?.()}>
             <View style={styles.mapIcon} />
           </TouchableOpacity>
         </Optional>

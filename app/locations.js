@@ -80,6 +80,8 @@ export default function Locations() {
             onClear={() => setPickUp(null)}
             onChangeText={handleChangePickUpText}
             overwriteValue={pickup?.structured_formatting.main_text}
+            onPressPin={() => router.navigate("/pin")}
+            showPinOption={false}
           />
 
           <TransitItem
@@ -89,6 +91,8 @@ export default function Locations() {
             onClear={() => setDropOff(null)}
             onChangeText={handleChangeDropOffText}
             overwriteValue={dropoff?.structured_formatting.main_text}
+            onPressPin={() => router.navigate("/pin")}
+            showPinOption={false}
           />
         </View>
       </View>
