@@ -9,6 +9,7 @@ import {
 import Optional from "../optional";
 import { useState } from "react";
 import useOnUpdate from "../../services/hooks/useOnUpdate";
+import { router } from "expo-router";
 
 /**
  * @typedef Props
@@ -38,8 +39,8 @@ export default function TransitItem(props) {
     setValue(props.overwriteValue);
   }, [overwriteValue]);
 
-  const containerStyles = [styles.transit];
-  if (isActive) containerStyles.push(styles.active);
+  const contentStyles = [styles.transit];
+  if (isActive) contentStyles.push(styles.active);
 
   const handleChangeText = (v) => {
     setValue(v);
@@ -53,33 +54,40 @@ export default function TransitItem(props) {
 
   return (
     <TouchableWithoutFeedback onPress={onPress}>
-      <View style={containerStyles}>
-        <View style={styles.transitIcon} />
-        <View style={styles.full}>
-          <Optional condition={isActive}>
-            <TextInput
-              autoFocus
-              value={value}
-              onChangeText={handleChangeText}
-              style={styles.input}
-              placeholder={placeholder}
-            />
-          </Optional>
-          <Optional condition={Boolean(isActive) === false}>
-            <>
-              <Optional condition={Boolean(value) === false}>
-                <Text numberOfLines={1}>{placeholder}</Text>
-              </Optional>
+      <View style={styles.container}>
+        <View style={contentStyles}>
+          <View style={styles.transitIcon} />
+          <View style={styles.full}>
+            <Optional condition={isActive}>
+              <TextInput
+                autoFocus
+                value={value}
+                onChangeText={handleChangeText}
+                style={styles.input}
+                placeholder={placeholder}
+              />
+            </Optional>
+            <Optional condition={Boolean(isActive) === false}>
+              <>
+                <Optional condition={Boolean(value) === false}>
+                  <Text numberOfLines={1}>{placeholder}</Text>
+                </Optional>
 
-              <Optional condition={value}>
-                <Text numberOfLines={1}>{value}</Text>
-              </Optional>
-            </>
+                <Optional condition={value}>
+                  <Text numberOfLines={1}>{value}</Text>
+                </Optional>
+              </>
+            </Optional>
+          </View>
+          <Optional condition={isActive && value}>
+            <TouchableOpacity onPress={handleOnClear}>
+              <View style={styles.clearIcon} />
+            </TouchableOpacity>
           </Optional>
         </View>
-        <Optional condition={isActive && value}>
-          <TouchableOpacity onPress={handleOnClear}>
-            <View style={styles.clearIcon} />
+        <Optional condition={isActive}>
+          <TouchableOpacity onPress={() => router.navigate("/pin")}>
+            <View style={styles.mapIcon} />
           </TouchableOpacity>
         </Optional>
       </View>
@@ -91,7 +99,13 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 16,
   },
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   transit: {
+    flex: 1,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
@@ -104,6 +118,12 @@ const styles = StyleSheet.create({
     height: 20,
     width: 20,
     borderRadius: 20,
+    backgroundColor: "gainsboro",
+  },
+  mapIcon: {
+    height: 20,
+    width: 20,
+    borderRadius: 4,
     backgroundColor: "gainsboro",
   },
   clearIcon: {
