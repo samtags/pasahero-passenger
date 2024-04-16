@@ -9,6 +9,7 @@ module.exports = ({ config }) => {
     foo: "bar",
     extra: {
       clerkPublishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
+      googleApiKey: process.env.EXPO_PUBLIC_GOOGLE_API_KEY,
     },
   };
 };

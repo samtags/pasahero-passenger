@@ -1,7 +1,14 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { SignedIn, SignedOut, useOAuth, useUser } from "@clerk/clerk-expo";
+import {
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SignedOut, useOAuth } from "@clerk/clerk-expo";
 import * as WebBrowser from "expo-web-browser";
-import { useWarmUpBrowser } from "../services/hooks/useWarmUpBrowser";
+import { useWarmUpBrowser } from "../src/services/hooks/useWarmUpBrowser";
+import { Link } from "expo-router";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -9,7 +16,6 @@ export default function Page() {
   useWarmUpBrowser();
 
   const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
-  const user = useUser();
 
   const handleSignInViaGoogle = async () => {
     try {
@@ -29,21 +35,18 @@ export default function Page() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.main}>
-        <Text style={styles.title}>Hello!</Text>
-        <SignedIn>
-          <Text style={styles.subtitle}>Welcome! {user.user.fullName}</Text>
-        </SignedIn>
-        <SignedOut>
-          <Text style={styles.subtitle}>I'm sorry your are not signed in.</Text>
-          <TouchableOpacity onPress={handleSignInViaGoogle}>
-            <Text style={styles.sub}>Sign in via Google</Text>
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Text style={styles.sub}>Join now!</Text>
-          </TouchableOpacity>
-        </SignedOut>
-      </View>
+      <SafeAreaView style={{ flex: 1 }}>
+        <View style={styles.main}>
+          <Link href="/locations">
+            <Text style={styles.text}>Where are we going?</Text>
+          </Link>
+          <SignedOut>
+            <TouchableOpacity onPress={handleSignInViaGoogle}>
+              <Text style={styles.underlined}>Sign in via Google</Text>
+            </TouchableOpacity>
+          </SignedOut>
+        </View>
+      </SafeAreaView>
     </View>
   );
 }
@@ -51,27 +54,22 @@ export default function Page() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    padding: 24,
+    backgroundColor: "whitesmoke",
   },
   main: {
     flex: 1,
-    justifyContent: "center",
-    maxWidth: 960,
-    marginHorizontal: "auto",
+    paddingHorizontal: 24,
   },
-  title: {
-    fontSize: 64,
-    fontWeight: "bold",
-  },
-  subtitle: {
-    fontSize: 36,
-    color: "#38434D",
-  },
-  sub: {
+
+  underlined: {
     fontSize: 24,
     color: "#38434D",
     textDecorationLine: "underline",
+    marginTop: 16,
+  },
+  text: {
+    fontSize: 24,
+    color: "#38434D",
     marginTop: 16,
   },
 });
