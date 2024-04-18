@@ -1,6 +1,6 @@
 module.exports = ({ config }) => {
   // You can access the static configuration from app.json via the `config` object
-  // console.log("🚀 ~ name:", config.name);
+  // console.debug("🚀 ~ name:", config.name);
 
   // Modify or extend the configuration as needed
   return {
