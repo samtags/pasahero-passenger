@@ -10,6 +10,7 @@ import supabase from "../../services/supabase";
 import { useRef } from "react";
 import Message from "./util/Message";
 import { useUser } from "@clerk/clerk-expo";
+import useIncomingMessage from "./util/useIncomingMessage";
 
 export default function Messaging() {
   const user = useUser();
@@ -17,6 +18,9 @@ export default function Messaging() {
   const refValue = useRef("");
   const refInput = useRef(null);
   const global = useGlobalSearchParams();
+
+  const incomingMessage = useIncomingMessage(global.transit);
+  console.debug("🚀 ~ Messaging ~ incomingMessage:", incomingMessage);
 
   function handleClearSetInput() {
     refInput.current?.setNativeProps({ text: "" });
