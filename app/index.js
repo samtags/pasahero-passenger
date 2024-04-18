@@ -1,10 +1,16 @@
-import { SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { Link, Stack } from "expo-router";
+import { Image, Text, View, SafeAreaView, StyleSheet } from "react-native";
 
-import { Link } from "expo-router";
-
-export default function Page() {
+export default function Home() {
   return (
     <View style={styles.container}>
+      <Stack.Screen
+        options={{
+          title: "Home",
+          headerStyle: { backgroundColor: "gainsboro" },
+          headerTitle: (props) => <LogoTitle {...props} />,
+        }}
+      />
       <SafeAreaView style={styles.full}>
         <View style={styles.main}>
           <Link href="/locations">
@@ -19,6 +25,15 @@ export default function Page() {
         </View>
       </SafeAreaView>
     </View>
+  );
+}
+
+function LogoTitle() {
+  return (
+    <Image
+      style={{ width: 50, height: 50 }}
+      source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }}
+    />
   );
 }
 
@@ -40,5 +55,6 @@ const styles = StyleSheet.create({
   },
   full: {
     flex: 1,
+    backgroundColor: "whitesmoke",
   },
 });

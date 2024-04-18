@@ -1,5 +1,5 @@
 import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import useAutoComplete from "../src/services/queries/useAutoComplete";
 import { useState } from "react";
 import TransitItem from "../src/components/locations/TransitItem";
@@ -68,6 +68,7 @@ export default function Locations() {
 
   return (
     <View style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }} />
       <View style={[styles.row, { gap: 8 }]}>
         <TouchableOpacity style={{ marginTop: 12 }} onPress={router.back}>
           <Text>Back</Text>

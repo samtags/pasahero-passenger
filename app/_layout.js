@@ -1,4 +1,4 @@
-import { Slot } from "expo-router";
+import { Stack } from "expo-router/stack";
 import { ClerkProvider } from "@clerk/clerk-expo";
 import Const from "expo-constants";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -9,10 +9,11 @@ const queryClient = new QueryClient({});
 
 export default function Layout() {
   useReactQueryDevTools(queryClient);
+
   return (
     <ClerkProvider publishableKey={Const.expoConfig.extra.clerkPublishableKey}>
       <QueryClientProvider client={queryClient}>
-        <Slot />
+        <Stack />
         <SignIn />
       </QueryClientProvider>
     </ClerkProvider>
