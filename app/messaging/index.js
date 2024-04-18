@@ -1,65 +1,23 @@
-import { Stack, useRouter } from "expo-router";
-import { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  TextInput,
-} from "react-native";
+import { Stack } from "expo-router";
+import Messaging from "../../src/screens/messaging/messaging";
+import Config from "../../src/screens/messaging/config";
 
-export default function Messaging() {
-  const router = useRouter();
+// todo: move this to launchdarkly
+const isDebugEnabled = true;
 
-  const [transit, setTransit] = useState(
-    "cefbafa1-080a-4053-a915-e878d5397f16"
-  );
-
+export default function Entry(props) {
   return (
-    <View style={styles.container}>
+    <>
       <Stack.Screen
         options={{
           title: "Setup",
         }}
       />
 
-      <Text style={{ fontWeight: "600" }}>Transit ID</Text>
-
-      <TextInput
-        autoFocus
-        value={transit}
-        placeholder="Transit"
-        onChangeText={setTransit}
-      />
-
-      <View style={styles.spacer} />
-
-      <TouchableOpacity
-        onPress={() => router.navigate(`/messaging/${transit}`)}
-      >
-        <Text style={{ fontWeight: "600" }}>Next</Text>
-      </TouchableOpacity>
-    </View>
+      {(() => {
+        if (isDebugEnabled) return <Config {...props} />;
+        return <Messaging {...props} />;
+      })()}
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "whitesmoke",
-  },
-  primary: {
-    backgroundColor: "gainsboro",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 18,
-    color: "#38434D",
-    marginVertical: 16,
-  },
-  spacer: {
-    padding: 8,
-  },
-});
