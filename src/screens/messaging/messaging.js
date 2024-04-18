@@ -5,9 +5,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   TextInput,
+  ScrollView,
 } from "react-native";
 import supabase from "../../services/supabase";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Message from "./util/Message";
 import { useUser } from "@clerk/clerk-expo";
 import useIncomingMessage from "./util/useIncomingMessage";
@@ -27,6 +28,7 @@ export default function Messaging() {
 
   const incomingMessage = useIncomingMessage(global.transit);
   useOnUpdate(handleAddIncomingMessage, [incomingMessage]);
+  useEffect(handleGetMessages, []);
 
   function handleClearSetInput() {
     refInput.current?.setNativeProps({ text: "" });
@@ -50,22 +52,29 @@ export default function Messaging() {
     handleAddMessage(message);
 
     handleClearSetInput();
-    handleToggleState();
+    handleManualRerender();
   };
 
   const handleChangeText = (v) => {
     refValue.current = v;
   };
 
-  function handleToggleState() {
+  function handleManualRerender() {
     toggleState((state) => !state);
   }
 
   function handleAddIncomingMessage() {
     if (incomingMessage) {
       handleAddMessage(incomingMessage);
-      handleToggleState();
+      handleManualRerender();
     }
+  }
+
+  async function handleGetMessages() {
+    const messages = await handleRetrieveMessages(global?.transit);
+    console.debug("Retrieved messages from server.", messages);
+    messages.forEach((message) => handleAddMessage(message));
+    handleManualRerender();
   }
 
   return (
@@ -135,6 +144,25 @@ function handleAddMessage(message) {
   } else {
     console.debug("Message already exists in the map.", message);
   }
+}
+
+/** @param {string} transit  */
+async function handleRetrieveMessages(transit) {
+  if (!transit) return [];
+
+  console.debug("Retrieving messages");
+
+  const { data, error } = await supabase
+    .from("msg")
+    .select("*")
+    .eq("transit", transit);
+
+  if (error) {
+    console.error("An error occurred while retrieving messages.", error);
+    return [];
+  }
+
+  return data || [];
 }
 
 const styles = StyleSheet.create({

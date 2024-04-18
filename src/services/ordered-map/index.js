@@ -34,7 +34,7 @@ export default class OrderedMap {
     });
   }
 
-  /** @param {(key: string, value: any) => void} callback */
+  /** @param {(key: string, value: any) => []} callback */
   map(callback) {
     const result = [];
 
