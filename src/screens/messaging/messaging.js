@@ -7,20 +7,26 @@ import {
   TextInput,
 } from "react-native";
 import supabase from "../../services/supabase";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Message from "./util/Message";
 import { useUser } from "@clerk/clerk-expo";
 import useIncomingMessage from "./util/useIncomingMessage";
+import OrderedMap from "../../services/ordered-map";
+import useOnUpdate from "../../services/hooks/useOnUpdate";
+import moment from "moment";
+
+const messageMap = new OrderedMap();
 
 export default function Messaging() {
   const user = useUser();
+  const [, toggleState] = useState(false);
 
   const refValue = useRef("");
   const refInput = useRef(null);
   const global = useGlobalSearchParams();
 
   const incomingMessage = useIncomingMessage(global.transit);
-  console.debug("🚀 ~ Messaging ~ incomingMessage:", incomingMessage);
+  useOnUpdate(handleAddIncomingMessage, [incomingMessage]);
 
   function handleClearSetInput() {
     refInput.current?.setNativeProps({ text: "" });
@@ -40,14 +46,27 @@ export default function Messaging() {
     // send to server
     sendMessage(message);
 
-    // todo: send message to client
+    // send message to client
+    handleAddMessage(message);
 
     handleClearSetInput();
+    handleToggleState();
   };
 
   const handleChangeText = (v) => {
     refValue.current = v;
   };
+
+  function handleToggleState() {
+    toggleState((state) => !state);
+  }
+
+  function handleAddIncomingMessage() {
+    if (incomingMessage) {
+      handleAddMessage(incomingMessage);
+      handleToggleState();
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -71,6 +90,21 @@ export default function Messaging() {
           <TouchableOpacity onPress={handleSendMessage}>
             <Text style={{ fontWeight: "bold" }}>Send</Text>
           </TouchableOpacity>
+
+          <View style={styles.spacer} />
+
+          <View style={{ gap: 8 }}>
+            {messageMap.map((key, value) => {
+              return (
+                <View key={key}>
+                  <Text style={styles.sender}>
+                    {moment(value.created_at).fromNow()}
+                  </Text>
+                  <Text style={styles.message}>{value.message}</Text>
+                </View>
+              );
+            })}
+          </View>
         </View>
       </View>
     </View>
@@ -94,6 +128,15 @@ async function sendMessage(message) {
   return data;
 }
 
+function handleAddMessage(message) {
+  if (!messageMap.get(message.id)) {
+    messageMap.addToEnd(message.id, message);
+    console.debug("Added message to map.", message);
+  } else {
+    console.debug("Message already exists in the map.", message);
+  }
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -109,6 +152,13 @@ const styles = StyleSheet.create({
     color: "#38434D",
     marginVertical: 16,
     textAlign: "center",
+  },
+  sender: {
+    color: "gray",
+  },
+  message: {
+    fontSize: 16,
+    fontWeight: "600",
   },
   spacer: {
     padding: 8,
