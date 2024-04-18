@@ -10,6 +10,8 @@ module.exports = ({ config }) => {
     extra: {
       clerkPublishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
       googleApiKey: process.env.EXPO_PUBLIC_GOOGLE_API_KEY,
+      supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
+      supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
     },
   };
 };
