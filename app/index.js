@@ -8,7 +8,6 @@ export default function Home() {
         options={{
           title: "Home",
           headerStyle: { backgroundColor: "gainsboro" },
-          headerTitle: (props) => <LogoTitle {...props} />,
         }}
       />
       <SafeAreaView style={styles.full}>
@@ -44,14 +43,17 @@ const styles = StyleSheet.create({
   },
   main: {
     flex: 1,
-    paddingHorizontal: 24,
+    padding: 24,
     position: "relative",
     gap: 16,
+    justifyContent: "center",
   },
   text: {
-    fontSize: 24,
+    fontSize: 16,
     color: "#38434D",
     marginTop: 16,
+    fontWeight: "600",
+    textAlign: "center",
   },
   full: {
     flex: 1,

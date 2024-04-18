@@ -41,6 +41,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "whitesmoke",
+    padding: 24,
   },
   primary: {
     backgroundColor: "gainsboro",

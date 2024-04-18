@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 import Messaging from "../../src/screens/messaging/messaging";
-import Config from "../../src/screens/messaging/config";
+import Setup from "../../src/screens/messaging/setup";
 
 // todo: move this to launchdarkly
 const isDebugEnabled = true;
@@ -15,7 +15,7 @@ export default function Entry(props) {
       />
 
       {(() => {
-        if (isDebugEnabled) return <Config {...props} />;
+        if (isDebugEnabled) return <Setup {...props} />;
         return <Messaging {...props} />;
       })()}
     </>

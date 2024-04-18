@@ -50,6 +50,7 @@ const styles = StyleSheet.create({
     color: "#38434D",
     textDecorationLine: "underline",
     marginTop: 16,
+    fontWeight: "700",
   },
   container: {
     position: "absolute",
