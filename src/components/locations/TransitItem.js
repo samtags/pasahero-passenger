@@ -21,6 +21,7 @@ import { router } from "expo-router";
  * @property {string} [overwriteValue]
  * @property {boolean} [showPinOption]
  * @property {() => void} [onPressPin]
+ * @property {() => void} [onFocus]
  *
  * @param {Props} props
  * @returns
@@ -35,6 +36,7 @@ export default function TransitItem(props) {
     overwriteValue,
     showPinOption,
     onPressPin,
+    onFocus,
   } = props;
 
   const [value, setValue] = useState("");
@@ -65,6 +67,7 @@ export default function TransitItem(props) {
             <Optional condition={isActive}>
               <TextInput
                 autoFocus
+                onFocus={() => onFocus?.()}
                 value={value}
                 onChangeText={handleChangeText}
                 style={styles.input}

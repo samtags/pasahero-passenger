@@ -1,4 +1,11 @@
-import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Text,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import useAutoComplete from "../../services/queries/useAutoComplete";
 import { useState } from "react";
@@ -8,7 +15,7 @@ import Optional from "../../components/optional";
 import useOnUpdate from "../../services/hooks/useOnUpdate";
 import * as ExpoLocation from "expo-location";
 
-export default function Locations(props) {
+export default function Locations() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
@@ -28,7 +35,37 @@ export default function Locations(props) {
   useOnUpdate(handleUpdateParams, [params]);
 
   function handleUpdateParams() {
-    console.log("🚀 ~ handleUpdateParams ~ param:", params);
+    if (params?.["first.placeId"]) {
+      if (pickup?.place_id !== params["first.placeId"]) {
+        setPickUp({
+          description: params["first.address"],
+          place_id: params["first.placeId"],
+          structured_formatting: {
+            main_text: params["first.address"],
+            secondary_text: params["first.address"],
+          },
+        });
+
+        // focus to the last transit if the last transit is empty
+        if (dropoff === null) setFocusedTransit("last");
+      }
+    }
+
+    if (params?.["last.placeId"]) {
+      if (dropoff?.place_id !== params["last.placeId"]) {
+        setDropOff({
+          description: params["last.address"],
+          place_id: params["last.placeId"],
+          structured_formatting: {
+            main_text: params["last.address"],
+            secondary_text: params["last.address"],
+          },
+        });
+
+        // focus to the first transit if the first transit is empty
+        if (pickup === null) setFocusedTransit("first");
+      }
+    }
   }
 
   function handleOnTransitValuesChange() {
@@ -97,46 +134,59 @@ export default function Locations(props) {
         <View style={styles.full}>
           <TransitItem
             placeholder="See you at?"
+            onFocus={() => setQ("")}
             isActive={focusedTransit === "first"}
             onPress={() => setFocusedTransit("first")}
             onClear={() => setPickUp(null)}
             onChangeText={handleChangePickUpText}
-            overwriteValue={pickup?.structured_formatting.main_text}
+            overwriteValue={pickup?.structured_formatting.secondary_text}
             onPressPin={() => handleRedirectToPin("first")}
-            showPinOption={false}
+            showPinOption={focusedTransit === "first" && params.locations === "true"} // prettier-ignore
           />
 
           <TransitItem
             placeholder="Going to?"
+            onFocus={() => setQ("")}
             isActive={focusedTransit === "last"}
             onPress={() => setFocusedTransit("last")}
             onClear={() => setDropOff(null)}
             onChangeText={handleChangeDropOffText}
-            overwriteValue={dropoff?.structured_formatting.main_text}
+            overwriteValue={dropoff?.structured_formatting.secondary_text}
             onPressPin={() => handleRedirectToPin("last")}
-            showPinOption={params.locations === "true"}
+            showPinOption={focusedTransit === "last" && params.locations === "true"} // prettier-ignore
           />
         </View>
       </View>
 
-      <Optional condition={isLoading}>
-        <View style={styles.center}>
-          <Text>...</Text>
-        </View>
-      </Optional>
+      <TouchableWithoutFeedback
+        style={{ flex: 1 }}
+        onPress={() => {
+          Keyboard.dismiss();
+          setFocusedTransit("");
+        }}
+        accessible={false}
+      >
+        <View style={{ flex: 1 }}>
+          <Optional condition={isLoading}>
+            <View style={styles.center}>
+              <Text>...</Text>
+            </View>
+          </Optional>
 
-      <View style={styles.list}>
-        {data.map((item) => {
-          return (
-            <TouchableOpacity
-              onPress={() => handleSelectSuggestion(item)}
-              key={item.place_id}
-            >
-              <Text>{item.description}</Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+          <View style={styles.list}>
+            {data.map((item) => {
+              return (
+                <TouchableOpacity
+                  onPress={() => handleSelectSuggestion(item)}
+                  key={item.place_id}
+                >
+                  <Text>{item.description}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
     </View>
   );
 }

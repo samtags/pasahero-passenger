@@ -9,8 +9,7 @@ export default async function reverseGeocode(latlng) {
     params: {
       key,
       latlng,
-      result_type:
-        "street_address|route|colloquial_area|establishment|premise|lodging",
+      result_type: "street_address|route|colloquial_area|establishment|lodging",
     },
   });
 }
