@@ -22,14 +22,6 @@ module.exports = ({ config }) => {
             "Allow $(PRODUCT_NAME) to use your location",
         },
       ],
-      [
-        "@rnmapbox/maps",
-        {
-          RNMapboxMapsVersion: "10.16.2",
-          RNMapboxMapsDownloadToken:
-            "REDACTED",
-        },
-      ],
     ],
   };
 };
