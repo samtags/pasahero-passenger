@@ -31,13 +31,36 @@ export default function Locations() {
   const debouncedInput = useDelayedValue(q, 750);
   const { data = [], isLoading } = useAutoComplete(debouncedInput);
 
-  useOnUpdate(handleOnTransitValuesChange, [pickup, dropoff]);
   useOnUpdate(handleUpdateParams, [params]);
+
+  function handleSetPickUp(location) {
+    setPickUp(location);
+    if (dropoff) {
+      handleRedirectToConfirm({
+        "first.placeId": location.place_id,
+        "first.address": location.description,
+        "last.placeId": dropoff.place_id,
+        "last.address": dropoff.description,
+      });
+    }
+  }
+
+  function handleSetDropOff(location) {
+    setDropOff(location);
+    if (pickup) {
+      handleRedirectToConfirm({
+        "first.placeId": pickup.place_id,
+        "first.address": pickup.description,
+        "last.placeId": location.place_id,
+        "last.address": location.description,
+      });
+    }
+  }
 
   function handleUpdateParams() {
     if (params?.["first.placeId"]) {
       if (pickup?.place_id !== params["first.placeId"]) {
-        setPickUp({
+        handleSetPickUp({
           description: params["first.address"],
           place_id: params["first.placeId"],
           structured_formatting: {
@@ -53,7 +76,7 @@ export default function Locations() {
 
     if (params?.["last.placeId"]) {
       if (dropoff?.place_id !== params["last.placeId"]) {
-        setDropOff({
+        handleSetDropOff({
           description: params["last.address"],
           place_id: params["last.placeId"],
           structured_formatting: {
@@ -68,24 +91,35 @@ export default function Locations() {
     }
   }
 
-  function handleOnTransitValuesChange() {
-    if (pickup && dropoff) {
-      router.navigate("preview", {
-        pickup,
-        dropoff,
-      });
-    }
+  /**
+   * @typedef {object} Params
+   * @property {string} "first.placeId"
+   * @property {string} "first.address"
+   * @property {string} "last.placeId"
+   * @property {string} "last.address"
+   *
+   * @param {Params} params
+   */
+
+  function handleRedirectToConfirm(params) {
+    router.navigate({
+      pathname: "match",
+      params,
+    });
+
+    Keyboard.dismiss();
+    setFocusedTransit("");
   }
 
   /** @param {Location} location  */
   function handleSelectSuggestion(location) {
     if (focusedTransit === "first") {
-      setPickUp(location);
+      handleSetPickUp(location);
 
       // focus to the first transit if the first transit is empty
       if (dropoff === null) setFocusedTransit("last");
     } else {
-      setDropOff(location);
+      handleSetDropOff(location);
 
       // focus to the last transit if the last transit is empty
       if (pickup === null) setFocusedTransit("first");
@@ -97,7 +131,7 @@ export default function Locations() {
   /** @param {string} text */
   function handleChangePickUpText(text) {
     // reset the value if the user updates the pickup text
-    if (pickup) setPickUp(null);
+    if (pickup) handleSetPickUp(null);
 
     setQ(text);
   }
@@ -105,7 +139,7 @@ export default function Locations() {
   /** @param {string} text */
   function handleChangeDropOffText(text) {
     // reset the value if the user updates the pickup text
-    if (dropoff) setDropOff(null);
+    if (dropoff) handleSetDropOff(null);
 
     setQ(text);
   }
@@ -124,6 +158,22 @@ export default function Locations() {
     });
   }
 
+  function handleClearPickUp() {
+    setPickUp(null);
+    router.setParams({
+      "first.placeId": "",
+      "first.address": "",
+    });
+  }
+
+  function handleClearDropOff() {
+    setDropOff(null);
+    router.setParams({
+      "last.placeId": "",
+      "last.address": "",
+    });
+  }
+
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
@@ -137,9 +187,9 @@ export default function Locations() {
             onFocus={() => setQ("")}
             isActive={focusedTransit === "first"}
             onPress={() => setFocusedTransit("first")}
-            onClear={() => setPickUp(null)}
+            onClear={handleClearPickUp}
             onChangeText={handleChangePickUpText}
-            overwriteValue={pickup?.structured_formatting.secondary_text}
+            overwriteValue={pickup?.description}
             onPressPin={() => handleRedirectToPin("first")}
             showPinOption={focusedTransit === "first" && params.locations === "true"} // prettier-ignore
           />
@@ -149,9 +199,9 @@ export default function Locations() {
             onFocus={() => setQ("")}
             isActive={focusedTransit === "last"}
             onPress={() => setFocusedTransit("last")}
-            onClear={() => setDropOff(null)}
+            onClear={handleClearDropOff}
             onChangeText={handleChangeDropOffText}
-            overwriteValue={dropoff?.structured_formatting.secondary_text}
+            overwriteValue={dropoff?.description}
             onPressPin={() => handleRedirectToPin("last")}
             showPinOption={focusedTransit === "last" && params.locations === "true"} // prettier-ignore
           />
