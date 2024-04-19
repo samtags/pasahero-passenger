@@ -11,26 +11,22 @@ import {
 export default function Messaging() {
   const router = useRouter();
 
-  const [transit, setTransit] = useState(
-    "cefbafa1-080a-4053-a915-e878d5397f16"
-  );
+  const [roomId, setRoom] = useState("cefbafa1-080a-4053-a915-e878d5397f16");
 
   return (
     <View style={styles.container}>
-      <Text style={{ fontWeight: "600" }}>Transit ID</Text>
+      <Text style={{ fontWeight: "600" }}>Room</Text>
 
       <TextInput
         autoFocus
-        value={transit}
+        value={roomId}
         placeholder="Transit"
-        onChangeText={setTransit}
+        onChangeText={setRoom}
       />
 
       <View style={styles.spacer} />
 
-      <TouchableOpacity
-        onPress={() => router.navigate(`/messaging/${transit}`)}
-      >
+      <TouchableOpacity onPress={() => router.navigate(`/messaging/${roomId}`)}>
         <Text style={{ fontWeight: "600" }}>Next</Text>
       </TouchableOpacity>
     </View>

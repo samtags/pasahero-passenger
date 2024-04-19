@@ -1,7 +1,31 @@
-import { Link, Stack } from "expo-router";
-import { Image, Text, View, SafeAreaView, StyleSheet } from "react-native";
+import { Link, Stack, useRouter } from "expo-router";
+import {
+  Image,
+  Text,
+  View,
+  SafeAreaView,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import * as Location from "expo-location";
 
 export default function Home() {
+  const router = useRouter();
+
+  async function handlePressSearch() {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    const granted = status === "granted";
+    handleGoToLocations(granted);
+  }
+
+  /** @param {boolean} granted */
+  function handleGoToLocations(granted) {
+    router.navigate({
+      pathname: "locations",
+      params: { locations: granted, foo: "bar" },
+    });
+  }
+
   return (
     <View style={styles.container}>
       <Stack.Screen
@@ -12,9 +36,9 @@ export default function Home() {
       />
       <SafeAreaView style={styles.full}>
         <View style={styles.main}>
-          <Link href="/locations">
+          <TouchableOpacity onPress={handlePressSearch}>
             <Text style={styles.text}>Search</Text>
-          </Link>
+          </TouchableOpacity>
           <Link href="/messaging">
             <Text style={styles.text}>Messaging</Text>
           </Link>

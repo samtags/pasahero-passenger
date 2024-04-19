@@ -1,41 +1,15 @@
-import { useRouter } from "expo-router";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
-  StyleSheet,
-} from "react-native";
+import { Stack } from "expo-router";
+import Pin from "../src/screens/pin";
 
-export default function Pin() {
-  const router = useRouter();
-
+export default function Entry(props) {
   return (
-    <View style={styles.container}>
-      <SafeAreaView>
-        <TouchableOpacity onPress={router.back}>
-          <Text>Back</Text>
-        </TouchableOpacity>
-
-        <Text>Pin</Text>
-
-        <TouchableOpacity style={styles.primary}>
-          <Text>Confirm Location</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    </View>
+    <>
+      <Stack.Screen
+        options={{
+          title: "Pin",
+        }}
+      />
+      <Pin {...props} />
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "whitesmoke",
-  },
-  primary: {
-    backgroundColor: "gainsboro",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-});

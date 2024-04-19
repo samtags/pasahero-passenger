@@ -13,5 +13,23 @@ module.exports = ({ config }) => {
       supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
       supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
     },
+    plugins: [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          locationWhenInUsePermission:
+            "Allow $(PRODUCT_NAME) to use your location",
+        },
+      ],
+      [
+        "@rnmapbox/maps",
+        {
+          RNMapboxMapsVersion: "10.16.2",
+          RNMapboxMapsDownloadToken:
+            "REDACTED",
+        },
+      ],
+    ],
   };
 };

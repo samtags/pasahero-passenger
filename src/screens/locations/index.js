@@ -1,14 +1,22 @@
 import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
-import { Stack, useRouter } from "expo-router";
+import {
+  Stack,
+  useGlobalSearchParams,
+  useLocalSearchParams,
+  useRouter,
+} from "expo-router";
 import useAutoComplete from "../../services/queries/useAutoComplete";
 import { useState } from "react";
 import TransitItem from "../../components/locations/TransitItem";
 import useDelayedValue from "../../services/hooks/useDelayedValue";
 import Optional from "../../components/optional";
 import useOnUpdate from "../../services/hooks/useOnUpdate";
+import * as ExpoLocation from "expo-location";
 
-export default function Locations() {
+export default function Locations(props) {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const globalParams = useGlobalSearchParams();
 
   /** @type {[Location, (v: Location) => void]} */
   const [pickup, setPickUp] = useState(null);
@@ -26,7 +34,7 @@ export default function Locations() {
 
   function handleOnTransitValuesChange() {
     if (pickup && dropoff) {
-      router.navigate("/preview", {
+      router.navigate("preview", {
         pickup,
         dropoff,
       });
@@ -66,6 +74,20 @@ export default function Locations() {
     setQ(text);
   }
 
+  /** @param {"first" | "last"} redirectSource */
+  async function handleRedirectToPin(redirectSource) {
+    const coordinates = await handleGetCurrentPosition();
+
+    router.navigate({
+      pathname: "pin",
+      params: {
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        redirectSource,
+      },
+    });
+  }
+
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
@@ -81,7 +103,7 @@ export default function Locations() {
             onClear={() => setPickUp(null)}
             onChangeText={handleChangePickUpText}
             overwriteValue={pickup?.structured_formatting.main_text}
-            onPressPin={() => router.navigate("/pin")}
+            onPressPin={() => handleRedirectToPin("first")}
             showPinOption={false}
           />
 
@@ -92,8 +114,8 @@ export default function Locations() {
             onClear={() => setDropOff(null)}
             onChangeText={handleChangeDropOffText}
             overwriteValue={dropoff?.structured_formatting.main_text}
-            onPressPin={() => router.navigate("/pin")}
-            showPinOption={false}
+            onPressPin={() => handleRedirectToPin("last")}
+            showPinOption={params.locations === "true"}
           />
         </View>
       </View>
@@ -118,6 +140,14 @@ export default function Locations() {
       </View>
     </View>
   );
+}
+
+async function handleGetCurrentPosition() {
+  const { coords } = await ExpoLocation.getCurrentPositionAsync({
+    accuracy: ExpoLocation.Accuracy.Highest,
+  });
+
+  return coords;
 }
 
 const styles = StyleSheet.create({

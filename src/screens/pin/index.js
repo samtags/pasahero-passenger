@@ -1,0 +1,96 @@
+import { useLocalSearchParams, useRouter } from "expo-router";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  StyleSheet,
+} from "react-native";
+import { useState, useRef } from "react";
+import MapView from "react-native-maps";
+
+export default function Pin() {
+  const params = useLocalSearchParams();
+  const router = useRouter();
+
+  const mapRef = useRef(null);
+  const [center, setCenter] = useState({});
+
+  function handleConfirm() {
+    const redirectSource = params.redirectSource;
+    router.back();
+    router.setParams({
+      [`${redirectSource}.latitude`]: center.latitude,
+      [`${redirectSource}.longitude`]: center.longitude,
+    });
+  }
+
+  return (
+    <View style={styles.container}>
+      <SafeAreaView style={{ flex: 1 }}>
+        <View
+          style={{
+            flex: 1,
+            position: "relative",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <View style={styles.marker}>
+            <View style={styles.pin} />
+            <Text>[Pin Icon]</Text>
+          </View>
+          <MapView
+            ref={mapRef}
+            initialRegion={{
+              latitude: params.latitude,
+              longitude: params.longitude,
+              latitudeDelta: 0.01084,
+              longitudeDelta: 0.006443,
+            }}
+            onRegionChangeComplete={(region) => {
+              setCenter({
+                latitude: region.latitude,
+                longitude: region.longitude,
+              });
+            }}
+            style={styles.map}
+          />
+        </View>
+        <TouchableOpacity onPress={handleConfirm} style={styles.primary}>
+          <Text>Confirm</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "whitesmoke",
+  },
+  primary: {
+    backgroundColor: "gainsboro",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    flexShrink: 0,
+  },
+  map: {
+    height: "100%",
+    width: "100%",
+  },
+  pin: {
+    backgroundColor: "gainsboro",
+    height: 24,
+    width: 24,
+    borderRadius: 4,
+  },
+  marker: {
+    position: "absolute",
+    zIndex: 1,
+    alignItems: "center",
+    gap: 2,
+  },
+});
