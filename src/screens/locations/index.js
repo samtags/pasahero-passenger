@@ -1,10 +1,5 @@
 import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
-import {
-  Stack,
-  useGlobalSearchParams,
-  useLocalSearchParams,
-  useRouter,
-} from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import useAutoComplete from "../../services/queries/useAutoComplete";
 import { useState } from "react";
 import TransitItem from "../../components/locations/TransitItem";
@@ -16,7 +11,6 @@ import * as ExpoLocation from "expo-location";
 export default function Locations(props) {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const globalParams = useGlobalSearchParams();
 
   /** @type {[Location, (v: Location) => void]} */
   const [pickup, setPickUp] = useState(null);
@@ -31,6 +25,11 @@ export default function Locations(props) {
   const { data = [], isLoading } = useAutoComplete(debouncedInput);
 
   useOnUpdate(handleOnTransitValuesChange, [pickup, dropoff]);
+  useOnUpdate(handleUpdateParams, [params]);
+
+  function handleUpdateParams() {
+    console.log("🚀 ~ handleUpdateParams ~ param:", params);
+  }
 
   function handleOnTransitValuesChange() {
     if (pickup && dropoff) {

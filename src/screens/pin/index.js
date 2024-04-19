@@ -8,21 +8,41 @@ import {
 } from "react-native";
 import { useState, useRef } from "react";
 import MapView from "react-native-maps";
+import reverseGeocode from "../../services/api/reverseGeocoding";
 
 export default function Pin() {
   const params = useLocalSearchParams();
   const router = useRouter();
 
   const mapRef = useRef(null);
-  const [center, setCenter] = useState({});
+  const [center, setCenter] = useState({
+    latitude: params.latitude,
+    longitude: params.longitude,
+  });
 
-  function handleConfirm() {
+  async function handleConfirm() {
     const redirectSource = params.redirectSource;
-    router.back();
-    router.setParams({
-      [`${redirectSource}.latitude`]: center.latitude,
-      [`${redirectSource}.longitude`]: center.longitude,
-    });
+
+    // query reverse geocoding API
+    const result = await reverseGeocode(
+      `${center.latitude},${center.longitude}`
+    );
+
+    if (result.data.status === "OK") {
+      if (result?.data?.results?.[0]) {
+        const data = result?.data?.results?.[0];
+        const placeId = data?.place_id;
+        const address = data?.formatted_address;
+
+        router.back();
+        router.setParams({
+          [`${redirectSource}.latitude`]: center.latitude,
+          [`${redirectSource}.longitude`]: center.longitude,
+          [`${redirectSource}.placeId`]: placeId,
+          [`${redirectSource}.address`]: address,
+        });
+      }
+    }
   }
 
   return (
