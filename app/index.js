@@ -42,8 +42,8 @@ export default function Home() {
           <Link href="/messaging">
             <Text style={styles.text}>Messaging</Text>
           </Link>
-          <Link href="/topup">
-            <Text style={styles.text}>Top-up</Text>
+          <Link href="/wallet">
+            <Text style={styles.text}>Wallet</Text>
           </Link>
         </View>
       </SafeAreaView>
