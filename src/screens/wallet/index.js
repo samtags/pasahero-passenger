@@ -1,18 +1,17 @@
-import { useRouter } from "expo-router";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
-  StyleSheet,
-} from "react-native";
+import { View, Text, SafeAreaView, StyleSheet } from "react-native";
+import useWallet from "./util/useWallet";
+import amount from "../../services/util/amount";
+import { useUser } from "@clerk/clerk-expo";
 
 export default function Wallet() {
+  const user = useUser();
+  const wallet = useWallet(user?.user?.id);
+
   return (
     <View style={styles.container}>
       <SafeAreaView>
         <Text>PH Pay</Text>
-        <Text style={styles.amount}>₱56.94</Text>
+        <Text style={styles.amount}>{amount.format(wallet?.balance || 0)}</Text>
       </SafeAreaView>
     </View>
   );
