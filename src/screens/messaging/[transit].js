@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   TextInput,
-  ScrollView,
 } from "react-native";
 import supabase from "../../services/supabase";
 import { useEffect, useRef, useState } from "react";
@@ -104,18 +103,51 @@ export default function Messaging() {
 
           <View style={{ gap: 8 }}>
             {messageMap.map((key, value) => {
+              if (value.sender_id === user?.user?.id) {
+                return (
+                  <SenderChat
+                    key={key}
+                    created_at={value.created_at}
+                    message={value.message}
+                  />
+                );
+              }
+
               return (
-                <View key={key}>
-                  <Text style={styles.sender}>
-                    {moment(value.created_at).fromNow()}
-                  </Text>
-                  <Text style={styles.message}>{value.message}</Text>
-                </View>
+                <ReceiverChat
+                  key={key}
+                  created_at={value.created_at}
+                  message={value.message}
+                />
               );
             })}
           </View>
         </View>
       </View>
+    </View>
+  );
+}
+
+function SenderChat(props) {
+  return (
+    <View style={{ alignItems: "flex-end" }}>
+      <View style={{ maxWidth: "80%" }}>
+        <Text style={[styles.sender, styles.textAlignRight]}>
+          {moment(props.created_at).fromNow()}
+        </Text>
+        <Text style={[styles.message, styles.textAlignRight]}>
+          {props.message}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+function ReceiverChat(props) {
+  return (
+    <View style={{ maxWidth: "80%" }}>
+      <Text style={styles.sender}>{moment(props.created_at).fromNow()}</Text>
+      <Text style={styles.message}>{props.message}</Text>
     </View>
   );
 }
@@ -191,4 +223,5 @@ const styles = StyleSheet.create({
   spacer: {
     padding: 8,
   },
+  textAlignRight: { textAlign: "right" },
 });

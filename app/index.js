@@ -39,6 +39,9 @@ export default function Home() {
           <TouchableOpacity onPress={handlePressSearch}>
             <Text style={styles.text}>Search</Text>
           </TouchableOpacity>
+          <Link href="/match/list">
+            <Text style={styles.text}>Matches</Text>
+          </Link>
           <Link href="/demand">
             <Text style={styles.text}>Create Demand</Text>
           </Link>

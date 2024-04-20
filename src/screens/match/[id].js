@@ -1,15 +1,19 @@
-import { useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import { View, Text, StyleSheet, SafeAreaView } from "react-native";
 
 export default function Match() {
   const params = useLocalSearchParams();
-  console.log("🚀 ~ Match ~ params:", params);
 
   return (
     <View style={styles.container}>
       <SafeAreaView style={{ flex: 1 }}>
         <View style={{ gap: 8, flex: 1 }}>
           <Text>{params.id}</Text>
+          <Link href={`/messaging/${params.id}`}>
+            <Text style={{ textAlign: "center", fontWeight: "600" }}>
+              Send Message
+            </Text>
+          </Link>
         </View>
       </SafeAreaView>
     </View>

@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import Messaging from "../../src/screens/messaging/messaging";
+import Messaging from "../../src/screens/messaging/[transit]";
 import Setup from "../../src/screens/messaging/setup";
 
 // todo: move this to launchdarkly
