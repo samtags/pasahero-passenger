@@ -30,7 +30,7 @@ export default function Home() {
     <View style={styles.container}>
       <Stack.Screen
         options={{
-          title: "Home",
+          title: "PasaHero",
           headerStyle: { backgroundColor: "gainsboro" },
         }}
       />
@@ -39,6 +39,9 @@ export default function Home() {
           <TouchableOpacity onPress={handlePressSearch}>
             <Text style={styles.text}>Search</Text>
           </TouchableOpacity>
+          <Link href="/demand">
+            <Text style={styles.text}>Create Demand</Text>
+          </Link>
           <Link href="/messaging">
             <Text style={styles.text}>Messaging</Text>
           </Link>
@@ -71,6 +74,7 @@ const styles = StyleSheet.create({
     position: "relative",
     gap: 16,
     justifyContent: "center",
+    alignItems: "center",
   },
   text: {
     fontSize: 16,
