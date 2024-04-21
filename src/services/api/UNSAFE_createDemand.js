@@ -21,6 +21,12 @@ export default async function UNSAFE_createDemand(passenger_id) {
       .select("id")
       .single();
 
+    await supabase.rpc("transfer", {
+      sender_id: passenger_id,
+      receiver_id: "PasaHero",
+      amount: 5,
+    });
+
     return {
       match_id: match.id,
       demand_id: demand.id,
