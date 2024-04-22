@@ -9,7 +9,7 @@ import {
 import Optional from "../optional";
 import { useState } from "react";
 import useOnUpdate from "../../services/hooks/useOnUpdate";
-import { router } from "expo-router";
+import { Image } from "expo-image";
 
 /**
  * @typedef Props
@@ -93,8 +93,16 @@ export default function TransitItem(props) {
           </Optional>
         </View>
         <Optional condition={showPinOption}>
-          <TouchableOpacity onPress={() => onPressPin?.()}>
-            <View style={styles.mapIcon} />
+          <TouchableOpacity
+            style={{ alignItems: "center" }}
+            onPress={() => onPressPin?.()}
+          >
+            <Image
+              style={{ height: 20, width: 20 }}
+              source="https://tbldsrfpqyqzrastjzoc.supabase.co/storage/v1/object/public/assets/pin.svg?t=2024-04-22T14%3A05%3A19.748Z"
+              contentFit="cover"
+            />
+            <Text style={{ fontWeight: "700", fontSize: 9 }}>Pin</Text>
           </TouchableOpacity>
         </Optional>
       </View>

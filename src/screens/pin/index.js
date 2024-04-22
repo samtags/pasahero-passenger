@@ -9,6 +9,7 @@ import {
 import { useState, useRef } from "react";
 import MapView from "react-native-maps";
 import reverseGeocode from "../../services/api/reverseGeocoding";
+import { Image } from "expo-image";
 
 export default function Pin() {
   const params = useLocalSearchParams();
@@ -57,8 +58,11 @@ export default function Pin() {
           }}
         >
           <View style={styles.marker}>
-            <View style={styles.pin} />
-            <Text>[Pin Icon]</Text>
+            <Image
+              style={{ height: 56, width: 56 }}
+              source="https://tbldsrfpqyqzrastjzoc.supabase.co/storage/v1/object/public/assets/pin.svg?t=2024-04-22T14%3A05%3A19.748Z"
+              contentFit="cover"
+            />
           </View>
           <MapView
             ref={mapRef}

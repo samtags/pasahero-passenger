@@ -1,6 +1,5 @@
 import { Link, Stack, useRouter } from "expo-router";
 import {
-  Image,
   Text,
   View,
   SafeAreaView,
@@ -54,15 +53,6 @@ export default function Home() {
         </View>
       </SafeAreaView>
     </View>
-  );
-}
-
-function LogoTitle() {
-  return (
-    <Image
-      style={{ width: 50, height: 50 }}
-      source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }}
-    />
   );
 }
 
