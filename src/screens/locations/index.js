@@ -51,8 +51,8 @@ export default function Locations() {
       handleRedirectToConfirm({
         "first.placeId": pickup.place_id,
         "first.address": pickup.description,
-        "last.placeId": location.place_id,
-        "last.address": location.description,
+        "last.placeId": location?.place_id,
+        "last.address": location?.description,
       });
     }
   }
@@ -101,10 +101,15 @@ export default function Locations() {
    * @param {Params} params
    */
 
-  function handleRedirectToConfirm(params) {
+  function handleRedirectToConfirm(payload) {
+    payload["first.latitude"] = params?.[`first.${payload["first.placeId"]}.latitude`]; // prettier-ignore
+    payload["first.longitude"] = params?.[`first.${payload["first.placeId"]}.longitude`]; // prettier-ignore
+    payload["last.latitude"] = params?.[`last.${payload["last.placeId"]}.latitude`]; // prettier-ignore
+    payload["last.longitude"] = params?.[`last.${payload["last.placeId"]}.longitude`]; // prettier-ignore
+
     router.navigate({
       pathname: "match",
-      params,
+      params: payload,
     });
 
     Keyboard.dismiss();

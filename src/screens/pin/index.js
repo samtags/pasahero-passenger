@@ -37,8 +37,9 @@ export default function Pin() {
 
         router.back();
         router.setParams({
-          [`${redirectSource}.latitude`]: center.latitude,
-          [`${redirectSource}.longitude`]: center.longitude,
+          // first.ChIJETKun6zAlzMRxwiz-19C__Z.latitude
+          [`${redirectSource}.${placeId}.latitude`]: center?.latitude,
+          [`${redirectSource}.${placeId}.longitude`]: center?.longitude,
           [`${redirectSource}.placeId`]: placeId,
           [`${redirectSource}.address`]: address,
         });
