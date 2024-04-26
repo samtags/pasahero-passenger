@@ -8,7 +8,7 @@ export default function Match() {
     <View style={styles.container}>
       <SafeAreaView style={{ flex: 1 }}>
         <View style={{ gap: 8, flex: 1 }}>
-          <Text>{params.id}</Text>
+          <Text style={{ textAlign: "center" }}>{params.id}</Text>
           <Link href={`/messaging/${params.id}`}>
             <Text style={{ textAlign: "center", fontWeight: "600" }}>
               Send Message

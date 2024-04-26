@@ -1,4 +1,5 @@
-import { useLocalSearchParams } from "expo-router";
+import { StackActions } from "@react-navigation/native";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import {
   View,
   Text,
@@ -6,6 +7,7 @@ import {
   StyleSheet,
   SafeAreaView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
@@ -15,8 +17,15 @@ import { useRef, useState } from "react";
 import useOnUpdate from "../../services/hooks/useOnUpdate";
 import Optional from "../../components/optional";
 import { Image } from "expo-image";
+import { useMutation } from "@tanstack/react-query";
+import findNearby from "../../services/api/findNearby";
+import { useUser } from "@clerk/clerk-expo";
 
 export default function Match() {
+  const user = useUser();
+  const router = useRouter();
+  const navigation = useNavigation();
+  console.log(navigation.getState());
   const mapRef = useRef(null);
 
   const params = useLocalSearchParams();
@@ -33,6 +42,15 @@ export default function Match() {
   const { data: first } = useGetCoordinates(firstPlaceId, firstLat, firstLng);
   const { data: last } = useGetCoordinates(lastPlaceId, lastLat, lastLng);
 
+  const { isPending, mutateAsync } = useMutation({
+    mutationFn: () =>
+      findNearby({
+        user_id: user?.user?.id,
+        latitude: first?.latitude,
+        longitude: first?.longitude,
+      }),
+  });
+
   useOnUpdate(() => {
     if (coords.length) {
       mapRef.current.fitToCoordinates(coords, {
@@ -45,6 +63,19 @@ export default function Match() {
       });
     }
   }, [coords]);
+
+  const handleOnConfirm = () => {
+    mutateAsync()
+      .then((res) => {
+        navigation.dispatch(StackActions.popToTop());
+        router.navigate({
+          pathname: `match/${res?.id}`,
+        });
+      })
+      .catch((err) => {
+        console.log("🚀 ~ handleOnConfirm ~ err:", err);
+      });
+  };
 
   return (
     <View style={styles.container}>
@@ -104,8 +135,13 @@ export default function Match() {
             <Text>{params["last.address"]}</Text>
           </View>
           <View style={{ flex: 1 }} />
-          <TouchableOpacity style={styles.button}>
-            <Text>Request</Text>
+          <TouchableOpacity
+            disabled={isPending}
+            onPress={handleOnConfirm}
+            style={styles.button}
+          >
+            {!isPending && <Text>Requesting</Text>}
+            {isPending && <ActivityIndicator />}
           </TouchableOpacity>
         </View>
       </SafeAreaView>
