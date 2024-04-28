@@ -20,12 +20,12 @@ import { Image } from "expo-image";
 import { useMutation } from "@tanstack/react-query";
 import findNearby from "../../services/api/findNearby";
 import { useUser } from "@clerk/clerk-expo";
+import log from "../../services/log";
 
 export default function Match() {
   const user = useUser();
   const router = useRouter();
   const navigation = useNavigation();
-  console.log(navigation.getState());
   const mapRef = useRef(null);
 
   const params = useLocalSearchParams();
@@ -73,7 +73,9 @@ export default function Match() {
         });
       })
       .catch((err) => {
-        console.log("🚀 ~ handleOnConfirm ~ err:", err);
+        log.warn("🚀 ~ handleOnConfirm ~ err:", {
+          error: err,
+        });
       });
   };
 

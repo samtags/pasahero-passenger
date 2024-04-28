@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import supabase from "../../../services/supabase";
+import log from "../../../services/log";
 
 /**
  *
@@ -20,17 +21,17 @@ export default function useIncomingMessage(transit) {
           filter: `transit=eq.${transit}`,
         },
         (payload) => {
-          console.debug("Incoming message", payload.new);
+          log.debug("Incoming message", payload.new);
           setMessage(payload.new);
         }
       )
       .subscribe();
 
-    console.debug("Subscribed to incoming messages");
+    log.debug("Subscribed to incoming messages");
 
     return () => {
       channel.unsubscribe();
-      console.debug("Unsubscribed from incoming messages");
+      log.debug("Unsubscribed from incoming messages");
     };
   }, []);
 

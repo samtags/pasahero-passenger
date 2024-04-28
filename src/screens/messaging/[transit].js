@@ -14,6 +14,7 @@ import useIncomingMessage from "./util/useIncomingMessage";
 import OrderedMap from "../../services/ordered-map";
 import useOnUpdate from "../../services/hooks/useOnUpdate";
 import moment from "moment";
+import log from "../../services/log";
 
 const messageMap = new OrderedMap();
 
@@ -71,7 +72,7 @@ export default function Messaging() {
 
   async function handleGetMessages() {
     const messages = await handleRetrieveMessages(global?.transit);
-    console.debug("Retrieved messages from server.", messages);
+    log.debug("Retrieved messages from server.", { messages });
     messages.forEach((message) => handleAddMessage(message));
     handleManualRerender();
   }
@@ -160,11 +161,11 @@ async function sendMessage(message) {
 
   if (error) {
     // todo: send log to newrelic
-    console.error("An error occurred while sending message to server.", error);
+    log.error("An error occurred while sending message to server.", { error });
     return;
   }
 
-  console.debug("Message sent to server!");
+  log.debug("Message sent to server!");
 
   return data;
 }
@@ -172,9 +173,9 @@ async function sendMessage(message) {
 function handleAddMessage(message) {
   if (!messageMap.get(message.id)) {
     messageMap.addToEnd(message.id, message);
-    console.debug("Added message to map.", message);
+    log.debug("Added message to map.", { message });
   } else {
-    console.debug("Message already exists in the map.", message);
+    log.debug("Message already exists in the map.", { message });
   }
 }
 
@@ -182,7 +183,7 @@ function handleAddMessage(message) {
 async function handleRetrieveMessages(transit) {
   if (!transit) return [];
 
-  console.debug("Retrieving messages");
+  log.debug("Retrieving messages");
 
   const { data, error } = await supabase
     .from("msg")
@@ -190,7 +191,7 @@ async function handleRetrieveMessages(transit) {
     .eq("transit", transit);
 
   if (error) {
-    console.error("An error occurred while retrieving messages.", error);
+    log.error("An error occurred while retrieving messages.", { error });
     return [];
   }
 

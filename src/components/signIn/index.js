@@ -8,6 +8,7 @@ import {
 import { SignedOut, useOAuth } from "@clerk/clerk-expo";
 import * as WebBrowser from "expo-web-browser";
 import { useWarmUpBrowser } from "../../services/hooks/useWarmUpBrowser";
+import log from "../../services/log";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -28,7 +29,7 @@ export default function SignIn() {
         setActive({ session: signUp.createdSessionId });
       }
     } catch (err) {
-      console.error("OAuth error", err);
+      log.error("OAuth error", { error: err });
     }
   };
 

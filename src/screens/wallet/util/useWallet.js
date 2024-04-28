@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import supabase from "../../../services/supabase";
 import getWallet from "../../../services/api/getWallet";
+import log from "../../../services/log";
 
 /** @param {string} id */
 export default function useWallet(id) {
@@ -26,17 +27,17 @@ export default function useWallet(id) {
           filter: `user_id=eq.${id}`,
         },
         (payload) => {
-          console.debug("Balance", payload.new);
+          log.debug("Balance", payload.new);
           setBalance(payload.new);
         }
       )
       .subscribe();
 
-    console.debug("Subscribed to wallet");
+    log.debug("Subscribed to wallet");
 
     return () => {
       channel.unsubscribe();
-      console.debug("Unsubscribed from wallet");
+      log.debug("Unsubscribed from wallet");
     };
   }, []);
 
