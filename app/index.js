@@ -7,9 +7,11 @@ import {
   TouchableOpacity,
 } from "react-native";
 import * as Location from "expo-location";
+import { SignedIn, useAuth } from "@clerk/clerk-expo";
 
 export default function Home() {
   const router = useRouter();
+  const { signOut } = useAuth();
 
   async function handlePressSearch() {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -36,20 +38,25 @@ export default function Home() {
       <SafeAreaView style={styles.full}>
         <View style={styles.main}>
           <TouchableOpacity onPress={handlePressSearch}>
-            <Text style={styles.text}>Search</Text>
+            <Text style={styles.text}>Find Nearby</Text>
           </TouchableOpacity>
           <Link href="/match/list">
             <Text style={styles.text}>Matches</Text>
           </Link>
-          <Link href="/demand">
+          {/* <Link href="/demand">
             <Text style={styles.text}>Create Demand</Text>
           </Link>
           <Link href="/messaging">
             <Text style={styles.text}>Messaging</Text>
-          </Link>
+          </Link> */}
           <Link href="/wallet">
             <Text style={styles.text}>Wallet</Text>
           </Link>
+          <SignedIn>
+            <Link href="" onPress={signOut}>
+              <Text style={styles.text}>Sign Out</Text>
+            </Link>
+          </SignedIn>
         </View>
       </SafeAreaView>
     </View>
