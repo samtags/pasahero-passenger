@@ -11,7 +11,7 @@ const options = {
 };
 
 function log(message, payload = {}) {
-  payload.level = "debug";
+  payload.level = payload.level || "debug";
   payload.entity = payload.entity || {};
   payload.entity.name = "pasahero.passenger";
   payload.message = message;
