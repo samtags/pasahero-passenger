@@ -22,6 +22,16 @@ module.exports = ({ config }) => {
             "Allow $(PRODUCT_NAME) to use your location",
         },
       ],
+      "@config-plugins/react-native-webrtc",
+      "@react-native-firebase/app",
+      [
+        "expo-build-properties",
+        {
+          ios: {
+            useFrameworks: "static",
+          },
+        },
+      ],
     ],
   };
 };
