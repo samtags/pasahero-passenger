@@ -38,7 +38,7 @@ export default function Home() {
       <SafeAreaView style={styles.full}>
         <View style={styles.main}>
           <TouchableOpacity onPress={handlePressSearch}>
-            <Text style={styles.text}>Find Nearby</Text>
+            <Text style={styles.text}>Find Nearby Drivers</Text>
           </TouchableOpacity>
           <Link href="/match/list">
             <Text style={styles.text}>Matches</Text>
@@ -49,6 +49,12 @@ export default function Home() {
           <Link href="/messaging">
             <Text style={styles.text}>Messaging</Text>
           </Link> */}
+          <Link href="/call">
+            <Text style={styles.text}>Call</Text>
+          </Link>
+          <Link href="/join">
+            <Text style={styles.text}>Join</Text>
+          </Link>
           <Link href="/wallet">
             <Text style={styles.text}>Wallet</Text>
           </Link>
@@ -88,3 +94,9 @@ const styles = StyleSheet.create({
     backgroundColor: "whitesmoke",
   },
 });
+
+const events = [
+  "participant-joined",
+  "participant-updated",
+  "participant-left",
+];
