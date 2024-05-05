@@ -12,6 +12,7 @@ module.exports = ({ config }) => {
       googleApiKey: process.env.EXPO_PUBLIC_GOOGLE_API_KEY,
       supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
       supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
+      mapBoxKey: process.env.EXPO_PUBLIC_MAPBOX_KEY,
     },
     plugins: [
       "expo-router",
@@ -35,8 +36,7 @@ module.exports = ({ config }) => {
       [
         "@rnmapbox/maps",
         {
-          RNMapboxMapsDownloadToken:
-            "REDACTED",
+          RNMapboxMapsDownloadToken: process.env.EXPO_PUBLIC_MAPBOX_KEY,
         },
       ],
     ],

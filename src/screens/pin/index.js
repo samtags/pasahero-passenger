@@ -7,15 +7,20 @@ import {
   StyleSheet,
 } from "react-native";
 import { useState, useRef } from "react";
-import MapView from "react-native-maps";
+// import MapView from "react-native-maps";
 import reverseGeocode from "../../services/api/reverseGeocoding";
 import { Image } from "expo-image";
+import Const from "expo-constants";
+import Mapbox from "@rnmapbox/maps";
+
+Mapbox.setAccessToken(Const.expoConfig.extra.mapBoxKey);
 
 export default function Pin() {
   const params = useLocalSearchParams();
   const router = useRouter();
 
   const mapRef = useRef(null);
+
   const [center, setCenter] = useState({
     latitude: params.latitude,
     longitude: params.longitude,
@@ -65,22 +70,27 @@ export default function Pin() {
               contentFit="cover"
             />
           </View>
-          <MapView
+          <Mapbox.MapView
             ref={mapRef}
-            initialRegion={{
-              latitude: params.latitude,
-              longitude: params.longitude,
-              latitudeDelta: 0.01084,
-              longitudeDelta: 0.006443,
-            }}
-            onRegionChangeComplete={(region) => {
+            onCameraChanged={(e) => {
+              const latitude = e.properties.center[1];
+              const longitude = e.properties.center[0];
+
               setCenter({
-                latitude: region.latitude,
-                longitude: region.longitude,
+                latitude,
+                longitude,
               });
             }}
+            logoPosition={{ top: -100, left: 0 }}
             style={styles.map}
-          />
+            scaleBarEnabled={false}
+          >
+            <Mapbox.Camera
+              animationMode="none"
+              zoomLevel={15}
+              centerCoordinate={[params.longitude, params.latitude]}
+            />
+          </Mapbox.MapView>
         </View>
         <TouchableOpacity onPress={handleConfirm} style={styles.primary}>
           <Text>Confirm</Text>
@@ -105,6 +115,7 @@ const styles = StyleSheet.create({
   map: {
     height: "100%",
     width: "100%",
+    flex: 1,
   },
   pin: {
     backgroundColor: "gainsboro",
