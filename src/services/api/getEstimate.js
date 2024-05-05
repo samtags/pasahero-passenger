@@ -12,6 +12,6 @@ export default async function getEstimate({ service, origin, destination }) {
 
     return res?.data;
   } catch (error) {
-    return undefined;
+    return null;
   }
 }

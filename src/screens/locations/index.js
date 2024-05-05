@@ -37,10 +37,10 @@ export default function Locations() {
     setPickUp(location);
     if (dropoff) {
       handleRedirectToConfirm({
-        "first.placeId": location.place_id,
-        "first.address": location.description,
-        "last.placeId": dropoff.place_id,
-        "last.address": dropoff.description,
+        "first.placeId": location?.place_id,
+        "first.address": location?.description,
+        "last.placeId": dropoff?.place_id,
+        "last.address": dropoff?.description,
       });
     }
   }
@@ -49,8 +49,8 @@ export default function Locations() {
     setDropOff(location);
     if (pickup) {
       handleRedirectToConfirm({
-        "first.placeId": pickup.place_id,
-        "first.address": pickup.description,
+        "first.placeId": pickup?.place_id,
+        "first.address": pickup?.description,
         "last.placeId": location?.place_id,
         "last.address": location?.description,
       });

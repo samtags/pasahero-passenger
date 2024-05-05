@@ -21,6 +21,7 @@ import { useMutation } from "@tanstack/react-query";
 import findNearby from "../../services/api/findNearby";
 import { useUser } from "@clerk/clerk-expo";
 import log from "../../services/log";
+import useGetEstimate from "../../services/queries/useGetEstimate";
 
 export default function Match() {
   const user = useUser();
@@ -41,6 +42,13 @@ export default function Match() {
 
   const { data: first } = useGetCoordinates(firstPlaceId, firstLat, firstLng);
   const { data: last } = useGetCoordinates(lastPlaceId, lastLat, lastLng);
+
+  let origin = `${first?.latitude},${first?.longitude}`;
+  let destination = `${last?.latitude},${last?.longitude}`;
+
+  const { data: angkasPassenger } = useGetEstimate("AngkasPassenger", origin, destination); // prettier-ignore
+  const { data: joyRideMcTaxi } = useGetEstimate("JoyRideMcTaxi", origin, destination); // prettier-ignore
+  const { data: moveItMotoTaxi } = useGetEstimate("MoveItMotoTaxi", origin, destination); // prettier-ignore
 
   const { isPending, mutateAsync } = useMutation({
     mutationFn: () =>
@@ -135,6 +143,43 @@ export default function Match() {
           <View style={{ gap: 8, padding: 16 }}>
             <Text>{params["first.address"]}</Text>
             <Text>{params["last.address"]}</Text>
+            <View style={{ marginTop: 12, gap: 8 }}>
+              {angkasPassenger && (
+                <ServiceCard
+                  serviceName="Angkas Passenger"
+                  minFare={angkasPassenger?.fare.minFare}
+                  maxFare={angkasPassenger?.fare.maxFare}
+                  currency={angkasPassenger?.fare.currency}
+                  onPress={() => {
+                    console.log("AngkasPassenger");
+                  }}
+                />
+              )}
+
+              {joyRideMcTaxi && (
+                <ServiceCard
+                  serviceName="JoyRide MC Taxi"
+                  minFare={joyRideMcTaxi?.fare.minFare}
+                  maxFare={joyRideMcTaxi?.fare.maxFare}
+                  currency={joyRideMcTaxi?.fare.currency}
+                  onPress={() => {
+                    console.log("JoyRideMcTaxi");
+                  }}
+                />
+              )}
+
+              {moveItMotoTaxi && (
+                <ServiceCard
+                  serviceName="Move It MotoTaxi"
+                  minFare={moveItMotoTaxi?.fare.minFare}
+                  maxFare={moveItMotoTaxi?.fare.maxFare}
+                  currency={moveItMotoTaxi?.fare.currency}
+                  onPress={() => {
+                    console.log("MoveItMotoTaxi");
+                  }}
+                />
+              )}
+            </View>
           </View>
           <View style={{ flex: 1 }} />
           <TouchableOpacity
@@ -148,6 +193,17 @@ export default function Match() {
         </View>
       </SafeAreaView>
     </View>
+  );
+}
+
+function ServiceCard({ serviceName, minFare, maxFare, currency, onPress }) {
+  return (
+    <TouchableOpacity onPress={onPress}>
+      <Text>{serviceName}</Text>
+      <Text>
+        {currency} {minFare} - {currency} {maxFare}
+      </Text>
+    </TouchableOpacity>
   );
 }
 
