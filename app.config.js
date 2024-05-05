@@ -32,6 +32,13 @@ module.exports = ({ config }) => {
           },
         },
       ],
+      [
+        "@rnmapbox/maps",
+        {
+          RNMapboxMapsDownloadToken:
+            "REDACTED",
+        },
+      ],
     ],
   };
 };
