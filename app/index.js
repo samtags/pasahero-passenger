@@ -8,12 +8,13 @@ import {
 } from "react-native";
 import * as Location from "expo-location";
 import { SignedIn, useUser } from "@clerk/clerk-expo";
+import useIncomingCall from "../src/services/hooks/useIncomingCall";
 
 export default function Home() {
   const router = useRouter();
 
   const user = useUser();
-  // useIncomingCall(user?.user?.id);
+  useIncomingCall(user?.user?.id);
 
   async function handlePressSearch() {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -47,16 +48,14 @@ export default function Home() {
           </Link>
           {/* <Link href="/demand">
             <Text style={styles.text}>Create Demand</Text>
-          </Link>
-          <Link href="/messaging">
-            <Text style={styles.text}>Messaging</Text>
           </Link> */}
+          <Link href="/messaging">
+            <Text style={styles.text}>Debug: Messaging</Text>
+          </Link>
           <Link href={"/call/dial-debug"}>
-            <Text style={styles.text}>Call</Text>
+            <Text style={styles.text}>Debug: Call</Text>
           </Link>
-          <Link href="/call/join">
-            <Text style={styles.text}>Join</Text>
-          </Link>
+
           <Link href="/wallet">
             <Text style={styles.text}>Wallet</Text>
           </Link>

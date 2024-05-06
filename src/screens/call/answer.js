@@ -1,33 +1,43 @@
 import React from "react";
-import { StyleSheet, Button, Text, View, SafeAreaView } from "react-native";
+import {
+  Text,
+  StyleSheet,
+  Button,
+  View,
+  Alert,
+  SafeAreaView,
+} from "react-native";
 
 import { RTCView } from "react-native-webrtc";
-import { Stack, useRouter } from "expo-router";
-import useOnUpdate from "../../src/services/hooks/useOnUpdate";
-import useDial from "../../src/services/hooks/useDial";
 
-const roomId = "PasaHeRoom";
+import { useRouter, Stack, useLocalSearchParams } from "expo-router";
+import useJoin from "../../services/hooks/useJoin";
+import useOnUpdate from "../../services/hooks/useOnUpdate";
 
-export default function CallScreen() {
+export default function JoinScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+
+  const roomId = params?.roomId;
 
   const {
-    status,
     isMuted,
     handleToggleMute,
     userStream,
+    status,
     streams,
-    handleHangup,
-  } = useDial(roomId);
+    handleHangUp,
+  } = useJoin(roomId);
 
   useOnUpdate(() => {
     if (status === "TERMINATED") {
-      handleEndCall();
+      Alert.alert("Call Ended", "Call has been terminated by the caller.");
+      setTimeout(() => router.back(), 1500);
     }
   }, [status]);
 
   function handleEndCall() {
-    handleHangup();
+    handleHangUp();
     setTimeout(() => router.back(), 1500);
   }
 
