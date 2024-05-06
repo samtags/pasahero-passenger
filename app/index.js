@@ -7,11 +7,13 @@ import {
   TouchableOpacity,
 } from "react-native";
 import * as Location from "expo-location";
-import { SignedIn, useAuth } from "@clerk/clerk-expo";
+import { SignedIn, useUser } from "@clerk/clerk-expo";
 
 export default function Home() {
   const router = useRouter();
-  const { signOut } = useAuth();
+
+  const user = useUser();
+  // useIncomingCall(user?.user?.id);
 
   async function handlePressSearch() {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -49,18 +51,18 @@ export default function Home() {
           <Link href="/messaging">
             <Text style={styles.text}>Messaging</Text>
           </Link> */}
-          <Link href="/call">
+          <Link href={"/call/dial-debug"}>
             <Text style={styles.text}>Call</Text>
           </Link>
-          <Link href="/join">
+          <Link href="/call/join">
             <Text style={styles.text}>Join</Text>
           </Link>
           <Link href="/wallet">
             <Text style={styles.text}>Wallet</Text>
           </Link>
           <SignedIn>
-            <Link href="" onPress={signOut}>
-              <Text style={styles.text}>Sign Out</Text>
+            <Link href="/profile">
+              <Text style={styles.text}>Profile</Text>
             </Link>
           </SignedIn>
         </View>

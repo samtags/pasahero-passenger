@@ -1,18 +1,23 @@
-import { Text, StyleSheet, Button, View, Alert } from "react-native";
+import {
+  Text,
+  StyleSheet,
+  Button,
+  View,
+  Alert,
+  SafeAreaView,
+} from "react-native";
 
 import { RTCView } from "react-native-webrtc";
 
-import useCall from "../src/services/hooks/useCall";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import useOnUpdate from "../src/services/hooks/useOnUpdate";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import useDial from "../../services/hooks/useDial";
+import useOnUpdate from "../../services/hooks/useOnUpdate";
 
-const roomId = "PasaHeRoom";
-
-export default function Call() {
+export default function Dial() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  const callerId = params?.callerId;
+  const roomId = params?.roomId;
 
   const {
     isMuted,
@@ -20,25 +25,34 @@ export default function Call() {
     userStream,
     handleToggleMute,
     streams,
-    handleCloseMedia,
-  } = useCall(callerId || roomId);
+    handleHangup,
+  } = useDial(roomId);
 
   function handleEndCall() {
-    handleCloseMedia();
-    router.back();
+    handleHangup();
+    setTimeout(() => router.back(), 1500);
   }
 
   useOnUpdate(() => {
-    if (status === "DISCONNECTED") {
-      handleEndCall();
+    if (status === "TERMINATED") {
       Alert.alert("Call Ended", "Call was terminated by the receiver.");
+      handleEndCall();
     }
   }, [status]);
 
   return (
-    <>
-      <View style={{ alignItems: "center" }}>
-        <Text>{status}</Text>
+    <SafeAreaView style={{ flex: 1 }}>
+      <Stack.Screen
+        options={{
+          headerShown: false,
+          headerBackVisible: false,
+        }}
+      />
+      <View style={{ paddingTop: 24, alignItems: "center" }}>
+        <Text>
+          {status[0]}
+          {status.slice(1).toLowerCase()}
+        </Text>
       </View>
 
       <Button color="#ef4444" title="End call" onPress={handleEndCall} />
@@ -58,7 +72,7 @@ export default function Call() {
           streamURL={stream && stream.toURL()}
         />
       ))}
-    </>
+    </SafeAreaView>
   );
 }
 
