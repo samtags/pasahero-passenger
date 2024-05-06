@@ -9,9 +9,14 @@ import {
 import * as Location from "expo-location";
 import { SignedIn, useUser } from "@clerk/clerk-expo";
 import useIncomingCall from "../src/services/hooks/useIncomingCall";
+import { useBoolVariation } from "@launchdarkly/react-native-client-sdk";
+import Optional from "../src/components/optional";
 
 export default function Home() {
   const router = useRouter();
+
+  const isManualDialEnabled = useBoolVariation("php-manual-dial", false);
+  console.log("🚀 ~ Home ~ isManualDialEnabled:", isManualDialEnabled);
 
   const user = useUser();
   useIncomingCall(user?.user?.id);
@@ -52,9 +57,12 @@ export default function Home() {
           <Link href="/messaging">
             <Text style={styles.text}>Debug: Messaging</Text>
           </Link>
-          <Link href={"/call/dial-debug"}>
-            <Text style={styles.text}>Debug: Call</Text>
-          </Link>
+
+          <Optional condition={isManualDialEnabled === true}>
+            <Link href={"/call/dial-debug"}>
+              <Text style={styles.text}>Debug: Call</Text>
+            </Link>
+          </Optional>
 
           <Link href="/wallet">
             <Text style={styles.text}>Wallet</Text>
