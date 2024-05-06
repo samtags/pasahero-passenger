@@ -193,7 +193,7 @@ export default function useDial(roomId) {
   };
 }
 
-async function handleGetRoomData(roomId) {
+export async function handleGetRoomData(roomId) {
   try {
     const doc = await db.collection("rooms").doc(roomId).get();
     if (doc?.exists) return doc.data();
@@ -221,7 +221,7 @@ async function handleCheckReceiverCallStatus(roomId) {
  *
  * @param {string} userId
  */
-async function handleClearRoom(userId) {
+export async function handleClearRoom(userId) {
   await db.collection("rooms").doc(userId).delete();
 }
 
