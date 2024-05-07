@@ -16,7 +16,7 @@ export default function useIncomingCall(userId) {
             await ref.update({ showed: true });
             setTimeout(() => {
               router.navigate({
-                pathname: "/call/answer",
+                pathname: "/call/ring",
                 params: {
                   roomId: userId,
                 },

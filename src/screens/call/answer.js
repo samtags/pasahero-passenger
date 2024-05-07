@@ -49,30 +49,36 @@ export default function JoinScreen() {
           headerBackVisible: false,
         }}
       />
-      <View style={{ paddingTop: 24, alignItems: "center" }}>
-        <Text>
+      <View style={{ paddingTop: 24, alignItems: "center", flex: 1 }}>
+        <Text
+          style={{ textAlign: "center", fontWeight: "medium", fontSize: 20 }}
+        >
           {status[0]}
           {status.slice(1).toLowerCase()}
         </Text>
       </View>
 
-      <Button color="#ef4444" title="End call" onPress={handleEndCall} />
+      <View>
+        <View style={{ gap: 12 }}>
+          {userStream && (
+            <Button
+              color="#a3a3a3"
+              title={isMuted ? "Unmute" : "Mute"}
+              onPress={handleToggleMute}
+            />
+          )}
 
-      {userStream && (
-        <Button
-          color="#a3a3a3"
-          title={isMuted ? "Unmute" : "Mute"}
-          onPress={handleToggleMute}
-        />
-      )}
+          <Button color="#ef4444" title="End call" onPress={handleEndCall} />
+        </View>
 
-      {streams?.map((stream) => (
-        <RTCView
-          key={stream._id}
-          style={styles.rtc}
-          streamURL={stream && stream.toURL()}
-        />
-      ))}
+        {streams?.map((stream) => (
+          <RTCView
+            key={stream._id}
+            style={styles.rtc}
+            streamURL={stream && stream.toURL()}
+          />
+        ))}
+      </View>
     </SafeAreaView>
   );
 }
