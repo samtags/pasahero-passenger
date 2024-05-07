@@ -35,8 +35,13 @@ export default function Dial() {
 
   useOnUpdate(() => {
     if (status === "TERMINATED") {
-      Alert.alert("Call Ended", "Call was terminated by the receiver.");
+      Alert.alert("Call Ended", "Call was dropped by the receiver.");
       handleEndCall();
+    }
+
+    if (status === "REJECTED") {
+      Alert.alert("Call Ended", "Call was rejected by the receiver.");
+      setTimeout(() => router.back(), 1500);
     }
   }, [status]);
 

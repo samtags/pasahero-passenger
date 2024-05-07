@@ -98,6 +98,10 @@ export default function useDial(roomId) {
               });
             }
           }
+
+          if (data?.rejected) {
+            handleCallRejected();
+          }
         })
       );
 
@@ -180,6 +184,12 @@ export default function useDial(roomId) {
 
     handleCloseMedia();
     setStatus("DROPPED");
+  }
+
+  function handleCallRejected() {
+    handleClearRoom(roomId);
+    setStatus("REJECTED");
+    handleCloseMedia();
   }
 
   return {

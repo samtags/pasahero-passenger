@@ -19,6 +19,7 @@ export default function useIncomingCall(userId) {
                 pathname: "/call/ring",
                 params: {
                   roomId: userId,
+                  sessionId: doc.sessionId,
                 },
               });
             }, 3000);

@@ -1,11 +1,14 @@
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Button, SafeAreaView, Text, View } from "react-native";
+import db from "../../services/firebase/db";
+import { handleGetRoomData } from "../../services/hooks/useDial";
 
 export default function Ring() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
   const roomId = params?.roomId;
+  const sessionId = params?.sessionId;
 
   const handleAccept = () => {
     router.replace({
@@ -14,6 +17,18 @@ export default function Ring() {
         roomId,
       },
     });
+  };
+
+  const handleReject = async () => {
+    const room = await handleGetRoomData(roomId);
+
+    if (room.sessionId === sessionId) {
+      db.collection("rooms").doc(roomId).update({
+        rejected: true,
+      });
+    }
+
+    router.back();
   };
 
   return (
@@ -26,7 +41,7 @@ export default function Ring() {
         </Text>
       </View>
       <View style={{ gap: 12 }}>
-        <Button color="#ef4444" title="Reject" onPress={router.back} />
+        <Button color="#ef4444" title="Reject" onPress={handleReject} />
         <Button color="#10b981" title="Answer" onPress={handleAccept} />
       </View>
     </SafeAreaView>
