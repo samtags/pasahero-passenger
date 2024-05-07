@@ -35,7 +35,7 @@ export default function Profile() {
           </TouchableOpacity>
         </View>
 
-        <Button onPress={handleSignOut} title="Sign Out" />
+        <Button color="#9ca3af" onPress={handleSignOut} title="Sign Out" />
       </SafeAreaView>
     </View>
   );

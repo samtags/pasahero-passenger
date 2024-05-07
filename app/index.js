@@ -16,7 +16,7 @@ export default function Home() {
   const router = useRouter();
 
   const isManualDialEnabled = useBoolVariation("php-manual-dial", false);
-  console.log("🚀 ~ Home ~ isManualDialEnabled:", isManualDialEnabled);
+  const isManualMessageEnabled = useBoolVariation("php-manual-message", false);
 
   const user = useUser();
   useIncomingCall(user?.user?.id);
@@ -51,12 +51,12 @@ export default function Home() {
           <Link href="/match/list">
             <Text style={styles.text}>Matches</Text>
           </Link>
-          {/* <Link href="/demand">
-            <Text style={styles.text}>Create Demand</Text>
-          </Link> */}
-          <Link href="/messaging">
-            <Text style={styles.text}>Debug: Messaging</Text>
-          </Link>
+
+          <Optional condition={isManualMessageEnabled === true}>
+            <Link href="/messaging">
+              <Text style={styles.text}>Debug: Messaging</Text>
+            </Link>
+          </Optional>
 
           <Optional condition={isManualDialEnabled === true}>
             <Link href={"/call/dial-debug"}>
@@ -67,6 +67,7 @@ export default function Home() {
           <Link href="/wallet">
             <Text style={styles.text}>Wallet</Text>
           </Link>
+
           <SignedIn>
             <Link href="/profile">
               <Text style={styles.text}>Profile</Text>

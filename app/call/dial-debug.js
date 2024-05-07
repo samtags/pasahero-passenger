@@ -13,16 +13,23 @@ export default function Entry(props) {
           title: "Dial",
         }}
       />
-      <View>
-        <View style={{ padding: 16 }}>
-          <TextInput
-            onChangeText={setValue}
-            value={value}
-            style={{ fontSize: 16 }}
-            placeholder="Enter user to call"
-          />
-        </View>
+      <View
+        style={{
+          padding: 16,
+          gap: 12,
+          flex: 1,
+          justifyContent: "space-between",
+        }}
+      >
+        <TextInput
+          autoFocus
+          onChangeText={setValue}
+          value={value}
+          style={{ fontSize: 16 }}
+          placeholder="Enter user to call"
+        />
         <Button
+          color="#9ca3af"
           title="Dial"
           onPress={() => {
             router.navigate({
