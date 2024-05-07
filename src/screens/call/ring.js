@@ -1,7 +1,8 @@
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { Button, SafeAreaView, Text, View } from "react-native";
+import { Alert, Button, SafeAreaView, Text, View } from "react-native";
 import db from "../../services/firebase/db";
 import { handleGetRoomData } from "../../services/hooks/useDial";
+import { useEffect } from "react";
 
 export default function Ring() {
   const router = useRouter();
@@ -9,6 +10,21 @@ export default function Ring() {
 
   const roomId = params?.roomId;
   const sessionId = params?.sessionId;
+
+  useEffect(() => {
+    if (roomId) {
+      const unsubscribe = db
+        .collection("rooms")
+        .doc(roomId)
+        .onSnapshot((doc) => {
+          if (doc.exists === false) {
+            handleCallerHangup();
+          }
+        });
+
+      return () => unsubscribe();
+    }
+  }, []);
 
   const handleAccept = () => {
     router.replace({
@@ -28,6 +44,11 @@ export default function Ring() {
       });
     }
 
+    router.back();
+  };
+
+  const handleCallerHangup = () => {
+    Alert.alert("Call Ended", "Call was dropped by the caller.");
     router.back();
   };
 

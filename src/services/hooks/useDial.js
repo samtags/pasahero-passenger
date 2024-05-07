@@ -188,8 +188,9 @@ export default function useDial(roomId) {
 
   function handleCallRejected() {
     handleClearRoom(roomId);
-    setStatus("REJECTED");
+
     handleCloseMedia();
+    setStatus("REJECTED");
   }
 
   return {
