@@ -36,7 +36,6 @@ export default function Pin() {
 
     if (result.data.status === "OK") {
       if (result?.data?.results?.[0]) {
-        const data = result?.data?.results?.[0];
         const placeId = data?.place_id;
         const address = data?.formatted_address;
 
@@ -47,6 +46,8 @@ export default function Pin() {
           [`${redirectSource}.${placeId}.longitude`]: center?.longitude,
           [`${redirectSource}.placeId`]: placeId,
           [`${redirectSource}.address`]: address,
+          // todo: change this to the real short address value
+          [`${redirectSource}.short_address`]: address,
         });
       }
     }

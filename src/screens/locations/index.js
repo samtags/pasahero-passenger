@@ -39,8 +39,10 @@ export default function Locations() {
       handleRedirectToConfirm({
         "first.placeId": location?.place_id,
         "first.address": location?.description,
+        "first.short_address": location?.structured_formatting?.main_text,
         "last.placeId": dropoff?.place_id,
         "last.address": dropoff?.description,
+        "last.short_address": dropoff?.structured_formatting?.main_text,
       });
     }
   }
@@ -51,8 +53,10 @@ export default function Locations() {
       handleRedirectToConfirm({
         "first.placeId": pickup?.place_id,
         "first.address": pickup?.description,
+        "first.short_address": pickup?.structured_formatting?.main_text,
         "last.placeId": location?.place_id,
         "last.address": location?.description,
+        "last.short_address": location?.structured_formatting?.main_text,
       });
     }
   }
@@ -65,7 +69,7 @@ export default function Locations() {
           place_id: params["first.placeId"],
           structured_formatting: {
             main_text: params["first.address"],
-            secondary_text: params["first.address"],
+            secondary_text: params["first.short_address"],
           },
         });
 
@@ -81,7 +85,7 @@ export default function Locations() {
           place_id: params["last.placeId"],
           structured_formatting: {
             main_text: params["last.address"],
-            secondary_text: params["last.address"],
+            secondary_text: params["last.short_address"],
           },
         });
 

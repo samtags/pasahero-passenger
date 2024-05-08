@@ -16,6 +16,5 @@ export default function useMatches() {
       const matches = await getMatches(user?.user?.id);
       return matches;
     },
-    staleTime: 1000 * 60 * 30,
   });
 }

@@ -22,6 +22,7 @@ import findNearby from "../../services/api/findNearby";
 import { useUser } from "@clerk/clerk-expo";
 import log from "../../services/log";
 import useGetEstimate from "../../services/queries/useGetEstimate";
+import generateRandomNumberFromTo from "../../services/util/random/generateNumberFromTo";
 
 export default function Match() {
   const user = useUser();
@@ -54,8 +55,18 @@ export default function Match() {
     mutationFn: () =>
       findNearby({
         user_id: user?.user?.id,
-        latitude: first?.latitude,
-        longitude: first?.longitude,
+        first_point: {
+          latitude: first?.latitude,
+          longitude: first?.longitude,
+          short_address: params["first.short_address"],
+          long_address: params["first.address"],
+        },
+        last_point: {
+          latitude: last?.latitude,
+          longitude: last?.longitude,
+          short_address: params["last.short_address"],
+          long_address: params["last.address"],
+        },
       }),
   });
 
@@ -141,6 +152,8 @@ export default function Match() {
         </View>
         <View style={{ flex: 1, paddingBottom: 16 }}>
           <View style={{ gap: 8, padding: 16 }}>
+            <Text>{generateRandomNumberFromTo(2, 7)} Drivers Nearby</Text>
+
             <Text>{params["first.address"]}</Text>
             <Text>{params["last.address"]}</Text>
             <View style={{ marginTop: 12, gap: 8 }}>
@@ -187,7 +200,7 @@ export default function Match() {
             onPress={handleOnConfirm}
             style={styles.button}
           >
-            {!isPending && <Text>Requesting</Text>}
+            {!isPending && <Text>Find Driver</Text>}
             {isPending && <ActivityIndicator />}
           </TouchableOpacity>
         </View>
@@ -196,7 +209,13 @@ export default function Match() {
   );
 }
 
-function ServiceCard({ serviceName, minFare, maxFare, currency, onPress }) {
+export function ServiceCard({
+  serviceName,
+  minFare,
+  maxFare,
+  currency,
+  onPress,
+}) {
   return (
     <TouchableOpacity onPress={onPress}>
       <Text>{serviceName}</Text>

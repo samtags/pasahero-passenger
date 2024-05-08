@@ -1,14 +1,11 @@
-import { Stack, useNavigation } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { useEffect } from "react";
 
 export default function Home() {
-  const navigation = useNavigation();
+  const router = useRouter();
 
   useEffect(() => {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "index" }],
-    });
+    router.back();
   }, []);
 
   return (
