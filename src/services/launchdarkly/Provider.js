@@ -17,8 +17,8 @@ const ctx = {
 };
 
 const client = new ReactNativeLDClient(
-  Const.expoConfig.extra.ldKey,
-  AutoEnvAttributes.Disabled
+  process.env.EXPO_PUBLIC_LD_KEY,
+  AutoEnvAttributes.Enabled
 );
 
 const LaunchdarklyProvider = ({ children }) => {
