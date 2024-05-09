@@ -1948,24 +1948,24 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@launchdarkly/js-client-sdk-common@1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-client-sdk-common/-/js-client-sdk-common-1.1.1.tgz#0497ef55e0cce870c61f024a39f57c8bd856a949"
-  integrity sha512-2/9HG422q5VyFupoSDgROIBFCYukNFPkFmyrrR2qFrgZWS2y0d9V1Df4YGVU03W8glz3zkQhHZnNlA408eTZ8g==
+"@launchdarkly/js-client-sdk-common@1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-client-sdk-common/-/js-client-sdk-common-1.1.0.tgz#a9116d8d22243b52af169d74996f7623961c795a"
+  integrity sha512-QIg5js7vVIyt5OqabffjshxSMPfmSl9EowkF+1zq2xlKSRO4WP098By5VNpAuS6S7C7Dej9YjKftDZrD/XCB+w==
   dependencies:
-    "@launchdarkly/js-sdk-common" "2.4.1"
+    "@launchdarkly/js-sdk-common" "2.4.0"
 
-"@launchdarkly/js-sdk-common@2.4.1":
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.4.1.tgz#6fb0fa1f906ffac5fb37b8a1da249b40df8a836d"
-  integrity sha512-bIEiP1+jVlPGwbVn8UYSVBMUDqGEnTevbg+fYD8bApbyFPY0v/vMvUDDhLxZGoj/EI76JfXrgT2/K70Xs1JJkA==
+"@launchdarkly/js-sdk-common@2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.4.0.tgz#fec9af2852d563d4a91ebc1d653a860ac517d7c3"
+  integrity sha512-cVq8FuxB8CN8jlN0k6Ojgq7HmwXAHiAkWEkdDBtd/TS+hRqw41K0h/Rqr0bLGR79FKB1t8jyvuUXxsxTIgZiuA==
 
-"@launchdarkly/react-native-client-sdk@10.1.1":
-  version "10.1.1"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/react-native-client-sdk/-/react-native-client-sdk-10.1.1.tgz#8ca3b430a67c3b100a07933afcb09cae4b43cc7f"
-  integrity sha512-LbnJ8vk3OgeIRHroGWy3vdnaiHZsVi7hLXa4ufdQJ2P+FVf0hEL6dVhYY1QdnOHD6En3Mc0q77E9CvMjJOp/MA==
+"@launchdarkly/react-native-client-sdk@10.1.0":
+  version "10.1.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/react-native-client-sdk/-/react-native-client-sdk-10.1.0.tgz#a89f54d3ad6835981d891f1c7dd9fcabdc05b124"
+  integrity sha512-AryyfB7zi/hDRhYHUgg28ez02nJ562pseJgPbFwwLStsRgegdl61N26D4dj9dBY8zaBao2tZfzs4WpqgT/Wlug==
   dependencies:
-    "@launchdarkly/js-client-sdk-common" "1.1.1"
+    "@launchdarkly/js-client-sdk-common" "1.1.0"
     "@react-native-async-storage/async-storage" "^1.21.0"
     base64-js "^1.5.1"
     event-target-shim "^6.0.2"

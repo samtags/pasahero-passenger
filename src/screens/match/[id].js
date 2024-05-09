@@ -72,18 +72,17 @@ export default function Match() {
                 }}
               />
             </Optional>
-          </Optional>
-
-          <Optional condition={Boolean(moveItMotoTaxi)}>
-            <ServiceCard
-              serviceName="Move It MotoTaxi"
-              minFare={moveItMotoTaxi?.fare.minFare}
-              maxFare={moveItMotoTaxi?.fare.maxFare}
-              currency={moveItMotoTaxi?.fare.currency}
-              onPress={() => {
-                console.log("MoveItMotoTaxi");
-              }}
-            />
+            <Optional condition={Boolean(moveItMotoTaxi)}>
+              <ServiceCard
+                serviceName="Move It MotoTaxi"
+                minFare={moveItMotoTaxi?.fare.minFare}
+                maxFare={moveItMotoTaxi?.fare.maxFare}
+                currency={moveItMotoTaxi?.fare.currency}
+                onPress={() => {
+                  console.log("MoveItMotoTaxi");
+                }}
+              />
+            </Optional>
           </Optional>
 
           <Optional condition={match?.status === "FOUND"}>
