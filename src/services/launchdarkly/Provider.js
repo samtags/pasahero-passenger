@@ -1,4 +1,4 @@
-// import Const from "expo-constants";
+import Const from "expo-constants";
 import {
   LDProvider,
   ReactNativeLDClient,
@@ -17,7 +17,7 @@ const ctx = {
 };
 
 const client = new ReactNativeLDClient(
-  "mob-a6a22c37-7e13-4dca-9493-7929a022b949",
+  Const.expoConfig.extra.ldKey,
   AutoEnvAttributes.Disabled
 );
 
