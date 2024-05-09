@@ -1,4 +1,3 @@
-import Const from "expo-constants";
 import {
   LDProvider,
   ReactNativeLDClient,
