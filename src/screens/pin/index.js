@@ -12,7 +12,6 @@ import reverseGeocode from "../../services/api/reverseGeocoding";
 import { Image } from "expo-image";
 import Const from "expo-constants";
 import Mapbox from "@rnmapbox/maps";
-
 Mapbox.setAccessToken(Const.expoConfig.extra.mapBoxKey);
 
 export default function Pin() {
@@ -82,8 +81,8 @@ export default function Pin() {
                 longitude,
               });
             }}
-            logoPosition={{ top: -100, left: 0 }}
             style={styles.map}
+            logoPosition={{ top: -100, left: 0 }}
             scaleBarEnabled={false}
           >
             <Mapbox.Camera
