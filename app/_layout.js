@@ -3,12 +3,14 @@ import { ClerkProvider } from "@clerk/clerk-expo";
 import Const from "expo-constants";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useReactQueryDevTools } from "@dev-plugins/react-query";
-import SignIn from "../src/components/signIn";
 import tokenCache from "../src/services/auth/tokenCache";
 import LaunchdarklyProvider from "../src/services/launchdarkly/Provider";
 import Mapbox from "@rnmapbox/maps";
 import { useFonts } from "expo-font";
+import { useWarmUpBrowser } from "../src/services/hooks/useWarmUpBrowser";
+import * as WebBrowser from "expo-web-browser";
 
+WebBrowser.maybeCompleteAuthSession();
 Mapbox.setAccessToken(Const.expoConfig.extra.mapBoxKey);
 
 const queryClient = new QueryClient({});
@@ -23,6 +25,7 @@ export default function Layout() {
   });
 
   useReactQueryDevTools(queryClient);
+  useWarmUpBrowser();
 
   // todo: splash screen
   if (!fontsLoaded) return null;
@@ -35,7 +38,6 @@ export default function Layout() {
       <QueryClientProvider client={queryClient}>
         <LaunchdarklyProvider>
           <Stack />
-          {/* <SignIn /> */}
         </LaunchdarklyProvider>
       </QueryClientProvider>
     </ClerkProvider>

@@ -1,14 +1,21 @@
 import { useMMKVString } from "react-native-mmkv";
 import { Stack, useRouter } from "expo-router";
-import { View, SafeAreaView, StyleSheet, TouchableOpacity } from "react-native";
+import { View, SafeAreaView, StyleSheet } from "react-native";
 import Text from "../../components/text";
 import Mapbox from "@rnmapbox/maps";
-import { Image } from "expo-image";
+import Transit from "../../components/locations/Transit";
+import log from "../../services/log";
+import storage from "../../services/storage";
 
 export default function Home() {
   const router = useRouter();
   const [loc] = useMMKVString("location.current");
   const location = JSON.parse(loc || "{}");
+
+  const handleOnPressWhereTo = () => {
+    handleInitializeDraft();
+    router.navigate("/transit/search/last");
+  };
 
   return (
     <View style={styles.container}>
@@ -26,27 +33,9 @@ export default function Home() {
             <Text size={28} weight="bold" color="#353579">
               Where are we going?
             </Text>
-            <View style={{ marginTop: 16 }} />
-            <TouchableOpacity>
-              <View
-                style={{
-                  backgroundColor: "#F0F0F0",
-                  paddingHorizontal: 16,
-                  paddingVertical: 10.5,
-                  flexDirection: "row",
-                  borderRadius: 10,
-                  alignItems: "center",
-                  gap: 8,
-                }}
-              >
-                <Image
-                  style={{ width: 12, height: 12, marginTop: 4 }}
-                  cachePolicy="memory-disk"
-                  source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FDestination.png?alt=media&token=e92cc2d1-77c3-486f-9793-3c0827ca5aef"
-                />
-                <Text color="#B9B8BB">Going to?</Text>
-              </View>
-            </TouchableOpacity>
+            <View style={styles.heading}>
+              <Transit onPress={handleOnPressWhereTo}>Going to?</Transit>
+            </View>
           </View>
         </View>
         <Mapbox.MapView
@@ -65,6 +54,11 @@ export default function Home() {
       </SafeAreaView>
     </View>
   );
+}
+
+function handleInitializeDraft() {
+  log.debug("User initialized draft");
+  storage.set("match.draft", "{}");
 }
 
 const styles = StyleSheet.create({
@@ -93,5 +87,9 @@ const styles = StyleSheet.create({
     height: "100%",
     width: "100%",
     flex: 1,
+  },
+  heading: {
+    flexDirection: "row",
+    marginTop: 16,
   },
 });

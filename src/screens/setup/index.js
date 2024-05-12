@@ -33,6 +33,14 @@ export default function Setup() {
 
   const isButtonDisabled = isGettingLocation || !selected || isGettingPlaceDetails; // prettier-ignore
 
+  const [q, setQ] = useState("");
+  const debouncedInput = useDelayedValue(q, 750);
+
+  let autoCompleteInput = debouncedInput;
+
+  if (selected?.description === q) autoCompleteInput = "";
+  const { data: autoCompleteResults = [] } = useAutoComplete(autoCompleteInput);
+
   const handleUseCurrentLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     const granted = status === "granted";
@@ -93,18 +101,14 @@ export default function Setup() {
 
     const latitude = result?.data?.result?.geometry?.location?.lat;
     const longitude = result?.data?.result?.geometry?.location?.lng;
+    const shortAddress = selected?.structured_formatting?.main_text;
+    const longAddress = selected?.description;
 
-    setLocation(JSON.stringify({ latitude, longitude }));
+    setLocation(
+      JSON.stringify({ latitude, longitude, shortAddress, longAddress })
+    );
     router.navigate("/");
   };
-
-  const [q, setQ] = useState("");
-  const debouncedInput = useDelayedValue(q, 750);
-
-  let autoCompleteInput = debouncedInput;
-
-  if (selected?.description === q) autoCompleteInput = "";
-  const { data: autoCompleteResults = [] } = useAutoComplete(autoCompleteInput);
 
   return (
     <SafeAreaView style={styles.container}>
