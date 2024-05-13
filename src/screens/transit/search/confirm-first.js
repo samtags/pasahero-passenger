@@ -65,6 +65,15 @@ export default function TransitSearchFirstScreen() {
               zoomLevel={13.79}
               centerCoordinate={[location.longitude, location.latitude]}
             />
+            <Mapbox.MarkerView
+              coordinate={[location?.longitude, location?.latitude]}
+            >
+              <Image
+                style={styles.marker}
+                cachePolicy="memory-disk"
+                source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FRequest%20Origin.png?alt=media&token=d7bfb9da-845a-4e48-96f5-b785b248bbfb"
+              />
+            </Mapbox.MarkerView>
           </Mapbox.MapView>
         </View>
         <View style={[styles.full, styles.spacer]}>
@@ -126,11 +135,12 @@ const styles = StyleSheet.create({
     paddingLeft: 12,
   },
   targetIcon: { width: 24, height: 24 },
-  mapContainer: { height: 210, backgroundColor: "#d1d5db" },
+  mapContainer: { height: 280, backgroundColor: "#d1d5db" },
   full: {
     flex: 1,
   },
   spacer: {
     padding: 16,
   },
+  marker: { width: 48, height: 48, marginBottom: 24 },
 });

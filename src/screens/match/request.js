@@ -16,6 +16,7 @@ import { useState } from "react";
 import findNearby from "../../services/api/findNearby";
 import { useMutation } from "@tanstack/react-query";
 import log from "../../services/log";
+import Mapbox from "@rnmapbox/maps";
 
 export default function List() {
   const router = useRouter();
@@ -202,7 +203,30 @@ export default function List() {
                     </Transit>
                   </View>
                 </View>
-                <View style={{ height: 280, backgroundColor: "#e5e7eb" }} />
+                <View style={{ height: 280, backgroundColor: "#e5e7eb" }}>
+                  <Mapbox.MapView
+                    scaleBarEnabled={false}
+                    style={styles.map}
+                    styleURL="mapbox://styles/mapbox/light-v11"
+                    logoPosition={{ top: -100, left: 0 }}
+                    attributionEnabled={false}
+                  >
+                    <Mapbox.Camera
+                      animationMode="none"
+                      zoomLevel={15}
+                      centerCoordinate={[first?.longitude, first?.latitude]}
+                    />
+                    <Mapbox.MarkerView
+                      coordinate={[first?.longitude, first?.latitude]}
+                    >
+                      <Image
+                        style={styles.marker}
+                        cachePolicy="memory-disk"
+                        source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FRequest%20Origin.png?alt=media&token=d7bfb9da-845a-4e48-96f5-b785b248bbfb"
+                      />
+                    </Mapbox.MarkerView>
+                  </Mapbox.MapView>
+                </View>
                 <ScrollView
                   style={{ flex: 1 }}
                   contentContainerStyle={{ paddingHorizontal: 16 }}
@@ -301,4 +325,10 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
   },
+  map: {
+    height: "100%",
+    width: "100%",
+    flex: 1,
+  },
+  marker: { width: 48, height: 48, marginBottom: 24 },
 });
