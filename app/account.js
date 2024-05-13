@@ -1,22 +1,22 @@
 import { Stack } from "expo-router";
-import Text from "../../../src/components/text";
-import TransitSearchConfirmFirst from "../../../src/screens/transit/search/confirm-first";
+import Text from "../src/components/text";
+import Account from "../src/screens/account";
 
-export default function TransitSearchConfirmFirstRoute() {
+export default function Entry(props) {
   return (
     <>
       <Stack.Screen
         options={{
           headerTitle: () => (
             <Text size={19} weight="bold" color="#353579">
-              Confirm Pickup
+              Account
             </Text>
           ),
           headerTitleAlign: "center",
           headerTintColor: "#757477",
         }}
       />
-      <TransitSearchConfirmFirst />
+      <Account />
     </>
   );
 }

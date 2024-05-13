@@ -1,3 +1,4 @@
+import "react-native-gesture-handler";
 import { Stack } from "expo-router/stack";
 import { ClerkProvider } from "@clerk/clerk-expo";
 import Const from "expo-constants";
@@ -9,6 +10,7 @@ import Mapbox from "@rnmapbox/maps";
 import { useFonts } from "expo-font";
 import { useWarmUpBrowser } from "../src/services/hooks/useWarmUpBrowser";
 import * as WebBrowser from "expo-web-browser";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 WebBrowser.maybeCompleteAuthSession();
 Mapbox.setAccessToken(Const.expoConfig.extra.mapBoxKey);
@@ -37,7 +39,9 @@ export default function Layout() {
     >
       <QueryClientProvider client={queryClient}>
         <LaunchdarklyProvider>
-          <Stack />
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <Stack />
+          </GestureHandlerRootView>
         </LaunchdarklyProvider>
       </QueryClientProvider>
     </ClerkProvider>

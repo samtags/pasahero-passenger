@@ -6,7 +6,7 @@ export default function Entry(props) {
     <>
       <Stack.Screen
         options={{
-          title: "Match",
+          headerShown: false,
         }}
       />
       <Match {...props} />

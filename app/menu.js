@@ -1,6 +1,5 @@
 import { Stack } from "expo-router";
-import List from "../../src/screens/match/list";
-import Text from "../../src/components/text";
+import Text from "../src/components/text";
 
 export default function Entry(props) {
   return (
@@ -9,15 +8,12 @@ export default function Entry(props) {
         options={{
           headerTitle: () => (
             <Text size={19} weight="bold" color="#353579">
-              Requested Trips
+              Account
             </Text>
           ),
           headerTitleAlign: "center",
-          headerTintColor: "#757477",
         }}
       />
-
-      <List {...props} />
     </>
   );
 }

@@ -1,11 +1,12 @@
 import { useMMKVString } from "react-native-mmkv";
 import { Stack, useRouter } from "expo-router";
-import { View, SafeAreaView, StyleSheet } from "react-native";
+import { View, SafeAreaView, StyleSheet, TouchableOpacity } from "react-native";
 import Text from "../../components/text";
 import Mapbox from "@rnmapbox/maps";
 import Transit from "../../components/locations/Transit";
 import log from "../../services/log";
 import storage from "../../services/storage";
+import { Image } from "expo-image";
 
 export default function Home() {
   const router = useRouter();
@@ -38,6 +39,22 @@ export default function Home() {
             </View>
           </View>
         </View>
+        <TouchableOpacity
+          onPress={router.navigate.bind(null, "/account")}
+          style={{
+            position: "absolute",
+            zIndex: 1,
+            right: 0,
+            padding: 16,
+            top: 16,
+          }}
+        >
+          <Image
+            style={{ width: 44, height: 44 }}
+            cachePolicy="memory-disk"
+            source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FUser.png?alt=media&token=88972e31-48ef-4dc4-bc63-2eca23074831"
+          />
+        </TouchableOpacity>
         <Mapbox.MapView
           scaleBarEnabled={false}
           style={styles.map}

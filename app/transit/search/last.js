@@ -31,6 +31,7 @@ export default function TransitSearchLastRoute() {
             </Text>
           ),
           headerTitleAlign: "center",
+          headerTintColor: "#757477",
         }}
       />
       <TransitSearchLast />
