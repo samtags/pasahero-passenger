@@ -55,6 +55,7 @@ export default function Home() {
             source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FUser.png?alt=media&token=88972e31-48ef-4dc4-bc63-2eca23074831"
           />
         </TouchableOpacity>
+
         <Mapbox.MapView
           scaleBarEnabled={false}
           style={styles.map}

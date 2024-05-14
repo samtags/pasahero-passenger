@@ -1,4 +1,4 @@
-import { View, StyleSheet, Button } from "react-native";
+import { View, StyleSheet, Button, ScrollView } from "react-native";
 import useMatches from "../../services/queries/useMatches";
 import { router } from "expo-router";
 
@@ -6,7 +6,10 @@ export default function List() {
   const { data } = useMatches();
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ padding: 24 }}
+    >
       <View style={styles.spacer}>
         {data?.map((match) => (
           <Button
@@ -17,15 +20,14 @@ export default function List() {
           />
         ))}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "whitesmoke",
-    padding: 24,
+    backgroundColor: "white",
   },
 
   button: {
