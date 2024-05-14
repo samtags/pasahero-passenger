@@ -1,12 +1,39 @@
 import { Stack } from "expo-router";
+import Text from "../../src/components/text";
 import Messaging from "../../src/screens/messaging/[transit]";
+import { TouchableOpacity, View } from "react-native";
+import { Image } from "expo-image";
 
-export default function Transit() {
+export default function Entry(props) {
   return (
     <>
       <Stack.Screen
         options={{
-          title: "Messaging",
+          headerTitle: () => (
+            <Text size={19} weight="bold" color="#353579">
+              Tom Hedge*
+            </Text>
+          ),
+          headerTitleAlign: "center",
+          headerRight: () => (
+            <TouchableOpacity>
+              <View
+                style={{
+                  backgroundColor: "#EFEFEF",
+                  height: 40,
+                  width: 40,
+                  borderRadius: 9,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Image
+                  style={{ width: 22, height: 22 }}
+                  source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FPhone.png?alt=media&token=f27c1ca8-c601-4f37-905c-61ac9ab0c9e5"
+                />
+              </View>
+            </TouchableOpacity>
+          ),
         }}
       />
       <Messaging />

@@ -1,13 +1,13 @@
-import { Stack, useGlobalSearchParams } from "expo-router";
+import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import {
   View,
-  Text,
   TouchableOpacity,
   StyleSheet,
   TextInput,
+  ScrollView,
 } from "react-native";
 import supabase from "../../services/supabase";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import Message from "./util/Message";
 import { useUser } from "@clerk/clerk-expo";
 import useIncomingMessage from "./util/useIncomingMessage";
@@ -15,20 +15,33 @@ import OrderedMap from "../../services/ordered-map";
 import useOnUpdate from "../../services/hooks/useOnUpdate";
 import moment from "moment";
 import log from "../../services/log";
-
-const messageMap = new OrderedMap();
+import { Image } from "expo-image";
+import Text from "../../components/text";
 
 export default function Messaging() {
+  const messageMap = useRef(new OrderedMap());
+
+  const scrollViewRef = useRef();
   const user = useUser();
   const [, toggleState] = useState(false);
 
   const refValue = useRef("");
   const refInput = useRef(null);
-  const global = useGlobalSearchParams();
+  const params = useLocalSearchParams();
 
-  const incomingMessage = useIncomingMessage(global.transit);
+  const incomingMessage = useIncomingMessage(params.transit);
   useOnUpdate(handleAddIncomingMessage, [incomingMessage]);
-  useEffect(handleGetMessages, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      handleGetMessages().finally(() => {
+        handleManualRerender();
+        setTimeout(() =>
+          scrollViewRef?.current?.scrollToEnd?.({ animated: false })
+        );
+      });
+    }, [])
+  );
 
   function handleClearSetInput() {
     refInput.current?.setNativeProps({ text: "" });
@@ -36,13 +49,17 @@ export default function Messaging() {
 
   function handleBuildMessage() {
     const msg = new Message();
-    msg.setMessage(refValue.current);
+    msg.setMessage(refValue.current?.trim?.());
     msg.setSenderId(user?.user?.id);
-    msg.setTransit(global?.transit ?? "/dev/null");
+    msg.setTransit(params?.transit ?? "/dev/null");
     return msg;
   }
 
   const handleSendMessage = () => {
+    if (!refValue.current?.trim?.()) {
+      toggleState();
+      return;
+    }
     const message = handleBuildMessage();
 
     // send to server
@@ -71,58 +88,82 @@ export default function Messaging() {
   }
 
   async function handleGetMessages() {
-    const messages = await handleRetrieveMessages(global?.transit);
+    const messages = await handleRetrieveMessages(params?.transit);
+    console.log("🚀 ~ handleGetMessages ~ messages:", messages);
     log.debug("Retrieved messages from server.", { messages });
     messages.forEach((message) => handleAddMessage(message));
-    handleManualRerender();
+  }
+
+  function handleAddMessage(message) {
+    if (!messageMap.current.get(message.id)) {
+      messageMap.current.addToEnd(message.id, message);
+      log.debug("Added message to map.", { message });
+    } else {
+      log.debug("Message already exists in the map.", { message });
+    }
   }
 
   return (
     <View style={styles.container}>
-      <Stack.Screen
-        options={{
-          title: "Messaging",
-        }}
-      />
+      <ScrollView
+        ref={scrollViewRef}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ gap: 24, padding: 16 }}
+      >
+        {messageMap?.current.map((key, value) => {
+          if (value.sender_id === user?.user?.id) {
+            return (
+              <SenderChat
+                key={key}
+                created_at={value.created_at}
+                message={value.message}
+              />
+            );
+          }
 
-      <Text style={styles.title}>{global?.transit}</Text>
-      <View style={styles.spacer}>
-        <View style={styles.spacer}>
+          return (
+            <ReceiverChat
+              key={key}
+              created_at={value.created_at}
+              message={value.message}
+            />
+          );
+        })}
+      </ScrollView>
+
+      <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
+        <View
+          style={{
+            backgroundColor: "#F0F0F0",
+            height: 81,
+            borderRadius: 10,
+            padding: 16,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            gap: 16,
+          }}
+        >
           <TextInput
-            autoFocus
             multiline
             ref={refInput}
             placeholder="Enter your message"
             onChangeText={handleChangeText}
+            style={{ fontFamily: "Lato-Regular", fontSize: 16, flex: 1 }}
           />
-          <View style={styles.spacer} />
-          <TouchableOpacity onPress={handleSendMessage}>
-            <Text style={{ fontWeight: "bold" }}>Send</Text>
+          <TouchableOpacity
+            style={{ alignSelf: "center" }}
+            onPress={handleSendMessage}
+          >
+            <Image
+              source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FSend.png?alt=media&token=3db4600b-40b0-4f4c-a0fe-e202e0ee9e15"
+              cachePolicy="memory-disk"
+              style={{
+                width: 28,
+                height: 28,
+              }}
+            />
           </TouchableOpacity>
-
-          <View style={styles.spacer} />
-
-          <View style={{ gap: 8 }}>
-            {messageMap.map((key, value) => {
-              if (value.sender_id === user?.user?.id) {
-                return (
-                  <SenderChat
-                    key={key}
-                    created_at={value.created_at}
-                    message={value.message}
-                  />
-                );
-              }
-
-              return (
-                <ReceiverChat
-                  key={key}
-                  created_at={value.created_at}
-                  message={value.message}
-                />
-              );
-            })}
-          </View>
         </View>
       </View>
     </View>
@@ -131,24 +172,44 @@ export default function Messaging() {
 
 function SenderChat(props) {
   return (
-    <View style={{ alignItems: "flex-end" }}>
-      <View style={{ maxWidth: "80%" }}>
-        <Text style={[styles.sender, styles.textAlignRight]}>
-          {moment(props.created_at).fromNow()}
-        </Text>
-        <Text style={[styles.message, styles.textAlignRight]}>
+    <View style={{ alignItems: "flex-end", gap: 8 }}>
+      <View
+        style={{
+          maxWidth: "80%",
+          backgroundColor: "#6366F1",
+          padding: 16,
+          borderRadius: 29,
+          borderBottomRightRadius: 0,
+        }}
+      >
+        <Text size={17} textAlign="right" color="white">
           {props.message}
         </Text>
       </View>
+      <Text size={14} textAlign="right" color="#6B7280">
+        {moment(props.created_at).fromNow()}
+      </Text>
     </View>
   );
 }
 
 function ReceiverChat(props) {
   return (
-    <View style={{ maxWidth: "80%" }}>
-      <Text style={styles.sender}>{moment(props.created_at).fromNow()}</Text>
-      <Text style={styles.message}>{props.message}</Text>
+    <View style={{ gap: 8 }}>
+      <View
+        style={{
+          maxWidth: "80%",
+          backgroundColor: "#F3F4F4",
+          padding: 16,
+          borderRadius: 29,
+          borderBottomLeftRadius: 0,
+        }}
+      >
+        <Text style={styles.message}>{props.message}</Text>
+      </View>
+      <Text size={14} color="#6B7280">
+        {moment(props.created_at).fromNow()}
+      </Text>
     </View>
   );
 }
@@ -168,15 +229,6 @@ async function sendMessage(message) {
   log.debug("Message sent to server!");
 
   return data;
-}
-
-function handleAddMessage(message) {
-  if (!messageMap.get(message.id)) {
-    messageMap.addToEnd(message.id, message);
-    log.debug("Added message to map.", { message });
-  } else {
-    log.debug("Message already exists in the map.", { message });
-  }
 }
 
 /** @param {string} transit  */
@@ -201,7 +253,7 @@ async function handleRetrieveMessages(transit) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "whitesmoke",
+    backgroundColor: "white",
   },
   primary: {
     backgroundColor: "gainsboro",

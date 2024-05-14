@@ -18,6 +18,7 @@ import Preview from "./components/Preview";
 import useOnUpdate from "../../services/hooks/useOnUpdate";
 
 export default function Match() {
+  const router = useRouter();
   const params = useLocalSearchParams();
   const match = useMatch(params.id);
 
@@ -38,6 +39,10 @@ export default function Match() {
       return () => clearTimeout(timer);
     }
   }, [match]);
+
+  function handleGoToMessages() {
+    router.navigate(`/messaging/${match?.id}`);
+  }
 
   return (
     <View style={styles.container}>
@@ -251,7 +256,7 @@ export default function Match() {
                     </View>
                   </View>
                   <View style={{ flexDirection: "row", gap: 7 }}>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={handleGoToMessages}>
                       <View
                         style={{
                           backgroundColor: "#EFEFEF",
@@ -1043,7 +1048,7 @@ function Feedback() {
               }}
             >
               <TextInput
-                style={{ fontFamily: "Lato-Regular" }}
+                style={{ fontFamily: "Lato-Regular", fontSize: 16 }}
                 placeholder="Give us a feed back"
                 multiline
               />
