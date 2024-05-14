@@ -1,10 +1,22 @@
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import Text from "../../src/components/text";
 import Messaging from "../../src/screens/messaging/[transit]";
 import { TouchableOpacity, View } from "react-native";
 import { Image } from "expo-image";
 
 export default function Entry(props) {
+  const router = useRouter();
+
+  function handlePressCall() {
+    router.navigate({
+      pathname: "/call/dial",
+      params: {
+        // todo: change with driver id
+        roomId: "Todo change with driver id",
+      },
+    });
+  }
+
   return (
     <>
       <Stack.Screen
@@ -16,7 +28,7 @@ export default function Entry(props) {
           ),
           headerTitleAlign: "center",
           headerRight: () => (
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handlePressCall}>
               <View
                 style={{
                   backgroundColor: "#EFEFEF",

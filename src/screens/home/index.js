@@ -7,8 +7,11 @@ import Transit from "../../components/locations/Transit";
 import log from "../../services/log";
 import storage from "../../services/storage";
 import { Image } from "expo-image";
+import { useUser } from "@clerk/clerk-expo";
+import useIncomingCall from "../../services/hooks/useIncomingCall";
 
 export default function Home() {
+  const user = useUser();
   const router = useRouter();
   const [loc] = useMMKVString("location.current");
   const location = JSON.parse(loc || "{}");
@@ -17,6 +20,8 @@ export default function Home() {
     handleInitializeDraft();
     router.navigate("/transit/search/last");
   };
+
+  useIncomingCall(user?.user?.id);
 
   return (
     <View style={styles.container}>

@@ -1,18 +1,17 @@
 import React from "react";
-import {
-  Text,
-  StyleSheet,
-  Button,
-  View,
-  Alert,
-  SafeAreaView,
-} from "react-native";
+import { StyleSheet, View, Alert, TouchableOpacity } from "react-native";
+import { StatusBar } from "expo-status-bar";
 
 import { RTCView } from "react-native-webrtc";
 
-import { useRouter, Stack, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import useJoin from "../../services/hooks/useJoin";
 import useOnUpdate from "../../services/hooks/useOnUpdate";
+import Text from "../../components/text";
+import { Image } from "expo-image";
+import Optional from "../../components/optional";
+import { LinearGradient } from "expo-linear-gradient";
+import useTimer from "../../services/hooks/useTimer";
 
 export default function JoinScreen() {
   const router = useRouter();
@@ -29,9 +28,10 @@ export default function JoinScreen() {
     handleHangUp,
   } = useJoin(roomId);
 
+  const timer = useTimer();
+
   useOnUpdate(() => {
     if (status === "TERMINATED") {
-      Alert.alert("Call Ended", "Call has been terminated by the caller.");
       setTimeout(() => router.back(), 1500);
     }
   }, [status]);
@@ -42,51 +42,71 @@ export default function JoinScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <Stack.Screen
-        options={{
-          headerShown: false,
-          headerBackVisible: false,
+    <View style={{ flex: 1 }}>
+      <StatusBar style="light" />
+      <LinearGradient
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
         }}
-      />
-      <View style={{ paddingTop: 24, alignItems: "center", flex: 1 }}>
-        <Text
-          style={{ textAlign: "center", fontWeight: "medium", fontSize: 20 }}
+        colors={["#242565", "#111023"]}
+        end={{ x: 1, y: 1 }}
+      >
+        <View
+          style={{ alignItems: "center", justifyContent: "center", flex: 1 }}
         >
-          {status[0]}
-          {status.slice(1).toLowerCase()}
-        </Text>
-      </View>
+          <Optional condition={status === "CONNECTING"}>
+            <Text size={21} color="white">
+              Connecting...
+            </Text>
+          </Optional>
 
-      <View>
-        <View style={{ gap: 12 }}>
-          {userStream && (
-            <Button
-              color="#a3a3a3"
-              title={isMuted ? "Unmute" : "Mute"}
-              onPress={handleToggleMute}
-            />
-          )}
+          <Optional condition={status === "CONNECTED"}>
+            <Text size={21} color="white">
+              {timer.text}
+            </Text>
+          </Optional>
 
-          <Button color="#ef4444" title="End call" onPress={handleEndCall} />
+          <Optional condition={status === "DROPPED" || status === "TERMINATED"}>
+            <Text size={21} color="white">
+              Call Ended
+            </Text>
+          </Optional>
         </View>
+        <View style={{ paddingVertical: 56 }}>
+          <View
+            style={{ gap: 108, flexDirection: "row", justifyContent: "center" }}
+          >
+            {userStream && (
+              <TouchableOpacity onPress={handleToggleMute}>
+                <Image
+                  source={
+                    isMuted
+                      ? "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FUnmute%20Call.png?alt=media&token=c3ad548f-32d2-4fba-ae1b-802923a7cf41"
+                      : "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FMute%20Call.png?alt=media&token=da54782a-004b-45d1-ac35-82255fa28c59"
+                  }
+                  style={{ width: 50, height: 50 }}
+                  cachePolicy="memory-disk"
+                />
+              </TouchableOpacity>
+            )}
 
-        {streams?.map((stream) => (
-          <RTCView
-            key={stream._id}
-            style={styles.rtc}
-            streamURL={stream && stream.toURL()}
-          />
-        ))}
-      </View>
-    </SafeAreaView>
+            <TouchableOpacity onPress={handleEndCall}>
+              <Image
+                source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FEnd%20Call.png?alt=media&token=b8157725-8b9b-488e-8441-4d21591dd566"
+                style={{ width: 50, height: 50 }}
+                cachePolicy="memory-disk"
+              />
+            </TouchableOpacity>
+          </View>
+          {streams?.map((stream) => (
+            <RTCView key={stream._id} streamURL={stream && stream.toURL()} />
+          ))}
+        </View>
+      </LinearGradient>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  rtc: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
-});
+const styles = StyleSheet.create({});

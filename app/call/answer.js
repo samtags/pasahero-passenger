@@ -8,6 +8,7 @@ export default function Entry(props) {
         options={{
           headerShown: false,
           headerBackVisible: false,
+          animation: "none",
         }}
       />
       <Answer {...props} />

@@ -44,6 +44,16 @@ export default function Match() {
     router.navigate(`/messaging/${match?.id}`);
   }
 
+  function handleCallDriver() {
+    router.navigate({
+      pathname: "/call/dial",
+      params: {
+        // todo: change with driver id
+        roomId: "Todo change with driver id",
+      },
+    });
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.full}>
@@ -273,7 +283,7 @@ export default function Match() {
                         />
                       </View>
                     </TouchableOpacity>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={handleCallDriver}>
                       <View
                         style={{
                           backgroundColor: "#EFEFEF",
