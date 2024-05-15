@@ -192,13 +192,24 @@ export default function List() {
                   <View style={styles.row}>
                     <Transit
                       color="#1B1B1B"
+                      onPress={() => router.navigate("/transit/search/first")}
                       indicatorSrc="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FOrigin.png?alt=media&token=7913bdfb-7b7f-41aa-aecb-433a275c92b8"
                     >
                       {match?.first?.shortAddress}
                     </Transit>
                   </View>
                   <View style={styles.row}>
-                    <Transit color="#1B1B1B">
+                    <Transit
+                      onPress={() =>
+                        router.navigate({
+                          pathname: "/transit/search/last",
+                          params: {
+                            shortAddress: match?.last?.shortAddress,
+                          },
+                        })
+                      }
+                      color="#1B1B1B"
+                    >
                       {match?.last?.shortAddress}
                     </Transit>
                   </View>

@@ -12,7 +12,7 @@ import { useRef, useState } from "react";
 import SearchResult from "../../../components/locations/SearchResult";
 import useDelayedValue from "../../../services/hooks/useDelayedValue";
 import useAutoComplete from "../../../services/queries/useAutoComplete";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import storage from "../../../services/storage";
 import log from "../../../services/log";
 import getCoordinatesByPlaceId from "../../../services/api/getCoordinatesByPlaceId";
@@ -21,11 +21,17 @@ export default function TransitSearchLastScreen() {
   const router = useRouter();
   const textInputRef = useRef(null);
 
-  const [q, setQ] = useState("");
-  const debouncedInput = useDelayedValue(q, 750);
-  const { data: autoCompleteResults = [] } = useAutoComplete(debouncedInput);
+  const params = useLocalSearchParams();
+
+  const [isModified, setIsModified] = useState(false);
+  const [q, setQ] = useState(params.shortAddress ?? "");
+  const debouncedInputValue = useDelayedValue(q, 750);
+  const inputValue = isModified ? debouncedInputValue : "";
+
+  const { data: autoCompleteResults = [] } = useAutoComplete(inputValue);
 
   function handleChangeText(text) {
+    setIsModified(true);
     setQ(text);
   }
 
@@ -79,6 +85,7 @@ export default function TransitSearchLastScreen() {
             onChangeText={handleChangeText}
             value={q}
             placeholder="Search location"
+            selection={isModified ? undefined : { start: 0, end: q.length }}
           />
         </View>
         <TouchableOpacity
