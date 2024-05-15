@@ -80,8 +80,21 @@ export default function Home() {
 }
 
 function handleInitializeDraft() {
-  log.debug("User initialized draft");
-  storage.set("match.draft", "{}");
+  const currentLocation = storage.getString("location.current");
+  const location = JSON.parse(currentLocation);
+
+  const draft = {
+    first: {
+      latitude: location.latitude,
+      longitude: location.longitude,
+      shortAddress: location.shortAddress,
+      longAddress: location.longAddress,
+    },
+    last: {},
+  };
+
+  log.debug("User initialized draft", { ["match.draft"]: draft });
+  storage.set("match.draft", JSON.stringify(draft));
 }
 
 const styles = StyleSheet.create({

@@ -32,15 +32,18 @@ export default function TransitSearchLastScreen() {
   async function handleSelect(item) {
     setQ(item?.description);
 
-    router.replace("/transit/search/confirm-first");
+    handleSetDestinationAddress({
+      shortAddress: item?.structured_formatting?.main_text,
+      longAddress: item?.description,
+    });
+
+    router.replace("/match/request");
 
     getCoordinatesByPlaceId(item?.place_id)
       .then((res) => {
-        handleSetTransitLast({
+        handleSetDestinationCoordinates({
           latitude: res?.data?.result?.geometry?.location?.lat,
           longitude: res?.data?.result?.geometry?.location?.lng,
-          shortAddress: item?.structured_formatting?.main_text,
-          longAddress: item?.description,
         });
       })
       .catch((error) => {
@@ -51,7 +54,7 @@ export default function TransitSearchLastScreen() {
           "We encountered an error while processing the selected destination. Please try to search a destination again."
         );
 
-        log.debug(
+        log.warn(
           "Oops, We encountered an error while processing the selected destination. Please try to search a destination again.",
           { error }
         );
@@ -79,6 +82,18 @@ export default function TransitSearchLastScreen() {
           />
         </View>
         <TouchableOpacity
+          onPress={() => {
+            const locationString = storage.getString("location.current");
+            const location = JSON.parse(locationString);
+
+            router.navigate({
+              pathname: "/transit/search/last.pin",
+              params: {
+                latitude: location.latitude,
+                longitude: location.longitude,
+              },
+            });
+          }}
           style={{
             alignItems: "center",
             justifyContent: "center",
@@ -111,7 +126,49 @@ export default function TransitSearchLastScreen() {
   );
 }
 
-function handleSetTransitLast({
+export function handleSetDestinationAddress({ shortAddress, longAddress }) {
+  let draft = {};
+
+  try {
+    const _matchDraft = storage.getString("match.draft");
+    log.debug("Got match.draft", { data: _matchDraft });
+    draft = JSON.parse(_matchDraft);
+  } catch {
+    log.warn("Failed to parse match.draft in last transit search.");
+  }
+
+  if (!draft.last) {
+    draft.last = {};
+  }
+
+  draft.last.shortAddress = shortAddress;
+  draft.last.longAddress = longAddress;
+
+  storage.set("match.draft", JSON.stringify(draft));
+  log.debug("Updated match.draft", {draft, shortAddress, longAddress}) // prettier-ignore
+}
+
+export function handleSetDestinationCoordinates({ latitude, longitude }) {
+  let draft = {};
+
+  try {
+    const _matchDraft = storage.getString("match.draft");
+    log.debug("Got match.draft", { data: _matchDraft });
+    draft = JSON.parse(_matchDraft);
+  } catch {
+    log.warn("Failed to parse match.draft in last transit search.");
+  }
+
+  if (!draft.last) draft.last = {};
+
+  draft.last.latitude = latitude;
+  draft.last.longitude = longitude;
+
+  storage.set("match.draft", JSON.stringify(draft));
+  log.debug("Updated match.draft", {draft, latitude, longitude}) // prettier-ignore
+}
+
+export function handleSetTransitLast({
   latitude,
   longitude,
   shortAddress,

@@ -177,7 +177,7 @@ export default function List() {
           </View>
           <View style={{ flex: 1 }}>
             <View style={{ flex: 1 }}>
-              <View style={{ height: 20, backgroundColor: "#6366F1" }} />
+              <View style={{ height: 20, backgroundColor: "#23235F" }} />
               <View style={{ position: "relative", flex: 1 }}>
                 <View
                   style={{
@@ -299,14 +299,14 @@ export default function List() {
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: "#6366F1",
+    backgroundColor: "#23235F",
   },
   container: {
     backgroundColor: "white",
     flex: 1,
   },
   header: {
-    backgroundColor: "#6366F1",
+    backgroundColor: "#23235F",
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 16,

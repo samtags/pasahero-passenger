@@ -16,6 +16,7 @@ import { Image } from "expo-image";
 import Cta from "../../components/cta";
 import Preview from "./components/Preview";
 import useOnUpdate from "../../services/hooks/useOnUpdate";
+import BackButton from "../../components/back";
 
 export default function Match() {
   const router = useRouter();
@@ -31,7 +32,7 @@ export default function Match() {
     match?.first_point?.longitude && match?.first_point?.latitude;
 
   useOnUpdate(() => {
-    if (match?.status === "COMPLETED") {
+    if (match?.status === "DONE") {
       const timer = setTimeout(() => {
         setShowFeedback(true);
       }, 1500);
@@ -828,7 +829,7 @@ export default function Match() {
             </View>
           </Optional>
 
-          <Optional condition={match?.status === "COMPLETED"}>
+          <Optional condition={match?.status === "DONE"}>
             <Preview
               style={styles.previewContent}
               onHandlerStateChange={() => {
@@ -1012,19 +1013,6 @@ export default function Match() {
   );
 }
 
-function BackButton() {
-  const router = useRouter();
-  return (
-    <TouchableOpacity onPress={router.back} style={styles.back}>
-      <Image
-        style={{ width: 44, height: 44 }}
-        cachePolicy="memory-disk"
-        source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FCircle%20Back.png?alt=media&token=bff546fa-0686-4949-ab46-08bd9510dc4d"
-      />
-    </TouchableOpacity>
-  );
-}
-
 function Feedback() {
   return (
     <View
@@ -1075,14 +1063,6 @@ function Feedback() {
 }
 
 const styles = StyleSheet.create({
-  back: {
-    position: "absolute",
-    zIndex: 1,
-    left: 0,
-    padding: 16,
-    top: 16,
-    zIndex: 3,
-  },
   container: {
     flex: 1,
   },

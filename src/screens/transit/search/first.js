@@ -12,6 +12,9 @@ import SearchResult from "../../../components/locations/SearchResult";
 import useDelayedValue from "../../../services/hooks/useDelayedValue";
 import useAutoComplete from "../../../services/queries/useAutoComplete";
 import { useRouter } from "expo-router";
+import storage from "../../../services/storage";
+import getCoordinatesByPlaceId from "../../../services/api/getCoordinatesByPlaceId";
+import log from "../../../services/log";
 
 export default function TransitSearchFirstScreen() {
   const router = useRouter();
@@ -25,13 +28,20 @@ export default function TransitSearchFirstScreen() {
   }
 
   function handleSelect(item) {
-    // todo: do something with the selected item
-    console.log("🚀 ~ handleSelect ~ item:", item);
-
-    router.replace({
-      pathname: "/match",
-      params: {},
-    });
+    getCoordinatesByPlaceId(item?.place_id)
+      .then((res) => {
+        console.log("🚀 ~ getCoordinatesByPlaceId ~ res:", res);
+        handleSetTransitFirst({
+          latitude: res?.data?.result?.geometry?.location?.lat,
+          longitude: res?.data?.result?.geometry?.location?.lng,
+          shortAddress: item?.structured_formatting?.main_text,
+          longAddress: item?.description,
+        });
+        router.replace("/match/request");
+      })
+      .catch((error) => {
+        console.log("🚀 ~ getCoordinatesByPlaceId ~ error:", error);
+      });
   }
 
   function handlePressPin() {
@@ -78,6 +88,28 @@ export default function TransitSearchFirstScreen() {
       </ScrollView>
     </SafeAreaView>
   );
+}
+
+export function handleSetTransitFirst({
+  latitude,
+  longitude,
+  shortAddress,
+  longAddress,
+}) {
+  let draft = {};
+
+  try {
+    const _matchDraft = storage.getString("match.draft");
+    log.debug("Got match.draft", { data: _matchDraft });
+    draft = JSON.parse(_matchDraft);
+  } catch {
+    log.warn("Failed to parse match.draft in last transit search.");
+  }
+
+  draft.first = { latitude, longitude, shortAddress, longAddress };
+
+  storage.set("match.draft", JSON.stringify(draft));
+  log.debug("Updated match.draft", {draft, latitude, longitude, shortAddress, longAddress}) // prettier-ignore
 }
 
 const styles = StyleSheet.create({
