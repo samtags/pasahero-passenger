@@ -22,9 +22,14 @@ export default function TransitSearchLastScreen() {
   const textInputRef = useRef(null);
 
   const params = useLocalSearchParams();
+  const isFromMatchRequest = Boolean(params?.shortAddress);
+  const latitude = params?.latitude;
+  const longitude = params?.longitude;
 
   const [isModified, setIsModified] = useState(false);
-  const [q, setQ] = useState(params.shortAddress ?? "");
+  const [selection, setSelection] = useState({ start: 0 });
+
+  const [q, setQ] = useState(() => params?.shortAddress ?? "");
   const debouncedInputValue = useDelayedValue(q, 750);
   const inputValue = isModified ? debouncedInputValue : "";
 
@@ -79,13 +84,17 @@ export default function TransitSearchLastScreen() {
             source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FDestination.png?alt=media&token=e92cc2d1-77c3-486f-9793-3c0827ca5aef"
           />
           <TextInput
-            autoFocus
+            autoFocus={isFromMatchRequest === false}
             ref={textInputRef}
             style={styles.textInput}
             onChangeText={handleChangeText}
             value={q}
             placeholder="Search location"
-            selection={isModified ? undefined : { start: 0, end: q.length }}
+            selection={isModified ? undefined : selection}
+            onFocus={() => {
+              if (isModified === false)
+                setSelection({ start: 0, end: q.length });
+            }}
           />
         </View>
         <TouchableOpacity
@@ -93,11 +102,11 @@ export default function TransitSearchLastScreen() {
             const locationString = storage.getString("location.current");
             const location = JSON.parse(locationString);
 
-            router.navigate({
+            router.replace({
               pathname: "/transit/search/last.pin",
               params: {
-                latitude: location.latitude,
-                longitude: location.longitude,
+                latitude: latitude || location.latitude,
+                longitude: longitude || location.longitude,
               },
             });
           }}

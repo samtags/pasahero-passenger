@@ -7,25 +7,41 @@ import {
   View,
 } from "react-native";
 import { Image } from "expo-image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SearchResult from "../../../components/locations/SearchResult";
 import useDelayedValue from "../../../services/hooks/useDelayedValue";
 import useAutoComplete from "../../../services/queries/useAutoComplete";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import storage from "../../../services/storage";
 import getCoordinatesByPlaceId from "../../../services/api/getCoordinatesByPlaceId";
 import log from "../../../services/log";
 
 export default function TransitSearchFirstScreen() {
   const router = useRouter();
+  const textInputRef = useRef(null);
 
-  const [q, setQ] = useState("");
-  const debouncedInput = useDelayedValue(q, 750);
-  const { data: autoCompleteResults = [] } = useAutoComplete(debouncedInput);
+  const params = useLocalSearchParams();
+  const isFromMatchRequest = Boolean(params?.shortAddress);
+
+  const [isModified, setIsModified] = useState(false);
+  const [selection, setSelection] = useState({ start: 0, end: 0 });
+
+  const [q, setQ] = useState(() => params?.shortAddress ?? "");
+  const debouncedInputValue = useDelayedValue(q, 750);
+  const inputValue = isModified ? debouncedInputValue : "";
+
+  const { data: autoCompleteResults = [] } = useAutoComplete(inputValue);
 
   function handleChangeText(text) {
+    setIsModified(true);
     setQ(text);
   }
+
+  useEffect(() => {
+    if (isFromMatchRequest && isModified === false) {
+      textInputRef.current.focus();
+    }
+  }, []);
 
   function handleSelect(item) {
     getCoordinatesByPlaceId(item?.place_id)
@@ -45,7 +61,16 @@ export default function TransitSearchFirstScreen() {
   }
 
   function handlePressPin() {
-    // handle: goto pin
+    const locationString = storage.getString("location.current");
+    const location = JSON.parse(locationString);
+
+    router.replace({
+      pathname: "/transit/search/first.pin",
+      params: {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      },
+    });
   }
 
   return (
@@ -58,10 +83,15 @@ export default function TransitSearchFirstScreen() {
             source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FOrigin.png?alt=media&token=7913bdfb-7b7f-41aa-aecb-433a275c92b8"
           />
           <TextInput
-            autoFocus
+            ref={textInputRef}
+            autoFocus={isFromMatchRequest === false}
             style={styles.textInput}
             onChangeText={handleChangeText}
             value={q}
+            selection={isModified ? undefined : selection}
+            onFocus={() => {
+              if (isModified === false) setSelection({ start: 0, end: q.length }); // prettier-ignore
+            }}
             placeholder="Search location"
           />
         </View>

@@ -1,4 +1,4 @@
-import { StackActions } from "@react-navigation/native";
+import { StackActions, CommonActions } from "@react-navigation/native";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import Text from "../../components/text";
 import SafeAreaView from "../../components/safeAreaView";
@@ -12,7 +12,7 @@ import { SignedOut, SignedIn, useOAuth, useUser } from "@clerk/clerk-expo";
 import EstimateItem from "../../components/estimate/Result";
 import useGetEstimate from "../../services/queries/useGetEstimate";
 import amount from "../../services/util/amount";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import findNearby from "../../services/api/findNearby";
 import { useMutation } from "@tanstack/react-query";
 import log from "../../services/log";
@@ -21,6 +21,7 @@ import Mapbox from "@rnmapbox/maps";
 export default function List() {
   const router = useRouter();
   const navigation = useNavigation();
+
   const user = useUser();
   const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
 
@@ -113,6 +114,38 @@ export default function List() {
       }),
   });
 
+  /**
+   * prevent stacking of same screen in the navigation stack
+   * resulting in a back button loop to the same screen
+   * this usually happens when the user came from pin location screen
+   */
+  useEffect(() => {
+    const routes = navigation.getState().routes;
+
+    let hasDuplicate = false;
+    let tmp = new Set();
+    const newRoutes = [];
+
+    routes.forEach((route) => {
+      if (tmp.has(route.name)) {
+        hasDuplicate = true;
+        return;
+      }
+
+      tmp.add(route.name);
+      newRoutes.push(route);
+    });
+
+    if (hasDuplicate) {
+      navigation.dispatch(
+        CommonActions.reset({
+          index: newRoutes.length - 1,
+          routes: newRoutes,
+        })
+      );
+    }
+  }, []);
+
   const handleSignIn = async () => {
     try {
       const flow = await startOAuthFlow();
@@ -192,7 +225,16 @@ export default function List() {
                   <View style={styles.row}>
                     <Transit
                       color="#1B1B1B"
-                      onPress={() => router.navigate("/transit/search/first")}
+                      onPress={() => {
+                        router.navigate({
+                          pathname: "/transit/search/first",
+                          params: {
+                            shortAddress: match?.first?.shortAddress,
+                            latitude: match?.first?.latitude,
+                            longitude: match?.first?.longitude,
+                          },
+                        });
+                      }}
                       indicatorSrc="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FOrigin.png?alt=media&token=7913bdfb-7b7f-41aa-aecb-433a275c92b8"
                     >
                       {match?.first?.shortAddress}
@@ -200,14 +242,22 @@ export default function List() {
                   </View>
                   <View style={styles.row}>
                     <Transit
-                      onPress={() =>
+                      onPress={() => {
                         router.navigate({
                           pathname: "/transit/search/last",
                           params: {
                             shortAddress: match?.last?.shortAddress,
+                            latitude: match?.last?.latitude,
+                            longitude: match?.last?.longitude,
                           },
-                        })
-                      }
+                        });
+                        router.replace({
+                          pathname: "/transit/search/last",
+                          params: {
+                            shortAddress: match?.last?.shortAddress,
+                          },
+                        });
+                      }}
                       color="#1B1B1B"
                     >
                       {match?.last?.shortAddress}

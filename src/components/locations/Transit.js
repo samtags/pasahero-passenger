@@ -23,7 +23,7 @@ export default function Transit({ onPress, children, indicatorSrc, color }) {
           cachePolicy="memory-disk"
           source={indicator}
         />
-        <Text color={color || "#B9B8BB"} weight="bold">
+        <Text numberOfLines={1} color={color || "#B9B8BB"} weight="bold">
           {children}
         </Text>
       </View>
@@ -36,6 +36,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#F0F0F0",
     paddingHorizontal: 16,
+    paddingRight: 24,
     paddingVertical: 10.5,
     flexDirection: "row",
     borderRadius: 10,

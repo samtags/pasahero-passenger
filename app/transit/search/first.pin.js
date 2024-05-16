@@ -9,7 +9,8 @@ import BackButton from "../../../src/components/back";
 import { StatusBar } from "expo-status-bar";
 import useReverseGeocoding from "../../../src/services/queries/useReverseGeocoding";
 import useDelayedValue from "../../../src/services/hooks/useDelayedValue";
-import { handleSetTransitLast } from "../../../src/screens/transit/search/last";
+import log from "../../../src/services/log";
+import storage from "../../../src/services/storage";
 
 export default function Pin() {
   const params = useLocalSearchParams();
@@ -21,11 +22,8 @@ export default function Pin() {
   const mapRef = useRef(null);
 
   const [center, setCenter] = useState(() => ({ latitude, longitude }));
-
   const [isDragging, setIsDragging] = useState(false);
-
   const coordinates = useDelayedValue(center, 750);
-
   const { data, isLoading } = useReverseGeocoding(
     coordinates.latitude,
     coordinates.longitude
@@ -39,13 +37,24 @@ export default function Pin() {
   const isDisabled = !isDragging || isLoading || !active;
 
   function handleConfirm() {
-    handleSetTransitLast({
+    handleSetTransitFirst({
       latitude: active.geometry.location.lat,
       longitude: active.geometry.location.lng,
       shortAddress: active.formatted_address,
       longAddress: active.formatted_address,
     });
     router.replace("/match/request");
+
+    // set user current location base on the selected location
+    const latitude = active.geometry.location.lat;
+    const longitude = active.geometry.location.lng;
+    const shortAddress = active.formatted_address;
+    const longAddress = active.formatted_address;
+
+    storage.set(
+      "location.current",
+      JSON.stringify({ latitude, longitude, shortAddress, longAddress })
+    );
   }
 
   return (
@@ -93,7 +102,7 @@ export default function Pin() {
         >
           <Mapbox.Camera
             animationMode="none"
-            zoomLevel={16.75}
+            zoomLevel={17}
             centerCoordinate={[params.longitude, params.latitude]}
           />
         </Mapbox.MapView>
@@ -137,6 +146,28 @@ export default function Pin() {
   );
 }
 
+export function handleSetTransitFirst({
+  latitude,
+  longitude,
+  shortAddress,
+  longAddress,
+}) {
+  let draft = {};
+
+  try {
+    const _matchDraft = storage.getString("match.draft");
+    log.debug("Got match.draft", { data: _matchDraft });
+    draft = JSON.parse(_matchDraft);
+  } catch {
+    log.warn("Failed to parse match.draft in first transit search.");
+  }
+
+  draft.first = { latitude, longitude, shortAddress, longAddress };
+
+  storage.set("match.draft", JSON.stringify(draft));
+  log.debug("Updated match.draft", {draft, latitude, longitude, shortAddress, longAddress}) // prettier-ignore
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -152,7 +183,6 @@ const styles = StyleSheet.create({
     height: "100%",
     width: "100%",
     flex: 1,
-    position: "relative",
   },
   pin: {
     backgroundColor: "gainsboro",
