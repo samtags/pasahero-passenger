@@ -1,4 +1,5 @@
 import "react-native-gesture-handler";
+import "react-native-reanimated";
 import { Stack } from "expo-router/stack";
 import { ClerkProvider } from "@clerk/clerk-expo";
 import Const from "expo-constants";

@@ -1,6 +1,7 @@
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Text from "../../components/text";
 import { Image } from "expo-image";
+import { Skeleton } from "moti/skeleton";
 
 /**
  *
@@ -15,7 +16,25 @@ export default function EstimateItem({
   highlightColor,
   isSelected,
   onSelect,
+  isLoading,
 }) {
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.contentRow}>
+          <Skeleton radius="round" width={24} height={24} colorMode="light" />
+          <View style={{ gap: 4 }}>
+            <Skeleton width={140} height={14} colorMode="light" />
+            <Skeleton width={95} height={10} colorMode="light" />
+          </View>
+        </View>
+        <View style={styles.checkboxContainer}>
+          <Skeleton radius={2} width={15} height={15} colorMode="light" />
+        </View>
+      </View>
+    );
+  }
+
   return (
     <TouchableOpacity onPress={() => onSelect?.()}>
       <View style={styles.container}>
@@ -99,4 +118,5 @@ const styles = StyleSheet.create({
  * @property {string} highlightColor
  * @property {boolean} [isSelected]
  * @property {() => unknown} onSelect
+ * @property {boolean} [isLoading]
  */

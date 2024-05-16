@@ -17,6 +17,8 @@ import findNearby from "../../services/api/findNearby";
 import { useMutation } from "@tanstack/react-query";
 import log from "../../services/log";
 import Mapbox from "@rnmapbox/maps";
+import { Skeleton } from "moti/skeleton";
+import Optional from "../../components/optional";
 
 export default function List() {
   const router = useRouter();
@@ -39,9 +41,9 @@ export default function List() {
   const origin = `${match?.first?.latitude},${match?.first?.longitude}`;
   const destination = `${match?.last?.latitude},${match?.last?.longitude}`;
 
-  const { data: angkasPassenger } = useGetEstimate("AngkasPassenger", origin, destination); // prettier-ignore
-  const { data: joyRideMcTaxi } = useGetEstimate("JoyRideMcTaxi", origin, destination); // prettier-ignore
-  const { data: moveItMotoTaxi } = useGetEstimate("MoveItMotoTaxi", origin, destination); // prettier-ignore
+  const { data: angkasPassenger, isLoading: isLoadingAngkas } = useGetEstimate("AngkasPassenger", origin, destination); // prettier-ignore
+  const { data: joyRideMcTaxi, isLoading: isLoadingJoyRide } = useGetEstimate("JoyRideMcTaxi", origin, destination); // prettier-ignore
+  const { data: moveItMotoTaxi, isLoading: isLoadingMoveIt } = useGetEstimate("MoveItMotoTaxi", origin, destination); // prettier-ignore
 
   const angkasMinFare = amount.format(angkasPassenger?.fare?.minFare || 0);
   const angkasMaxFare = Number(angkasPassenger?.fare?.maxFare || 0).toFixed(2);
@@ -69,7 +71,7 @@ export default function List() {
     fares.push(moveItMotoTaxi?.fare?.minFare, moveItMotoTaxi?.fare?.maxFare);
   }
 
-  fare = fares.filter(Boolean);
+  fares = fares.filter(Boolean);
 
   let smallestFare = undefined;
   let largestFare = undefined;
@@ -255,6 +257,8 @@ export default function List() {
                           pathname: "/transit/search/last",
                           params: {
                             shortAddress: match?.last?.shortAddress,
+                            latitude: match?.last?.latitude,
+                            longitude: match?.last?.longitude,
                           },
                         });
                       }}
@@ -296,6 +300,7 @@ export default function List() {
                     platform="Angkas"
                     serviceName="Passenger"
                     highlightColor="#2BBEF1"
+                    isLoading={isLoadingAngkas}
                     estimatedFare={angkasEstimatedFare}
                     serviceImage="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FAngkas.png?alt=media&token=6790cdbc-7cf7-456b-8e3e-2fed2c4193dc"
                     isSelected={selectedPlatforms.includes(angkasPassenger?.serviceName)} // prettier-ignore
@@ -305,6 +310,7 @@ export default function List() {
                     platform="JoyRide"
                     serviceName="MC Taxi"
                     highlightColor="#171ACB"
+                    isLoading={isLoadingJoyRide}
                     estimatedFare={joyRideEstimatedFare}
                     serviceImage="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FJoyRide%20McTaxi.png?alt=media&token=86c9d45f-aca9-458d-8079-0fc73cfd6ad7"
                     isSelected={selectedPlatforms.includes(joyRideMcTaxi?.serviceName)} // prettier-ignore
@@ -315,6 +321,7 @@ export default function List() {
                     platform="Move it"
                     serviceName="Moto Taxi"
                     highlightColor="#9B282D"
+                    isLoading={isLoadingMoveIt}
                     estimatedFare={moveItEstimatedFare}
                     serviceImage="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FMove%20it.png?alt=media&token=b19e275e-820b-4b45-98d0-e54e56b48246"
                     isSelected={selectedPlatforms.includes(moveItMotoTaxi?.serviceName)} // prettier-ignore
@@ -327,9 +334,23 @@ export default function List() {
               <Text textAlign="center" size={14} color="#707070">
                 Estimated Fare
               </Text>
-              <Text textAlign="center" size={34} weight="bold" color="#353579">
-                {smallestFare} - {largestFare}
-              </Text>
+              <Optional condition={fares.length === 0}>
+                <View style={{ alignItems: "center" }}>
+                  <Skeleton width={180} height={34} colorMode="light" />
+                </View>
+              </Optional>
+
+              <Optional condition={fares.length > 0}>
+                <Text
+                  textAlign="center"
+                  size={34}
+                  weight="bold"
+                  color="#353579"
+                >
+                  {smallestFare} - {largestFare}
+                </Text>
+              </Optional>
+
               <View style={{ paddingHorizontal: 24 }}>
                 <Text textAlign="center" size={11} color="#707070">
                   This estimation is based on price regulated by LTFB. Estimated
