@@ -5,7 +5,13 @@ import axios from "axios";
  * @param {Payload} param0
  * @returns
  */
-export default async function findNearby({ user_id, first_point, last_point }) {
+export default async function findNearby({
+  user_id,
+  first_point,
+  last_point,
+  services,
+  estimatePreview,
+}) {
   try {
     const res = await axios.post("https://demand-2h6pkmfalq-et.a.run.app", {
       user_id,
@@ -13,6 +19,8 @@ export default async function findNearby({ user_id, first_point, last_point }) {
       longitude: first_point.longitude,
       first_point,
       last_point,
+      services,
+      estimatePreview,
     });
 
     return res?.data;

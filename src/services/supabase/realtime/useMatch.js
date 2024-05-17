@@ -38,7 +38,9 @@ export default function useMatch(id) {
 async function handleGetMatch(id) {
   const { data, error } = await supabase
     .from("matches")
-    .select("id, driver_id, status, first_point, last_point")
+    .select(
+      "id, driver_id, status, first_point, last_point, services, estimatePreview"
+    )
     .eq("id", id)
     .single();
 
@@ -58,4 +60,6 @@ async function handleGetMatch(id) {
  * @property {string} passenger_id
  * @property {string} driver_id
  * @property { "REQUESTED" | "FOUND" | "ARRIVED" | "STARTED" | "COMPLETED" | "PASSENGER_CANCELED" } status
+ * @property {"JoyRideMcTaxi" | "MoveItMotoTaxi" | "AngkasPassenger"} services
+ * @property {string} estimatePreview
  */

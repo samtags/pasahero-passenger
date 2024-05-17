@@ -17,11 +17,33 @@ import Cta from "../../components/cta";
 import Preview from "./components/Preview";
 import useOnUpdate from "../../services/hooks/useOnUpdate";
 import BackButton from "../../components/back";
+import { useMMKVString } from "react-native-mmkv";
+import { useBoolVariation } from "@launchdarkly/react-native-client-sdk";
+import cancelMatchRequest from "../../services/api/cancelMatchRequest";
+import { useMutation } from "@tanstack/react-query";
 
 export default function Match() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const match = useMatch(params.id);
+
+  const { isPending: isCanceling, mutateAsync: handleCancel } = useMutation({
+    mutationFn: () => cancelMatchRequest({ id: match?.id }),
+    onSuccess: () => router.replace("/"),
+  });
+
+  const [matchDraft] = useMMKVString("match.draft");
+  const draft = JSON.parse(matchDraft ?? "{}");
+
+  const initialCoordinates = [
+    match?.first_point?.longitude ?? draft?.first?.longitude,
+    match?.first_point?.latitude ?? draft?.first?.latitude,
+  ];
+
+  const isEnableServiceCharge = useBoolVariation(
+    "php-enable-service-charge",
+    false
+  );
 
   const [scrollEnabled, setScrollEnabled] = useState(false);
   const scrollRef = useRef();
@@ -93,20 +115,39 @@ export default function Match() {
                 Hold still we are will find the best match for you.
               </Text>
               <View style={styles.services}>
-                <View style={styles.serviceContainer}>
-                  <Image
-                    source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FJoyRide%20McTaxi.png?alt=media&token=86c9d45f-aca9-458d-8079-0fc73cfd6ad7"
-                    cachePolicy="memory-disk"
-                    style={styles.image}
-                  />
-                </View>
-                <View style={styles.serviceContainer}>
-                  <Image
-                    source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FMove%20it.png?alt=media&token=b19e275e-820b-4b45-98d0-e54e56b48246"
-                    cachePolicy="memory-disk"
-                    style={styles.image}
-                  />
-                </View>
+                <Optional
+                  condition={match?.services?.includes("AngkasPassenger")}
+                >
+                  <View style={styles.serviceContainer}>
+                    <Image
+                      source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FAngkas.png?alt=media&token=6790cdbc-7cf7-456b-8e3e-2fed2c4193dc"
+                      cachePolicy="memory-disk"
+                      style={styles.image}
+                    />
+                  </View>
+                </Optional>
+                <Optional
+                  condition={match?.services?.includes("JoyRideMcTaxi")}
+                >
+                  <View style={styles.serviceContainer}>
+                    <Image
+                      source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FJoyRide%20McTaxi.png?alt=media&token=86c9d45f-aca9-458d-8079-0fc73cfd6ad7"
+                      cachePolicy="memory-disk"
+                      style={styles.image}
+                    />
+                  </View>
+                </Optional>
+                <Optional
+                  condition={match?.services?.includes("MoveItMotoTaxi")}
+                >
+                  <View style={styles.serviceContainer}>
+                    <Image
+                      source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FMove%20it.png?alt=media&token=b19e275e-820b-4b45-98d0-e54e56b48246"
+                      cachePolicy="memory-disk"
+                      style={styles.image}
+                    />
+                  </View>
+                </Optional>
               </View>
             </Preview>
             <View
@@ -121,7 +162,6 @@ export default function Match() {
                 <View
                   style={{
                     flexDirection: "row",
-                    alignItems: "center",
                     gap: 12,
                   }}
                 >
@@ -142,7 +182,6 @@ export default function Match() {
                 <View
                   style={{
                     flexDirection: "row",
-                    alignItems: "center",
                     gap: 12,
                   }}
                 >
@@ -168,28 +207,38 @@ export default function Match() {
                 gap: 16,
               }}
             >
-              <View style={{ gap: 8 }}>
-                <Text size={14} color="#707070">
-                  Service Charge
-                </Text>
-                <Text weight="bold" size={18} color="#1B1B1B">
-                  ₱5.00
-                </Text>
-              </View>
+              <Optional condition={isEnableServiceCharge}>
+                <View style={{ gap: 8 }}>
+                  <Text size={14} color="#707070">
+                    Service Charge
+                  </Text>
+                  <Text weight="bold" size={18} color="#1B1B1B">
+                    ₱5.00
+                  </Text>
+                </View>
+              </Optional>
               <View style={{ gap: 8 }}>
                 <Text size={14} color="#707070">
                   Estimated Fare
                 </Text>
                 <Text weight="700" size={34} color="#353579">
-                  ₱ 50.00 - 60.00
+                  {match?.estimatePreview ?? "₱ 0.00"}
                 </Text>
               </View>
               <Text color="#707070" size={11}>
                 This estimation is based on price regulated by LTFB. Estimated
                 fare may vary in the actual trip in the application you chose.
               </Text>
-              <Cta disabled color="#D1D5DB">
-                Slide to cancel
+              <Cta
+                disabled={isCanceling}
+                onPress={() => {
+                  scrollRef?.current?.scrollTo({ y: 0, animated: true });
+                  setScrollEnabled(false);
+                  handleCancel();
+                }}
+                color={isCanceling ? "#f3f4f6" : "#D1D5DB"}
+              >
+                Cancel Request
               </Cta>
             </View>
           </Optional>
@@ -989,10 +1038,7 @@ export default function Match() {
             <Mapbox.Camera
               animationMode="none"
               zoomLevel={13.79}
-              centerCoordinate={[
-                match?.first_point?.longitude,
-                match?.first_point?.latitude,
-              ]}
+              centerCoordinate={initialCoordinates}
             />
             <Mapbox.MarkerView
               coordinate={[
@@ -1120,5 +1166,5 @@ const styles = StyleSheet.create({
     width: 24,
   },
   marker: { width: 48, height: 48, marginBottom: 24 },
-  indicator: { width: 12, height: 12 },
+  indicator: { width: 12, height: 12, marginTop: 4 },
 });

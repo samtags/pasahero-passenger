@@ -113,6 +113,8 @@ export default function List() {
           short_address: last?.shortAddress,
           long_address: last?.longAddress,
         },
+        services: selectedPlatforms,
+        estimatePreview: `${smallestFare} - ${largestFare}`,
       }),
   });
 
@@ -181,6 +183,7 @@ export default function List() {
   const handleOnConfirm = () => {
     mutateAsync()
       .then((res) => {
+        console.log("🚀 ~ .then ~ res:", res);
         navigation.dispatch(StackActions.popToTop());
         router.navigate({
           pathname: `match/${res?.id}`,
@@ -192,6 +195,8 @@ export default function List() {
         });
       });
   };
+
+  const disableSubmit = isPending || fares.length === 0;
 
   return (
     <>
@@ -364,9 +369,9 @@ export default function List() {
               </SignedOut>
               <SignedIn>
                 <Cta
-                  disabled={isPending}
+                  disabled={disableSubmit}
                   onPress={handleOnConfirm}
-                  color={isPending ? "#B9BAF9" : "#6366F1"}
+                  color={disableSubmit ? "#B9BAF9" : "#6366F1"}
                 >
                   Request a Ride
                 </Cta>
