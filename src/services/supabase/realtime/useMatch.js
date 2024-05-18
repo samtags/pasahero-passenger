@@ -39,7 +39,7 @@ async function handleGetMatch(id) {
   const { data, error } = await supabase
     .from("matches")
     .select(
-      "id, driver_id, status, first_point, last_point, services, estimatePreview"
+      "id, driver_id, status, first_point, last_point, services, estimatePreview, driver_id"
     )
     .eq("id", id)
     .single();
@@ -62,4 +62,5 @@ async function handleGetMatch(id) {
  * @property { "REQUESTED" | "FOUND" | "ARRIVED" | "STARTED" | "COMPLETED" | "PASSENGER_CANCELED" } status
  * @property {"JoyRideMcTaxi" | "MoveItMotoTaxi" | "AngkasPassenger"} services
  * @property {string} estimatePreview
+ * @property {string} driver_id
  */

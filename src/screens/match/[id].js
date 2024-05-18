@@ -21,11 +21,16 @@ import { useMMKVString } from "react-native-mmkv";
 import { useBoolVariation } from "@launchdarkly/react-native-client-sdk";
 import cancelMatchRequest from "../../services/api/cancelMatchRequest";
 import { useMutation } from "@tanstack/react-query";
+import useGetDriver from "../../services/queries/useGetDriver";
+import { Skeleton } from "moti/skeleton";
 
 export default function Match() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const match = useMatch(params.id);
+  const { data: driver, isLoading: isFetchingDriver } = useGetDriver(
+    match?.driver_id
+  );
 
   const { isPending: isCanceling, mutateAsync: handleCancel } = useMutation({
     mutationFn: () => cancelMatchRequest({ id: match?.id }),
@@ -266,7 +271,10 @@ export default function Match() {
                 <Text size={14} color="#707070">
                   Your
                   <Text weight="bold" size={14} color="#0090F9">
-                    {` Angkas `}
+                    {" "}
+                    <Optional condition={isFetchingDriver === false}>
+                      {`Angkas `}
+                    </Optional>
                   </Text>
                   driver is on the way!
                 </Text>
@@ -302,17 +310,35 @@ export default function Match() {
                       style={{
                         width: 55,
                         height: 55,
-                        backgroundColor: "gainsboro",
+                        backgroundColor: "#f3f4f6",
                         borderRadius: 9,
+                        overflow: "hidden",
                       }}
-                    />
+                    >
+                      <Optional condition={isFetchingDriver === false}>
+                        <Image
+                          style={{ width: "100%", height: "100%" }}
+                          source={driver?.image_url}
+                          cachePolicy="memory-disk"
+                        />
+                      </Optional>
+                    </View>
                     <View style={{ gap: 4 }}>
-                      <Text color="#363F59" size={18} weight="900">
-                        Toyota Vios (CA3751)
-                      </Text>
-                      <Text size={14} weight="bold" color="#707070">
-                        Tom Hedge
-                      </Text>
+                      <Optional condition={isFetchingDriver}>
+                        <View style={{ flexDirection: "row", gap: 8 }}>
+                          <Skeleton height={14} width={50} colorMode="light" />
+                          <Skeleton height={14} width={75} colorMode="light" />
+                        </View>
+                        <Skeleton height={10} width={75} colorMode="light" />
+                      </Optional>
+                      <Optional condition={isFetchingDriver === false}>
+                        <Text color="#363F59" size={18} weight="900">
+                          {driver?.model} {`(${driver?.plate_number})`}
+                        </Text>
+                        <Text size={14} weight="bold" color="#707070">
+                          {driver?.display_name}
+                        </Text>
+                      </Optional>
                     </View>
                   </View>
                   <View style={{ flexDirection: "row", gap: 7 }}>
