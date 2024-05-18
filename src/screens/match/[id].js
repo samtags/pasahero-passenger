@@ -43,11 +43,6 @@ export default function Match() {
     match?.first_point?.latitude ?? draft?.first?.latitude,
   ];
 
-  const isEnableServiceCharge = useBoolVariation(
-    "php-enable-service-charge",
-    false
-  );
-
   const [scrollEnabled, setScrollEnabled] = useState(false);
   const scrollRef = useRef();
   const [showFeedback, setShowFeedback] = useState(false);
@@ -122,124 +117,29 @@ export default function Match() {
               platform="Angkas"
               eta="2:35"
             />
-
-            <TransitPoints
-              showShareRide
-              onShareRide={() => {}}
-              first_point={match?.first_point}
-              last_point={match?.last_point}
-            />
-
-            <FareDetails
-              estimatePreview={match?.estimatePreview}
-              showCancelOption
-              serviceCharge={match?.service_charge}
-              isCanceling={isCanceling}
-              onCancel={handleOnPressCancel}
-            />
           </Optional>
 
           <Optional condition={match?.status === "REQUESTED"}>
-            <Preview
-              style={styles.previewContent}
-              onHandlerStateChange={() => {
-                setScrollEnabled((prev) => {
-                  if (prev === false) return true;
-                  return prev;
-                });
-                scrollRef?.current?.scrollTo({ y: 50, animated: true });
-              }}
-            >
-              <Text size={28} weight="bold" color="#353579">
-                Searching
-              </Text>
-              <Text size={14} color="#707070">
-                Hold still we are will find the best match for you.
-              </Text>
-              <View style={styles.services}>
-                <Optional
-                  condition={match?.services?.includes("AngkasPassenger")}
-                >
-                  <View style={styles.serviceContainer}>
-                    <Image
-                      source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FAngkas.png?alt=media&token=6790cdbc-7cf7-456b-8e3e-2fed2c4193dc"
-                      cachePolicy="memory-disk"
-                      style={styles.image}
-                    />
-                  </View>
-                </Optional>
-                <Optional
-                  condition={match?.services?.includes("JoyRideMcTaxi")}
-                >
-                  <View style={styles.serviceContainer}>
-                    <Image
-                      source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FJoyRide%20McTaxi.png?alt=media&token=86c9d45f-aca9-458d-8079-0fc73cfd6ad7"
-                      cachePolicy="memory-disk"
-                      style={styles.image}
-                    />
-                  </View>
-                </Optional>
-                <Optional
-                  condition={match?.services?.includes("MoveItMotoTaxi")}
-                >
-                  <View style={styles.serviceContainer}>
-                    <Image
-                      source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FMove%20it.png?alt=media&token=b19e275e-820b-4b45-98d0-e54e56b48246"
-                      cachePolicy="memory-disk"
-                      style={styles.image}
-                    />
-                  </View>
-                </Optional>
-              </View>
-            </Preview>
-            <TransitPoints
-              first_point={match?.first_point}
-              last_point={match?.last_point}
+            <RequestedPreview
+              onHandlerStateChange={onHandlerStateChange}
+              services={match?.services}
             />
-
-            <View
-              style={{
-                backgroundColor: "white",
-                paddingHorizontal: 16,
-                paddingVertical: 32,
-                gap: 16,
-              }}
-            >
-              <Optional condition={isEnableServiceCharge}>
-                <View style={{ gap: 8 }}>
-                  <Text size={14} color="#707070">
-                    Service Charge
-                  </Text>
-                  <Text weight="bold" size={18} color="#1B1B1B">
-                    ₱5.00
-                  </Text>
-                </View>
-              </Optional>
-              <View style={{ gap: 8 }}>
-                <Text size={14} color="#707070">
-                  Estimated Fare
-                </Text>
-                <Text weight="700" size={34} color="#353579">
-                  {match?.estimatePreview ?? "₱ 0.00"}
-                </Text>
-              </View>
-              <Text color="#707070" size={11}>
-                This estimation is based on price regulated by LTFB. Estimated
-                fare may vary in the actual trip in the application you chose.
-              </Text>
-              <Cta
-                disabled={isCanceling}
-                onPress={() => {
-                  scrollRef?.current?.scrollTo({ y: 0, animated: true });
-                  setScrollEnabled(false);
-                  handleCancel();
-                }}
-                color={isCanceling ? "#f3f4f6" : "#D1D5DB"}
-              >
-                Cancel Request
-              </Cta>
-            </View>
           </Optional>
+
+          <TransitPoints
+            showShareRide
+            onShareRide={() => {}}
+            first_point={match?.first_point}
+            last_point={match?.last_point}
+          />
+
+          <FareDetails
+            estimatePreview={match?.estimatePreview}
+            showCancelOption
+            serviceCharge={match?.service_charge}
+            isCanceling={isCanceling}
+            onCancel={handleOnPressCancel}
+          />
 
           <Optional condition={match?.status === "ARRIVED"}>
             <Preview
@@ -830,6 +730,59 @@ export default function Match() {
 
 /**
  *
+ * @param {RequestedPreviewProps} props
+ * @returns
+ */
+function RequestedPreview({
+  onHandlerStateChange, //
+  services = [],
+}) {
+  return (
+    <Preview
+      style={styles.previewContent}
+      onHandlerStateChange={onHandlerStateChange}
+    >
+      <Text size={28} weight="bold" color="#353579">
+        Searching
+      </Text>
+      <Text size={14} color="#707070">
+        Hold still we are will find the best match for you.
+      </Text>
+      <View style={styles.services}>
+        <Optional condition={services?.includes("AngkasPassenger")}>
+          <View style={styles.serviceContainer}>
+            <Image
+              source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FAngkas.png?alt=media&token=6790cdbc-7cf7-456b-8e3e-2fed2c4193dc"
+              cachePolicy="memory-disk"
+              style={styles.image}
+            />
+          </View>
+        </Optional>
+        <Optional condition={services?.includes("JoyRideMcTaxi")}>
+          <View style={styles.serviceContainer}>
+            <Image
+              source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FJoyRide%20McTaxi.png?alt=media&token=86c9d45f-aca9-458d-8079-0fc73cfd6ad7"
+              cachePolicy="memory-disk"
+              style={styles.image}
+            />
+          </View>
+        </Optional>
+        <Optional condition={services?.includes("MoveItMotoTaxi")}>
+          <View style={styles.serviceContainer}>
+            <Image
+              source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FMove%20it.png?alt=media&token=b19e275e-820b-4b45-98d0-e54e56b48246"
+              cachePolicy="memory-disk"
+              style={styles.image}
+            />
+          </View>
+        </Optional>
+      </View>
+    </Preview>
+  );
+}
+
+/**
+ *
  * @param {FoundPreviewProps} props
  * @returns
  */
@@ -984,9 +937,6 @@ function TransitPoints({
   );
 }
 
-/**
- *
- */
 function FareDetails({
   estimatePreview,
   isCanceling,
@@ -1135,7 +1085,7 @@ const styles = StyleSheet.create({
   serviceContainer: {
     height: 24,
     width: 24,
-    borderRadius: 24,
+    borderRadius: 4,
     overflow: "hidden",
   },
   image: {
@@ -1143,7 +1093,7 @@ const styles = StyleSheet.create({
     width: 24,
   },
   marker: { width: 48, height: 48, marginBottom: 24 },
-  indicator: { width: 12, height: 12 },
+  indicator: { width: 12, height: 12, marginTop: 4 },
   driverInfoSubTitle: {
     justifyContent: "space-between",
     flexDirection: "row",
@@ -1192,7 +1142,7 @@ const styles = StyleSheet.create({
   },
   transitRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     gap: 12,
   },
   shareRideRow: {
@@ -1222,4 +1172,10 @@ const styles = StyleSheet.create({
  * @property {string} plate_number
  * @property {string} display_name
  *
+ */
+
+/**
+ * @typedef RequestedPreviewProps
+ * @property {() => void} onHandlerStateChange
+ * @property {string[]} services
  */
