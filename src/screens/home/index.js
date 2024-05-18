@@ -23,18 +23,20 @@ export default function Home() {
 
   useIncomingCall(user?.user?.id);
 
+  let greeting = "Hi,";
+
+  if (user?.user?.firstName) {
+    greeting = `Hi ${user?.user?.firstName}!`;
+  }
+
   return (
     <View style={styles.container}>
-      <Stack.Screen
-        options={{
-          headerShown: false,
-        }}
-      />
+      <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.full}>
         <View pointerEvents="box-none" style={styles.absolute}>
           <View style={styles.content}>
             <Text size={18} weight="bold" color="#757477">
-              Hi,
+              {greeting}
             </Text>
             <Text size={28} weight="bold" color="#353579">
               Where are we going?
@@ -46,13 +48,7 @@ export default function Home() {
         </View>
         <TouchableOpacity
           onPress={router.navigate.bind(null, "/account")}
-          style={{
-            position: "absolute",
-            zIndex: 1,
-            right: 0,
-            padding: 16,
-            top: 16,
-          }}
+          style={styles.accountIcon}
         >
           <Image
             style={{ width: 44, height: 44 }}
@@ -127,5 +123,12 @@ const styles = StyleSheet.create({
   heading: {
     flexDirection: "row",
     marginTop: 16,
+  },
+  accountIcon: {
+    position: "absolute",
+    zIndex: 1,
+    right: 0,
+    padding: 16,
+    top: 16,
   },
 });
