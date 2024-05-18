@@ -51,16 +51,6 @@ export default function Match() {
   const isCoordinatesReady =
     match?.first_point?.longitude && match?.first_point?.latitude;
 
-  useOnUpdate(() => {
-    if (match?.status === "DONE") {
-      const timer = setTimeout(() => {
-        setShowFeedback(true);
-      }, 1500);
-
-      return () => clearTimeout(timer);
-    }
-  }, [match]);
-
   function handleGoToMessages() {
     router.navigate(`/messaging/${match?.id}`);
   }
@@ -88,11 +78,32 @@ export default function Match() {
     handleCancel();
   }
 
+  function handleSubmitFeedback(feedback) {
+    // todo: do something with the feedback
+    console.log(feedback);
+    setShowFeedback(false);
+
+    router.replace("/");
+  }
+
+  useOnUpdate(() => {
+    if (match?.status === "DONE") {
+      const timer = setTimeout(() => {
+        setShowFeedback(true);
+      }, 1500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [match]);
+
   return (
     <View style={styles.container}>
       <View style={styles.full}>
         <Optional condition={showFeedback}>
-          <Feedback />
+          <Feedback
+            onClose={() => setShowFeedback(false)}
+            onSubmit={(feedback) => handleSubmitFeedback(feedback)}
+          />
         </Optional>
         <BackButton />
         <ScrollView
@@ -108,21 +119,9 @@ export default function Match() {
             if (e.nativeEvent.contentOffset.y <= 0) setScrollEnabled(false);
           }}
         >
-          <Optional condition={match?.status === "FOUND"}>
-            <FoundPreview
+          <Optional condition={match?.status === "DONE"}>
+            <DonePreview
               onHandlerStateChange={onHandlerStateChange}
-              onMessage={handleGoToMessages}
-              onCall={handleCallDriver}
-              driver_id={match?.driver_id}
-              platform="Angkas"
-              eta="2:35"
-            />
-          </Optional>
-
-          <Optional condition={match?.status === "ARRIVED"}>
-            <ArrivedPreview
-              onHandlerStateChange={onHandlerStateChange}
-              services={match?.services}
               driver_id={match?.driver_id}
             />
           </Optional>
@@ -136,168 +135,47 @@ export default function Match() {
             />
           </Optional>
 
-          <TransitPoints
-            showShareRide={["FOUND", "ARRIVED", "STARTED"].includes(match?.status)} // prettier-ignore
-            onShareRide={() => {}}
-            first_point={match?.first_point}
-            last_point={match?.last_point}
-          />
+          <Optional condition={match?.status === "ARRIVED"}>
+            <ArrivedPreview
+              onHandlerStateChange={onHandlerStateChange}
+              services={match?.services}
+              driver_id={match?.driver_id}
+            />
+          </Optional>
 
-          <FareDetails
-            estimatePreview={match?.estimatePreview}
-            showCancelOption={["REQUESTED", "FOUND"].includes(match?.status)}
-            serviceCharge={match?.service_charge}
-            isCanceling={isCanceling}
-            onCancel={handleOnPressCancel}
-          />
+          <Optional condition={match?.status === "FOUND"}>
+            <FoundPreview
+              onHandlerStateChange={onHandlerStateChange}
+              onMessage={handleGoToMessages}
+              onCall={handleCallDriver}
+              driver_id={match?.driver_id}
+              platform="Angkas"
+              eta="2:35"
+            />
+          </Optional>
 
-          <Optional condition={match?.status === "DONE"}>
-            <Preview
-              style={styles.previewContent}
-              onHandlerStateChange={() => {
-                setScrollEnabled((prev) => {
-                  if (prev === false) return true;
-                  return prev;
-                });
-                scrollRef?.current?.scrollTo({ y: 50, animated: true });
-              }}
-            >
-              <Text size={28} weight="bold" color="#353579">
-                Arrived
-              </Text>
+          <Optional condition={match?.status === "REQUESTED"}>
+            <RequestedPreview
+              onHandlerStateChange={onHandlerStateChange}
+              services={match?.services}
+            />
+          </Optional>
 
-              <Text size={14} color="#707070">
-                You have arrived to the destination.
-              </Text>
+          <Optional condition={Boolean(match)}>
+            <TransitPoints
+              showShareRide={["FOUND", "ARRIVED", "STARTED"].includes(match?.status)} // prettier-ignore
+              onShareRide={() => {}}
+              first_point={match?.first_point}
+              last_point={match?.last_point}
+            />
 
-              <View
-                style={{
-                  paddingTop: 16,
-                  marginTop: 16,
-                  borderColor: "#EAEAEA",
-                  borderTopWidth: 1,
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 12,
-                  }}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 12,
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: 55,
-                        height: 55,
-                        backgroundColor: "gainsboro",
-                        borderRadius: 9,
-                      }}
-                    />
-                    <View style={{ gap: 4 }}>
-                      <Text color="#363F59" size={18} weight="900">
-                        Toyota Vios (CA3751)
-                      </Text>
-                      <Text size={14} weight="bold" color="#707070">
-                        Tom Hedge
-                      </Text>
-                    </View>
-                  </View>
-                  <Text size={14} weight="900" color="#0090F9">
-                    Angkas
-                  </Text>
-                </View>
-              </View>
-            </Preview>
-
-            <View
-              style={{
-                backgroundColor: "white",
-                paddingHorizontal: 16,
-                paddingVertical: 32,
-                gap: 16,
-              }}
-            >
-              <View style={{ gap: 8 }}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 12,
-                  }}
-                >
-                  <Image
-                    style={styles.indicator}
-                    cachePolicy="memory-disk"
-                    source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FOrigin.png?alt=media&token=7913bdfb-7b7f-41aa-aecb-433a275c92b8"
-                  />
-                  <Text weight="900" size={18} color="#1B1B1B">
-                    {match?.first_point?.short_address}
-                  </Text>
-                </View>
-                <Text size={14} color="#707070">
-                  {match?.first_point?.long_address}
-                </Text>
-              </View>
-              <View style={{ gap: 8 }}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 12,
-                  }}
-                >
-                  <Image
-                    style={styles.indicator}
-                    cachePolicy="memory-disk"
-                    source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FDestination.png?alt=media&token=e92cc2d1-77c3-486f-9793-3c0827ca5aef"
-                  />
-                  <Text weight="900" size={18} color="#1B1B1B">
-                    {match?.last_point?.short_address}
-                  </Text>
-                </View>
-                <Text size={14} color="#707070">
-                  {match?.last_point?.long_address}
-                </Text>
-              </View>
-            </View>
-
-            <View
-              style={{
-                backgroundColor: "white",
-                paddingHorizontal: 16,
-                paddingVertical: 32,
-                gap: 16,
-              }}
-            >
-              <View style={{ gap: 8 }}>
-                <Text size={14} color="#707070">
-                  Service Charge
-                </Text>
-                <Text weight="bold" size={18} color="#1B1B1B">
-                  ₱5.00
-                </Text>
-              </View>
-              <View style={{ gap: 8 }}>
-                <Text size={14} color="#707070">
-                  Estimated Fare
-                </Text>
-                <Text weight="700" size={34} color="#353579">
-                  ₱ 50.00 - 60.00
-                </Text>
-              </View>
-              <Text color="#707070" size={11}>
-                This estimation is based on price regulated by LTFB. Estimated
-                fare may vary in the actual trip in the application you chose.
-              </Text>
-            </View>
+            <FareDetails
+              estimatePreview={match?.estimatePreview}
+              showCancelOption={["REQUESTED", "FOUND"].includes(match?.status)}
+              serviceCharge={match?.service_charge}
+              isCanceling={isCanceling}
+              onCancel={handleOnPressCancel}
+            />
           </Optional>
         </ScrollView>
         <Mapbox.MapView
@@ -489,6 +367,7 @@ function StartedPreview({
   onCall,
   driver_id,
 }) {
+  // todo: store driver_info in the match data
   const { data: driver, isLoading } = useGetDriver(driver_id);
   const { image_url, model, plate_number, display_name } = driver || {};
 
@@ -514,6 +393,32 @@ function StartedPreview({
         display_name={display_name}
         onCall={onCall}
         onMessage={onMessage}
+        isLoading={isLoading}
+      />
+    </Preview>
+  );
+}
+
+function DonePreview({ onHandlerStateChange, driver_id }) {
+  // todo: store driver_info in the match data
+  const { data: driver, isLoading } = useGetDriver(driver_id);
+  const { image_url, model, plate_number, display_name } = driver || {};
+  return (
+    <Preview
+      style={styles.previewContent}
+      onHandlerStateChange={onHandlerStateChange}
+    >
+      <PreviewTitle>Arrived</PreviewTitle>
+
+      <Text size={14} color="#707070">
+        You have arrived to the destination.
+      </Text>
+
+      <DriverInfo
+        image_url={image_url}
+        model={model}
+        plate_number={plate_number}
+        display_name={display_name}
         isLoading={isLoading}
       />
     </Preview>
@@ -603,6 +508,8 @@ function TransitPoints({
   showShareRide,
   onShareRide,
 }) {
+  const isEnableRideShare = useBoolVariation("php-enable-share-ride", false);
+
   return (
     <View style={styles.transitContainer}>
       <View style={{ gap: 8 }}>
@@ -636,21 +543,23 @@ function TransitPoints({
         </Text>
       </View>
 
-      <Optional condition={showShareRide}>
-        <TouchableOpacity onPress={() => onShareRide?.()}>
-          <View style={styles.shareRideRow}>
-            <View style={styles.iconContainer}>
-              <Image
-                style={{ height: 16, width: 18, resizeMode: "contain" }}
-                cachePolicy="memory-disk"
-                source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FShare.png?alt=media&token=4e75220d-0bc9-44ee-8aae-a8526df4d141"
-              />
+      <Optional condition={isEnableRideShare}>
+        <Optional condition={showShareRide}>
+          <TouchableOpacity onPress={() => onShareRide?.()}>
+            <View style={styles.shareRideRow}>
+              <View style={styles.iconContainer}>
+                <Image
+                  style={{ height: 16, width: 18, resizeMode: "contain" }}
+                  cachePolicy="memory-disk"
+                  source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FShare.png?alt=media&token=4e75220d-0bc9-44ee-8aae-a8526df4d141"
+                />
+              </View>
+              <Text weight="900" color="#10B981">
+                Share this ride
+              </Text>
             </View>
-            <Text weight="900" color="#10B981">
-              Share this ride
-            </Text>
-          </View>
-        </TouchableOpacity>
+          </TouchableOpacity>
+        </Optional>
       </Optional>
     </View>
   );
@@ -712,7 +621,7 @@ function FareDetails({
   );
 }
 
-function Feedback() {
+function Feedback({ onClose, onSubmit }) {
   return (
     <View
       style={{
@@ -751,10 +660,12 @@ function Feedback() {
               />
             </View>
           </View>
-          <Cta textColor="#353579" color="transparent">
+          <Cta onPress={onClose} textColor="#353579" color="transparent">
             Not Now. Thank you!
           </Cta>
-          <Cta color="#6366F1">Submit</Cta>
+          <Cta onPress={onSubmit} color="#6366F1">
+            Submit
+          </Cta>
         </View>
       </View>
     </View>
