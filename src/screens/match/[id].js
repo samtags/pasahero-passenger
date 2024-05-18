@@ -23,14 +23,12 @@ import cancelMatchRequest from "../../services/api/cancelMatchRequest";
 import { useMutation } from "@tanstack/react-query";
 import useGetDriver from "../../services/queries/useGetDriver";
 import { Skeleton } from "moti/skeleton";
+import { format } from "../../services/util/amount";
 
 export default function Match() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const match = useMatch(params.id);
-  const { data: driver, isLoading: isFetchingDriver } = useGetDriver(
-    match?.driver_id
-  );
 
   const { isPending: isCanceling, mutateAsync: handleCancel } = useMutation({
     mutationFn: () => cancelMatchRequest({ id: match?.id }),
@@ -76,10 +74,23 @@ export default function Match() {
     router.navigate({
       pathname: "/call/dial",
       params: {
-        // todo: change with driver id
-        roomId: "Todo change with driver id",
+        roomId: match?.driver_id,
       },
     });
+  }
+
+  function onHandlerStateChange() {
+    setScrollEnabled((prev) => {
+      if (prev === false) return true;
+      return prev;
+    });
+    scrollRef?.current?.scrollTo({ y: 50, animated: true });
+  }
+
+  function handleOnPressCancel() {
+    scrollRef?.current?.scrollTo({ y: 0, animated: true });
+    setScrollEnabled(false);
+    handleCancel();
   }
 
   return (
@@ -102,6 +113,32 @@ export default function Match() {
             if (e.nativeEvent.contentOffset.y <= 0) setScrollEnabled(false);
           }}
         >
+          <Optional condition={match?.status === "FOUND"}>
+            <FoundPreview
+              onHandlerStateChange={onHandlerStateChange}
+              onMessage={handleGoToMessages}
+              onCall={handleCallDriver}
+              driver_id={match?.driver_id}
+              platform="Angkas"
+              eta="2:35"
+            />
+
+            <TransitPoints
+              showShareRide
+              onShareRide={() => {}}
+              first_point={match?.first_point}
+              last_point={match?.last_point}
+            />
+
+            <FareDetails
+              estimatePreview={match?.estimatePreview}
+              showCancelOption
+              serviceCharge={match?.service_charge}
+              isCanceling={isCanceling}
+              onCancel={handleOnPressCancel}
+            />
+          </Optional>
+
           <Optional condition={match?.status === "REQUESTED"}>
             <Preview
               style={styles.previewContent}
@@ -155,55 +192,11 @@ export default function Match() {
                 </Optional>
               </View>
             </Preview>
-            <View
-              style={{
-                backgroundColor: "white",
-                paddingHorizontal: 16,
-                paddingVertical: 32,
-                gap: 16,
-              }}
-            >
-              <View style={{ gap: 8 }}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    gap: 12,
-                  }}
-                >
-                  <Image
-                    style={styles.indicator}
-                    cachePolicy="memory-disk"
-                    source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FOrigin.png?alt=media&token=7913bdfb-7b7f-41aa-aecb-433a275c92b8"
-                  />
-                  <Text weight="900" size={18} color="#1B1B1B">
-                    {match?.first_point?.short_address}
-                  </Text>
-                </View>
-                <Text size={14} color="#707070">
-                  {match?.first_point?.long_address}
-                </Text>
-              </View>
-              <View style={{ gap: 8 }}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    gap: 12,
-                  }}
-                >
-                  <Image
-                    style={styles.indicator}
-                    cachePolicy="memory-disk"
-                    source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FDestination.png?alt=media&token=e92cc2d1-77c3-486f-9793-3c0827ca5aef"
-                  />
-                  <Text weight="900" size={18} color="#1B1B1B">
-                    {match?.last_point?.short_address}
-                  </Text>
-                </View>
-                <Text size={14} color="#707070">
-                  {match?.last_point?.long_address}
-                </Text>
-              </View>
-            </View>
+            <TransitPoints
+              first_point={match?.first_point}
+              last_point={match?.last_point}
+            />
+
             <View
               style={{
                 backgroundColor: "white",
@@ -244,256 +237,6 @@ export default function Match() {
                 color={isCanceling ? "#f3f4f6" : "#D1D5DB"}
               >
                 Cancel Request
-              </Cta>
-            </View>
-          </Optional>
-
-          <Optional condition={match?.status === "FOUND"}>
-            <Preview
-              style={styles.previewContent}
-              onHandlerStateChange={() => {
-                setScrollEnabled((prev) => {
-                  if (prev === false) return true;
-                  return prev;
-                });
-                scrollRef?.current?.scrollTo({ y: 50, animated: true });
-              }}
-            >
-              <Text size={28} weight="bold" color="#353579">
-                On the way
-              </Text>
-              <View
-                style={{
-                  justifyContent: "space-between",
-                  flexDirection: "row",
-                }}
-              >
-                <Text size={14} color="#707070">
-                  Your
-                  <Text weight="bold" size={14} color="#0090F9">
-                    {" "}
-                    <Optional condition={isFetchingDriver === false}>
-                      {`Angkas `}
-                    </Optional>
-                  </Text>
-                  driver is on the way!
-                </Text>
-                <Text weight="bold" size={14} color="#0090F9">
-                  2:35
-                </Text>
-              </View>
-
-              <View
-                style={{
-                  paddingTop: 16,
-                  marginTop: 16,
-                  borderColor: "#EAEAEA",
-                  borderTopWidth: 1,
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 12,
-                  }}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 12,
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: 55,
-                        height: 55,
-                        backgroundColor: "#f3f4f6",
-                        borderRadius: 9,
-                        overflow: "hidden",
-                      }}
-                    >
-                      <Optional condition={isFetchingDriver === false}>
-                        <Image
-                          style={{ width: "100%", height: "100%" }}
-                          source={driver?.image_url}
-                          cachePolicy="memory-disk"
-                        />
-                      </Optional>
-                    </View>
-                    <View style={{ gap: 4 }}>
-                      <Optional condition={isFetchingDriver}>
-                        <View style={{ flexDirection: "row", gap: 8 }}>
-                          <Skeleton height={14} width={50} colorMode="light" />
-                          <Skeleton height={14} width={75} colorMode="light" />
-                        </View>
-                        <Skeleton height={10} width={75} colorMode="light" />
-                      </Optional>
-                      <Optional condition={isFetchingDriver === false}>
-                        <Text color="#363F59" size={18} weight="900">
-                          {driver?.model} {`(${driver?.plate_number})`}
-                        </Text>
-                        <Text size={14} weight="bold" color="#707070">
-                          {driver?.display_name}
-                        </Text>
-                      </Optional>
-                    </View>
-                  </View>
-                  <View style={{ flexDirection: "row", gap: 7 }}>
-                    <TouchableOpacity onPress={handleGoToMessages}>
-                      <View
-                        style={{
-                          backgroundColor: "#EFEFEF",
-                          height: 40,
-                          width: 40,
-                          borderRadius: 9,
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Image
-                          style={{ width: 22, height: 22 }}
-                          source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FChat.png?alt=media&token=5f0ac4b3-d2ac-4af4-ba83-db9adb4027cb"
-                        />
-                      </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={handleCallDriver}>
-                      <View
-                        style={{
-                          backgroundColor: "#EFEFEF",
-                          height: 40,
-                          width: 40,
-                          borderRadius: 9,
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Image
-                          style={{ width: 22, height: 22 }}
-                          source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FPhone.png?alt=media&token=f27c1ca8-c601-4f37-905c-61ac9ab0c9e5"
-                        />
-                      </View>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            </Preview>
-
-            <View
-              style={{
-                backgroundColor: "white",
-                paddingHorizontal: 16,
-                paddingVertical: 32,
-                gap: 16,
-              }}
-            >
-              <View style={{ gap: 8 }}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 12,
-                  }}
-                >
-                  <Image
-                    style={styles.indicator}
-                    cachePolicy="memory-disk"
-                    source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FOrigin.png?alt=media&token=7913bdfb-7b7f-41aa-aecb-433a275c92b8"
-                  />
-                  <Text weight="900" size={18} color="#1B1B1B">
-                    {match?.first_point?.short_address}
-                  </Text>
-                </View>
-                <Text size={14} color="#707070">
-                  {match?.first_point?.long_address}
-                </Text>
-              </View>
-              <View style={{ gap: 8 }}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 12,
-                  }}
-                >
-                  <Image
-                    style={styles.indicator}
-                    cachePolicy="memory-disk"
-                    source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FDestination.png?alt=media&token=e92cc2d1-77c3-486f-9793-3c0827ca5aef"
-                  />
-                  <Text weight="900" size={18} color="#1B1B1B">
-                    {match?.last_point?.short_address}
-                  </Text>
-                </View>
-                <Text size={14} color="#707070">
-                  {match?.last_point?.long_address}
-                </Text>
-              </View>
-
-              <TouchableOpacity>
-                <View
-                  style={{
-                    gap: 12,
-                    flexDirection: "row",
-                    alignItems: "center",
-                  }}
-                >
-                  <View
-                    style={{
-                      backgroundColor: "#EFEFEF",
-                      width: 40,
-                      height: 40,
-                      borderRadius: 9,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Image
-                      style={{ height: 16, width: 18 }}
-                      resizeMode="contain"
-                      cachePolicy="memory-disk"
-                      source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FShare.png?alt=media&token=4e75220d-0bc9-44ee-8aae-a8526df4d141"
-                    />
-                  </View>
-                  <Text weight="900" color="#10B981">
-                    Share this ride
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-
-            <View
-              style={{
-                backgroundColor: "white",
-                paddingHorizontal: 16,
-                paddingVertical: 32,
-                gap: 16,
-              }}
-            >
-              <View style={{ gap: 8 }}>
-                <Text size={14} color="#707070">
-                  Service Charge
-                </Text>
-                <Text weight="bold" size={18} color="#1B1B1B">
-                  ₱5.00
-                </Text>
-              </View>
-              <View style={{ gap: 8 }}>
-                <Text size={14} color="#707070">
-                  Estimated Fare
-                </Text>
-                <Text weight="700" size={34} color="#353579">
-                  ₱ 50.00 - 60.00
-                </Text>
-              </View>
-              <Text color="#707070" size={11}>
-                This estimation is based on price regulated by LTFB. Estimated
-                fare may vary in the actual trip in the application you chose.
-              </Text>
-              <Cta disabled color="#D1D5DB">
-                Slide to cancel
               </Cta>
             </View>
           </Optional>
@@ -1085,6 +828,214 @@ export default function Match() {
   );
 }
 
+/**
+ *
+ * @param {FoundPreviewProps} props
+ * @returns
+ */
+function FoundPreview({
+  onHandlerStateChange,
+  platform,
+  eta,
+  onMessage,
+  onCall,
+  driver_id,
+}) {
+  // todo: store driver_info in the match data
+  const { data: driver, isLoading } = useGetDriver(driver_id);
+  const { image_url, model, plate_number, display_name } = driver || {};
+
+  return (
+    <Preview
+      style={styles.previewContent}
+      onHandlerStateChange={onHandlerStateChange}
+    >
+      <Text size={28} weight="bold" color="#353579">
+        On the way
+      </Text>
+      <View style={styles.driverInfoSubTitle}>
+        <Text size={14} color="#707070">
+          Your
+          <Text weight="bold" size={14} color="#0090F9">
+            {" "}
+            <Optional condition={isLoading === false}>
+              {`${platform} `}
+            </Optional>
+          </Text>
+          driver is on the way!
+        </Text>
+        <Optional condition={Boolean(eta)}>
+          <Text weight="bold" size={14} color="#0090F9">
+            {eta}
+          </Text>
+        </Optional>
+      </View>
+
+      <View style={styles.driverInfoContainer}>
+        <View style={styles.driverInfoRow}>
+          <View style={styles.driverDetailsRow}>
+            <View style={styles.driverImageContainer}>
+              <Optional condition={isLoading === false}>
+                <Image
+                  style={styles.driverImage}
+                  source={image_url}
+                  cachePolicy="memory-disk"
+                />
+              </Optional>
+            </View>
+            <View style={{ gap: 4 }}>
+              <Optional condition={isLoading}>
+                <View style={{ flexDirection: "row", gap: 8 }}>
+                  <Skeleton height={14} width={50} colorMode="light" />
+                  <Skeleton height={14} width={75} colorMode="light" />
+                </View>
+                <Skeleton height={10} width={75} colorMode="light" />
+              </Optional>
+              <Optional condition={isLoading === false}>
+                <Text color="#363F59" size={18} weight="900">
+                  {model} {`(${plate_number})`}
+                </Text>
+                <Text size={14} weight="bold" color="#707070">
+                  {display_name}
+                </Text>
+              </Optional>
+            </View>
+          </View>
+          <View style={{ flexDirection: "row", gap: 7 }}>
+            <TouchableOpacity onPress={onMessage}>
+              <View style={styles.iconContainer}>
+                <Image
+                  style={{ width: 22, height: 22 }}
+                  source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FChat.png?alt=media&token=5f0ac4b3-d2ac-4af4-ba83-db9adb4027cb"
+                />
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={onCall}>
+              <View style={styles.iconContainer}>
+                <Image
+                  style={{ width: 22, height: 22 }}
+                  source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FPhone.png?alt=media&token=f27c1ca8-c601-4f37-905c-61ac9ab0c9e5"
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Preview>
+  );
+}
+
+function TransitPoints({
+  first_point, //
+  last_point,
+  showShareRide,
+  onShareRide,
+}) {
+  return (
+    <View style={styles.transitContainer}>
+      <View style={{ gap: 8 }}>
+        <View style={styles.transitRow}>
+          <Image
+            style={styles.indicator}
+            cachePolicy="memory-disk"
+            source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FOrigin.png?alt=media&token=7913bdfb-7b7f-41aa-aecb-433a275c92b8"
+          />
+          <Text weight="900" size={18} color="#1B1B1B">
+            {first_point?.short_address}
+          </Text>
+        </View>
+        <Text size={14} color="#707070">
+          {first_point?.long_address}
+        </Text>
+      </View>
+      <View style={{ gap: 8 }}>
+        <View style={styles.transitRow}>
+          <Image
+            style={styles.indicator}
+            cachePolicy="memory-disk"
+            source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FDestination.png?alt=media&token=e92cc2d1-77c3-486f-9793-3c0827ca5aef"
+          />
+          <Text weight="900" size={18} color="#1B1B1B">
+            {last_point?.short_address}
+          </Text>
+        </View>
+        <Text size={14} color="#707070">
+          {last_point?.long_address}
+        </Text>
+      </View>
+
+      <Optional condition={showShareRide}>
+        <TouchableOpacity onPress={() => onShareRide?.()}>
+          <View style={styles.shareRideRow}>
+            <View style={styles.iconContainer}>
+              <Image
+                style={{ height: 16, width: 18, resizeMode: "contain" }}
+                cachePolicy="memory-disk"
+                source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FShare.png?alt=media&token=4e75220d-0bc9-44ee-8aae-a8526df4d141"
+              />
+            </View>
+            <Text weight="900" color="#10B981">
+              Share this ride
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </Optional>
+    </View>
+  );
+}
+
+/**
+ *
+ */
+function FareDetails({
+  estimatePreview,
+  isCanceling,
+  onCancel,
+  showCancelOption,
+  serviceCharge,
+}) {
+  const isEnableServiceCharge = useBoolVariation(
+    "php-enable-service-charge",
+    false
+  );
+
+  return (
+    <View style={styles.fareDetailsContainer}>
+      <Optional condition={isEnableServiceCharge}>
+        <View style={{ gap: 8 }}>
+          <Text size={14} color="#707070">
+            Service Charge
+          </Text>
+          <Text weight="bold" size={18} color="#1B1B1B">
+            {format(serviceCharge ?? 0)}
+          </Text>
+        </View>
+      </Optional>
+      <View style={{ gap: 8 }}>
+        <Text size={14} color="#707070">
+          Estimated Fare
+        </Text>
+        <Text weight="700" size={34} color="#353579">
+          {estimatePreview ?? "₱ 0.00"}
+        </Text>
+      </View>
+      <Text color="#707070" size={11}>
+        This estimation is based on price regulated by LTFB. Estimated fare may
+        vary in the actual trip in the application you chose.
+      </Text>
+      <Optional condition={showCancelOption}>
+        <Cta
+          disabled={isCanceling}
+          onPress={onCancel}
+          color={isCanceling ? "#f3f4f6" : "#D1D5DB"}
+        >
+          Cancel Request
+        </Cta>
+      </Optional>
+    </View>
+  );
+}
+
 function Feedback() {
   return (
     <View
@@ -1192,5 +1143,83 @@ const styles = StyleSheet.create({
     width: 24,
   },
   marker: { width: 48, height: 48, marginBottom: 24 },
-  indicator: { width: 12, height: 12, marginTop: 4 },
+  indicator: { width: 12, height: 12 },
+  driverInfoSubTitle: {
+    justifyContent: "space-between",
+    flexDirection: "row",
+  },
+  driverInfoContainer: {
+    paddingTop: 16,
+    marginTop: 16,
+    borderColor: "#EAEAEA",
+    borderTopWidth: 1,
+  },
+  driverInfoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  driverDetailsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  driverImageContainer: {
+    width: 55,
+    height: 55,
+    backgroundColor: "#f3f4f6",
+    borderRadius: 9,
+    overflow: "hidden",
+  },
+  driverImage: {
+    width: "100%",
+    height: "100%",
+  },
+  iconContainer: {
+    backgroundColor: "#EFEFEF",
+    height: 40,
+    width: 40,
+    borderRadius: 9,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  transitContainer: {
+    backgroundColor: "white",
+    paddingHorizontal: 16,
+    paddingVertical: 32,
+    gap: 16,
+  },
+  transitRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  shareRideRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  fareDetailsContainer: {
+    backgroundColor: "white",
+    paddingHorizontal: 16,
+    paddingVertical: 32,
+    gap: 16,
+  },
 });
+
+/**
+ * @typedef FoundPreviewProps
+ * @property {() => void} onHandlerStateChange
+ * @property {() => void} onMessage
+ * @property {() => void} onCall
+ * @property {string} driver_id
+ * @property {boolean} isLoading
+ * @property {string} platform
+ * @property {string} eta
+ * @property {string} image_url
+ * @property {string} model
+ * @property {string} plate_number
+ * @property {string} display_name
+ *
+ */

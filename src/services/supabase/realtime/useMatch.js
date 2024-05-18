@@ -39,7 +39,7 @@ async function handleGetMatch(id) {
   const { data, error } = await supabase
     .from("matches")
     .select(
-      "id, driver_id, status, first_point, last_point, services, estimatePreview, driver_id"
+      "id, driver_id, status, first_point, last_point, services, estimatePreview, driver_id, service_charge"
     )
     .eq("id", id)
     .single();
