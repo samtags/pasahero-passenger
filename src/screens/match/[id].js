@@ -52,7 +52,13 @@ export default function Match() {
     match?.first_point?.longitude && match?.first_point?.latitude;
 
   function handleGoToMessages() {
-    router.navigate(`/messaging/${match?.id}`);
+    router.navigate({
+      pathname: `/messaging/${match?.id}`,
+      params: {
+        match_id: match?.id,
+        driver_id: match?.driver_id,
+      },
+    });
   }
 
   function handleCallDriver() {

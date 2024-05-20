@@ -26,7 +26,6 @@ export default function Dial() {
     streams,
     handleHangup,
   } = useDial(roomId);
-  console.log("🚀 ~ Dial ~ status:", status);
 
   const timer = useTimer();
 
@@ -37,13 +36,15 @@ export default function Dial() {
 
   useOnUpdate(() => {
     if (status === "TERMINATED") {
-      Alert.alert("Call Ended", "Call was dropped by the receiver.");
       handleEndCall();
     }
 
     if (status === "REJECTED") {
-      Alert.alert("Call Ended", "Call was rejected by the receiver.");
       setTimeout(() => router.back(), 1500);
+    }
+
+    if (status === "CONNECTED") {
+      timer.handleStart();
     }
   }, [status]);
 
@@ -75,7 +76,9 @@ export default function Dial() {
             </Text>
           </Optional>
 
-          <Optional condition={status === "DROPPED"}>
+          <Optional
+            condition={["DROPPED", "REJECTED", "TERMINATED"].includes(status)}
+          >
             <Text size={21} color="white">
               Call Ended
             </Text>

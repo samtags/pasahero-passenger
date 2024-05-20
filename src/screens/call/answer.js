@@ -34,6 +34,10 @@ export default function JoinScreen() {
     if (status === "TERMINATED") {
       setTimeout(() => router.back(), 1500);
     }
+
+    if (status === "CONNECTED") {
+      timer.handleStart();
+    }
   }, [status]);
 
   function handleEndCall() {

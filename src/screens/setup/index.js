@@ -8,6 +8,7 @@ import {
   ScrollView,
   Alert,
   KeyboardAvoidingView,
+  ActivityIndicator,
 } from "react-native";
 import Text from "../../components/text";
 import Cta from "../../components/cta";
@@ -19,6 +20,8 @@ import * as Location from "expo-location";
 import { useMMKVString } from "react-native-mmkv";
 import getCoordinatesByPlaceId from "../../services/api/getCoordinatesByPlaceId";
 import log from "../../services/log";
+import reverseGeocode from "../../services/api/reverseGeocoding";
+import Optional from "../../components/optional";
 
 export default function Setup() {
   const [_, setLocation] = useMMKVString("location.current");
@@ -59,8 +62,6 @@ export default function Setup() {
       accuracy: Location.Accuracy.Highest,
     }).catch(() => undefined);
 
-    setIsGettingLocation(false);
-
     if (!data) {
       Alert.alert(
         "Oops!",
@@ -74,8 +75,39 @@ export default function Setup() {
     const longitude = data?.coords?.longitude;
     const heading = data?.coords?.heading;
 
-    setLocation(JSON.stringify({ latitude, longitude, heading }));
-    router.navigate("/");
+    const geocode = await reverseGeocode(`${latitude},${longitude}`);
+    setIsGettingLocation(false);
+
+    const place = geocode?.data?.results?.[0];
+
+    const longAddress = place?.formatted_address;
+    const shortAddress = place?.formatted_address;
+
+    setSelected(place);
+    setSelection({ start: 0, end: 0 });
+    setQ(longAddress);
+
+    if (!place) {
+      return Alert.alert(
+        "Oops!",
+        "Unable to get location details to the current location. Please try to search again."
+      );
+    }
+
+    setLocation(
+      JSON.stringify({
+        latitude,
+        longitude,
+        heading,
+        longAddress,
+        shortAddress,
+      })
+    );
+
+    log.info("Initial location set to current location.", { latitude, longitude, heading, longAddress, shortAddress }); // prettier-ignore
+    setTimeout(() => {
+      router.navigate("/");
+    }, 750);
   };
 
   const handleOnSetLocation = async () => {
@@ -157,20 +189,27 @@ export default function Setup() {
               placeholder="Search location"
             />
           </View>
-          <TouchableOpacity
-            onPress={handleUseCurrentLocation}
-            style={{
-              alignItems: "center",
-              justifyContent: "center",
-              paddingLeft: 12,
-            }}
-          >
-            <Image
-              style={{ width: 22, height: 22 }}
-              cachePolicy="memory-disk"
-              source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FTarget.png?alt=media&token=d6c31afa-5308-43e8-a8cd-291cb7316009"
-            />
-          </TouchableOpacity>
+          <Optional condition={isGettingLocation === false}>
+            <TouchableOpacity
+              onPress={handleUseCurrentLocation}
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                paddingLeft: 12,
+              }}
+            >
+              <Image
+                style={{ width: 22, height: 22 }}
+                cachePolicy="memory-disk"
+                source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FTarget.png?alt=media&token=d6c31afa-5308-43e8-a8cd-291cb7316009"
+              />
+            </TouchableOpacity>
+          </Optional>
+          <Optional condition={isGettingLocation}>
+            <View style={{ paddingLeft: 16, justifyContent: "center" }}>
+              <ActivityIndicator color="#6366F1" />
+            </View>
+          </Optional>
         </View>
         <ScrollView
           style={{ flex: 1 }}

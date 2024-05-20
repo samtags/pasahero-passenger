@@ -1,18 +1,20 @@
-import { Stack, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import Text from "../../src/components/text";
 import Messaging from "../../src/screens/messaging/[transit]";
 import { TouchableOpacity, View } from "react-native";
 import { Image } from "expo-image";
+import useGetDriver from "../../src/services/queries/useGetDriver";
 
 export default function Entry(props) {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const { data: driver } = useGetDriver(params?.driver_id);
 
   function handlePressCall() {
     router.navigate({
       pathname: "/call/dial",
       params: {
-        // todo: change with driver id
-        roomId: "Todo change with driver id",
+        roomId: params?.driver_id,
       },
     });
   }
@@ -23,7 +25,7 @@ export default function Entry(props) {
         options={{
           headerTitle: () => (
             <Text size={19} weight="bold" color="#353579">
-              Tom Hedge*
+              {driver.display_name}
             </Text>
           ),
           headerTitleAlign: "center",

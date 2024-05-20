@@ -1,19 +1,23 @@
 import moment from "moment";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function useTimer() {
-  const [baseTime] = useState(moment());
+  let timeRef = useRef();
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
+  function handleStart() {
+    const baseTime = moment();
+
+    timeRef.current = setInterval(() => {
       const duration = moment.duration(moment().diff(baseTime));
       setMinutes(duration.minutes());
       setSeconds(duration.seconds());
     }, 1000);
+  }
 
-    return () => clearInterval(timer);
+  useEffect(() => {
+    return () => clearInterval(timeRef.current);
   }, []);
 
   const mm = minutes.toString().padStart(2, "0");
@@ -25,5 +29,6 @@ export default function useTimer() {
     ss,
     minutes,
     seconds,
+    handleStart,
   };
 }
