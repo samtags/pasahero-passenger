@@ -19,8 +19,13 @@ import log from "../../services/log";
 import Mapbox from "@rnmapbox/maps";
 import { Skeleton } from "moti/skeleton";
 import Optional from "../../components/optional";
+import * as WebBrowser from "expo-web-browser";
+import { useWarmUpBrowser } from "../../services/hooks/useWarmUpBrowser";
 
+WebBrowser.maybeCompleteAuthSession();
 export default function List() {
+  useWarmUpBrowser();
+
   const router = useRouter();
   const navigation = useNavigation();
 
