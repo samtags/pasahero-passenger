@@ -1,4 +1,4 @@
-import { View, Alert, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { RTCView } from "react-native-webrtc";
 
 import { useLocalSearchParams, useRouter } from "expo-router";

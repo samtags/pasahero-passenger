@@ -3,7 +3,7 @@ import log from "../log";
 
 export default function subscribe(table, id, callback) {
   const channel = supabase
-    .channel("changes")
+    .channel(`${table}.${id}`)
     .on(
       "postgres_changes",
       {

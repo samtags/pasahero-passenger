@@ -11,7 +11,7 @@ export default function useIncomingMessage(transit) {
 
   useEffect(() => {
     const channel = supabase
-      .channel("changes")
+      .channel(`msg.${transit}`)
       .on(
         "postgres_changes",
         {

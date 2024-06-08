@@ -40,10 +40,10 @@ export default function Pin() {
 
   function handleConfirm() {
     handleSetTransitLast({
-      latitude: active.geometry.location.lat,
-      longitude: active.geometry.location.lng,
-      shortAddress: active.formatted_address,
-      longAddress: active.formatted_address,
+      latitude: active?.geometry?.location.lat,
+      longitude: active?.geometry?.location.lng,
+      shortAddress: active?.formatted_address,
+      longAddress: active?.formatted_address,
     });
     router.replace("/match/request");
   }

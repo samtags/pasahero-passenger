@@ -17,7 +17,7 @@ export default function useWallet(id) {
 
   useEffect(() => {
     const channel = supabase
-      .channel("changes")
+      .channel(`wallet.${id}`)
       .on(
         "postgres_changes",
         {

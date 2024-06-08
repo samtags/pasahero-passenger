@@ -187,7 +187,7 @@ export default function Match() {
         <Mapbox.MapView
           scaleBarEnabled={false}
           style={styles.map}
-          styleURL="mapbox://styles/mapbox/light-v11"
+          styleURL="mapbox://styles/mapbox/navigation-day-v1"
           logoPosition={{ top: -100, left: 0 }}
           attributionEnabled={false}
         >

@@ -21,6 +21,8 @@ import { Skeleton } from "moti/skeleton";
 import Optional from "../../components/optional";
 import * as WebBrowser from "expo-web-browser";
 import { useWarmUpBrowser } from "../../services/hooks/useWarmUpBrowser";
+import useGetDirections from "../../services/hooks/useGetDirections";
+import * as Polyline from "@mapbox/polyline";
 
 WebBrowser.maybeCompleteAuthSession();
 export default function List() {
@@ -43,8 +45,20 @@ export default function List() {
   const first = match?.first;
   const last = match?.last;
 
-  const origin = `${match?.first?.latitude},${match?.first?.longitude}`;
-  const destination = `${match?.last?.latitude},${match?.last?.longitude}`;
+  const origin = `${first?.latitude},${first?.longitude}`;
+  const destination = `${last?.latitude},${last?.longitude}`;
+
+  const { data: directions } = useGetDirections(origin, destination);
+  const route = directions?.routes?.[0];
+  let coordinates = [];
+
+  if (route) {
+    const points = Polyline.decode(route.overview_polyline.points);
+    coordinates = points.map((point) => ({
+      latitude: point[0],
+      longitude: point[1],
+    }));
+  }
 
   const { data: angkasPassenger, isLoading: isLoadingAngkas } = useGetEstimate("AngkasPassenger", origin, destination); // prettier-ignore
   const { data: joyRideMcTaxi, isLoading: isLoadingJoyRide } = useGetEstimate("JoyRideMcTaxi", origin, destination); // prettier-ignore
@@ -150,7 +164,7 @@ export default function List() {
         CommonActions.reset({
           index: newRoutes.length - 1,
           routes: newRoutes,
-        })
+        }),
       );
     }
   }, []);
@@ -178,7 +192,7 @@ export default function List() {
 
     if (selectedPlatforms.includes(serviceName)) {
       setSelectedPlatforms((prev) =>
-        prev.filter((platform) => platform !== serviceName)
+        prev.filter((platform) => platform !== serviceName),
       );
     } else {
       setSelectedPlatforms((prev) => [...prev, serviceName]);
@@ -188,7 +202,6 @@ export default function List() {
   const handleOnConfirm = () => {
     mutateAsync()
       .then((res) => {
-        console.log("🚀 ~ .then ~ res:", res);
         navigation.dispatch(StackActions.popToTop());
         router.navigate({
           pathname: `match/${res?.id}`,
@@ -202,6 +215,11 @@ export default function List() {
   };
 
   const disableSubmit = isPending || fares.length === 0;
+
+  let boundingBox = undefined;
+  if ((coordinates?.length || 0) > 0) {
+    boundingBox = calculateBoundingBox(coordinates);
+  }
 
   return (
     <>
@@ -286,20 +304,84 @@ export default function List() {
                     logoPosition={{ top: -100, left: 0 }}
                     attributionEnabled={false}
                   >
-                    <Mapbox.Camera
-                      animationMode="none"
-                      zoomLevel={15}
-                      centerCoordinate={[first?.longitude, first?.latitude]}
-                    />
-                    <Mapbox.MarkerView
-                      coordinate={[first?.longitude, first?.latitude]}
+                    <Optional
+                      condition={
+                        boundingBox && boundingBox?.[0] && boundingBox?.[1]
+                      }
                     >
-                      <Image
-                        style={styles.marker}
-                        cachePolicy="memory-disk"
-                        source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FRequest%20Origin.png?alt=media&token=d7bfb9da-845a-4e48-96f5-b785b248bbfb"
+                      <Mapbox.Camera
+                        animationMode="flyTo"
+                        bounds={{
+                          ne: boundingBox?.[1],
+                          sw: boundingBox?.[0],
+                          paddingTop: 96, // padding + marker height
+                          paddingLeft: 48,
+                          paddingRight: 48,
+                          paddingBottom: 16,
+                        }}
+                        animationDuration={1000}
                       />
-                    </Mapbox.MarkerView>
+                    </Optional>
+                    <Optional condition={coordinates?.length > 0}>
+                      <Mapbox.ShapeSource
+                        id="route"
+                        shape={{
+                          type: "Feature",
+                          properties: {},
+                          geometry: {
+                            type: "LineString",
+                            coordinates: coordinates.map((coords) => [
+                              coords.longitude,
+                              coords.latitude,
+                            ]),
+                          },
+                        }}
+                      >
+                        <Mapbox.LineLayer
+                          id="stroke"
+                          style={{
+                            lineColor: "#373BF4",
+                            lineWidth: 6.5,
+                            lineCap: "round",
+                            lineJoin: "round",
+                          }}
+                        />
+                        <Mapbox.LineLayer
+                          id="routeLayer"
+                          style={{
+                            lineColor: "#6366F1",
+                            lineWidth: 3,
+                            lineCap: "round",
+                            lineJoin: "round",
+                          }}
+                        />
+                      </Mapbox.ShapeSource>
+                    </Optional>
+                    <Optional condition={first}>
+                      <Mapbox.MarkerView
+                        id="from"
+                        coordinate={[first?.longitude, first?.latitude]}
+                      >
+                        <Image
+                          style={styles.marker}
+                          cachePolicy="memory-disk"
+                          source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FFrom.png?alt=media&token=0d152a8f-e9c4-4014-8816-6a5dc5660290"
+                        />
+                      </Mapbox.MarkerView>
+                    </Optional>
+
+                    <Optional condition={last}>
+                      <Mapbox.MarkerView
+                        id="to"
+                        coordinate={[last?.longitude, last?.latitude]}
+                      >
+                        <Image
+                          style={styles.marker}
+                          cachePolicy="memory-disk"
+                          source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FTo.png?alt=media&token=5b8f1ebc-aaba-462c-b216-44c9a4a738be"
+                        />
+                      </Mapbox.MarkerView>
+                    </Optional>
                   </Mapbox.MapView>
                 </View>
                 <ScrollView
@@ -422,5 +504,35 @@ const styles = StyleSheet.create({
     width: "100%",
     flex: 1,
   },
-  marker: { width: 48, height: 48, marginBottom: 24 },
+  marker: { width: 38, height: 38, marginBottom: 24 },
+  destinationMarker: { width: 56, height: 56, marginBottom: 24 },
 });
+
+function calculateBoundingBox(coordinates) {
+  let minLat, minLon, maxLat, maxLon;
+
+  coordinates.forEach((point) => {
+    const { latitude, longitude } = point;
+
+    if (minLat === undefined || latitude < minLat) {
+      minLat = latitude;
+    }
+
+    if (minLon === undefined || longitude < minLon) {
+      minLon = longitude;
+    }
+
+    if (maxLat === undefined || latitude > maxLat) {
+      maxLat = latitude;
+    }
+
+    if (maxLon === undefined || longitude > maxLon) {
+      maxLon = longitude;
+    }
+  });
+
+  return [
+    [minLon, minLat],
+    [maxLon, maxLat],
+  ];
+}

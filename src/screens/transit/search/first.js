@@ -46,17 +46,28 @@ export default function TransitSearchFirstScreen() {
   function handleSelect(item) {
     getCoordinatesByPlaceId(item?.place_id)
       .then((res) => {
-        console.log("🚀 ~ getCoordinatesByPlaceId ~ res:", res);
         handleSetTransitFirst({
           latitude: res?.data?.result?.geometry?.location?.lat,
           longitude: res?.data?.result?.geometry?.location?.lng,
           shortAddress: item?.structured_formatting?.main_text,
           longAddress: item?.description,
         });
+
         router.replace("/match/request");
+
+        // set location.current
+        storage.set(
+          "location.current",
+          JSON.stringify({
+            latitude: res?.data?.result?.geometry?.location?.lat,
+            longitude: res?.data?.result?.geometry?.location?.lng,
+            shortAddress: item?.structured_formatting?.main_text,
+            longAddress: item?.description,
+          })
+        );
       })
       .catch((error) => {
-        console.log("🚀 ~ getCoordinatesByPlaceId ~ error:", error);
+        log.debug("Failed to get coordinates by place id", { error });
       });
   }
 
