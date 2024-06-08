@@ -25,6 +25,7 @@ import useGetDriver from "../../services/queries/useGetDriver";
 import { Skeleton } from "moti/skeleton";
 import { format } from "../../services/util/amount";
 import LottieView from "lottie-react-native";
+import useNearbyDrivers from "../../services/hooks/useNearbyDrivers";
 
 export default function Match() {
   const router = useRouter();
@@ -58,6 +59,13 @@ export default function Match() {
   const pointerEvents = scrollEnabled ? "auto" : "box-none";
   const isCoordinatesReady =
     match?.first_point?.longitude && match?.first_point?.latitude;
+
+  const { nearbyDriverIds } = useNearbyDrivers({
+    payload: {
+      latitude: match?.first_point?.longitude ?? draft?.first?.latitude,
+      longitude: match?.first_point?.latitude ?? draft?.first?.latitude,
+    },
+  });
 
   function handleGoToMessages() {
     router.navigate({
@@ -261,7 +269,7 @@ function RequestedPreview({
       style={styles.previewContent}
       onHandlerStateChange={onHandlerStateChange}
     >
-      <GrayBar />
+      {/* <GrayBar /> */}
       <Text size={28} weight="bold" color="#353579">
         Looking for drivers
       </Text>

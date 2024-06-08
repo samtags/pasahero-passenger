@@ -60,8 +60,6 @@ export default function List() {
     ],
   });
 
-  console.log("cameraConfig", cameraConfig);
-
   const { data: angkasPassenger, isLoading: isLoadingAngkas } = useGetEstimate("AngkasPassenger", origin, destination); // prettier-ignore
   const { data: joyRideMcTaxi, isLoading: isLoadingJoyRide } = useGetEstimate("JoyRideMcTaxi", origin, destination); // prettier-ignore
   const { data: moveItMotoTaxi, isLoading: isLoadingMoveIt } = useGetEstimate("MoveItMotoTaxi", origin, destination); // prettier-ignore
@@ -105,7 +103,7 @@ export default function List() {
         CommonActions.reset({
           index: newRoutes.length - 1,
           routes: newRoutes,
-        }),
+        })
       );
     }
   }, []);
@@ -222,7 +220,7 @@ export default function List() {
 
     if (selectedPlatforms.includes(serviceName)) {
       setSelectedPlatforms((prev) =>
-        prev.filter((platform) => platform !== serviceName),
+        prev.filter((platform) => platform !== serviceName)
       );
     } else {
       setSelectedPlatforms((prev) => [...prev, serviceName]);
