@@ -31,6 +31,13 @@ export default function Match() {
   const params = useLocalSearchParams();
   const match = useMatch(params.id);
 
+  const [isMapInitialized, setIsMapInitialized] = useState(false);
+
+  function initializeMap() {
+    if (isMapInitialized) return;
+    setIsMapInitialized(true);
+  }
+
   const { isPending: isCanceling, mutateAsync: handleCancel } = useMutation({
     mutationFn: () => cancelMatchRequest({ id: match?.id }),
     onSuccess: () => router.replace("/"),
@@ -187,49 +194,52 @@ export default function Match() {
         </ScrollView>
         <Mapbox.MapView
           scaleBarEnabled={false}
-          style={styles.map}
+          style={[styles.map, { opacity: isMapInitialized ? 1 : 0 }]}
           // styleURL="mapbox://styles/mapbox/streets-v12"
           // styleURL="mapbox://styles/mapbox/outdoors-v12"
           // styleURL="mapbox://styles/mapbox/light-v11"
           styleURL="mapbox://styles/mapbox/navigation-day-v1"
           logoPosition={{ top: -100, left: 0 }}
           attributionEnabled={false}
+          regionDidChangeDebounceTime={1000}
+          onDidFinishLoadingStyle={initializeMap}
         >
           <Optional condition={isCoordinatesReady}>
             <Mapbox.Camera
-              animationMode="flyTo"
+              animationMode="none"
               zoomLevel={13.79}
               centerCoordinate={initialCoordinates}
             />
-
-            <Mapbox.MarkerView
-              coordinate={[
-                match?.first_point?.longitude,
-                match?.first_point?.latitude,
-              ]}
-            >
-              <View
-                style={{
-                  position: "absolute",
-                  height: 220,
-                  width: 220,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
+            <Optional condition={match?.status === "REQUESTED"}>
+              <Mapbox.MarkerView
+                coordinate={[
+                  match?.first_point?.longitude,
+                  match?.first_point?.latitude,
+                ]}
               >
-                <Image
-                  style={styles.marker}
-                  cachePolicy="memory-disk"
-                  source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FFrom.png?alt=media&token=0d152a8f-e9c4-4014-8816-6a5dc5660290"
+                <View
+                  style={{
+                    position: "absolute",
+                    height: 220,
+                    width: 220,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Image
+                    style={styles.marker}
+                    cachePolicy="memory-disk"
+                    source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FFrom.png?alt=media&token=0d152a8f-e9c4-4014-8816-6a5dc5660290"
+                  />
+                </View>
+                <LottieView
+                  autoPlay
+                  loop
+                  style={{ width: 220, height: 220 }}
+                  source={require("../../assets/json/pulse.json")}
                 />
-              </View>
-              <LottieView
-                autoPlay
-                loop
-                style={{ width: 220, height: 220 }}
-                source={require("../../assets/json/pulse.json")}
-              />
-            </Mapbox.MarkerView>
+              </Mapbox.MarkerView>
+            </Optional>
           </Optional>
         </Mapbox.MapView>
       </View>
@@ -251,6 +261,7 @@ function RequestedPreview({
       style={styles.previewContent}
       onHandlerStateChange={onHandlerStateChange}
     >
+      <GrayBar />
       <Text size={28} weight="bold" color="#353579">
         Looking for drivers
       </Text>
@@ -599,10 +610,7 @@ function FareDetails({
   showCancelOption,
   serviceCharge,
 }) {
-  const isEnableServiceCharge = useBoolVariation(
-    "php-enable-service-charge",
-    false,
-  );
+  const isEnableServiceCharge = useBoolVariation("php-enable-service-charge", false); // prettier-ignore
 
   return (
     <View style={styles.fareDetailsContainer}>

@@ -52,13 +52,15 @@ export default function List() {
   const route = directions?.routes?.[0];
   let coordinates = [];
 
-  if (route) {
-    const points = Polyline.decode(route.overview_polyline.points);
-    coordinates = points.map((point) => ({
-      latitude: point[0],
-      longitude: point[1],
-    }));
-  }
+  const [cameraConfig, setCameraConfig] = useState({
+    zoomLevel: 14,
+    centerCoordinate: [
+      first?.longitude || DEFAULT_COORDINATES[0],
+      first?.latitude || DEFAULT_COORDINATES[1],
+    ],
+  });
+
+  console.log("cameraConfig", cameraConfig);
 
   const { data: angkasPassenger, isLoading: isLoadingAngkas } = useGetEstimate("AngkasPassenger", origin, destination); // prettier-ignore
   const { data: joyRideMcTaxi, isLoading: isLoadingJoyRide } = useGetEstimate("JoyRideMcTaxi", origin, destination); // prettier-ignore
@@ -75,6 +77,66 @@ export default function List() {
   const moveItMinFare = amount.format(moveItMotoTaxi?.fare?.minFare || 0);
   const moveItMaxFare = Number(moveItMotoTaxi?.fare?.maxFare || 0).toFixed(2);
   const moveItEstimatedFare = `${moveItMinFare} - ${moveItMaxFare}`;
+
+  /**
+   * prevent stacking of same screen in the navigation stack
+   * resulting in a back button loop to the same screen
+   * this usually happens when the user came from pin location screen
+   */
+  useEffect(() => {
+    const routes = navigation.getState().routes;
+
+    let hasDuplicate = false;
+    let tmp = new Set();
+    const newRoutes = [];
+
+    routes.forEach((route) => {
+      if (tmp.has(route.name)) {
+        hasDuplicate = true;
+        return;
+      }
+
+      tmp.add(route.name);
+      newRoutes.push(route);
+    });
+
+    if (hasDuplicate) {
+      navigation.dispatch(
+        CommonActions.reset({
+          index: newRoutes.length - 1,
+          routes: newRoutes,
+        }),
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    let boundingBox = undefined;
+    let bounds = undefined;
+    let animationMode = "none";
+
+    if (coordinates?.length > 0) {
+      boundingBox = calculateBoundingBox(coordinates);
+
+      bounds = {
+        ne: boundingBox?.[1],
+        sw: boundingBox?.[0],
+        paddingTop: 96, // padding + marker height
+        paddingLeft: 48,
+        paddingRight: 48,
+        paddingBottom: 16,
+      };
+
+      animationMode = "flyTo";
+
+      setTimeout(() => {
+        setCameraConfig({
+          bounds,
+          animationMode,
+        });
+      }, 250);
+    }
+  }, [coordinates]);
 
   let fares = [];
 
@@ -137,38 +199,6 @@ export default function List() {
       }),
   });
 
-  /**
-   * prevent stacking of same screen in the navigation stack
-   * resulting in a back button loop to the same screen
-   * this usually happens when the user came from pin location screen
-   */
-  useEffect(() => {
-    const routes = navigation.getState().routes;
-
-    let hasDuplicate = false;
-    let tmp = new Set();
-    const newRoutes = [];
-
-    routes.forEach((route) => {
-      if (tmp.has(route.name)) {
-        hasDuplicate = true;
-        return;
-      }
-
-      tmp.add(route.name);
-      newRoutes.push(route);
-    });
-
-    if (hasDuplicate) {
-      navigation.dispatch(
-        CommonActions.reset({
-          index: newRoutes.length - 1,
-          routes: newRoutes,
-        }),
-      );
-    }
-  }, []);
-
   const handleSignIn = async () => {
     try {
       const flow = await startOAuthFlow();
@@ -214,12 +244,15 @@ export default function List() {
       });
   };
 
-  const disableSubmit = isPending || fares.length === 0;
-
-  let boundingBox = undefined;
-  if ((coordinates?.length || 0) > 0) {
-    boundingBox = calculateBoundingBox(coordinates);
+  if (route) {
+    const points = Polyline.decode(route.overview_polyline.points);
+    coordinates = points.map((point) => ({
+      latitude: point[0],
+      longitude: point[1],
+    }));
   }
+
+  const disableSubmit = isPending || fares.length === 0;
 
   return (
     <>
@@ -303,25 +336,9 @@ export default function List() {
                     styleURL="mapbox://styles/mapbox/light-v11"
                     logoPosition={{ top: -100, left: 0 }}
                     attributionEnabled={false}
+                    onDidFinishRenderingMap={() => console.log("Map ready")}
                   >
-                    <Optional
-                      condition={
-                        boundingBox && boundingBox?.[0] && boundingBox?.[1]
-                      }
-                    >
-                      <Mapbox.Camera
-                        animationMode="flyTo"
-                        bounds={{
-                          ne: boundingBox?.[1],
-                          sw: boundingBox?.[0],
-                          paddingTop: 96, // padding + marker height
-                          paddingLeft: 48,
-                          paddingRight: 48,
-                          paddingBottom: 16,
-                        }}
-                        animationDuration={1000}
-                      />
-                    </Optional>
+                    <Mapbox.Camera animationDuration={2000} {...cameraConfig} />
                     <Optional condition={coordinates?.length > 0}>
                       <Mapbox.ShapeSource
                         id="route"
@@ -357,7 +374,7 @@ export default function List() {
                         />
                       </Mapbox.ShapeSource>
                     </Optional>
-                    <Optional condition={first}>
+                    <Optional condition={first?.longitude && first?.latitude}>
                       <Mapbox.MarkerView
                         id="from"
                         coordinate={[first?.longitude, first?.latitude]}
@@ -370,7 +387,7 @@ export default function List() {
                       </Mapbox.MarkerView>
                     </Optional>
 
-                    <Optional condition={last}>
+                    <Optional condition={last?.longitude && last?.latitude}>
                       <Mapbox.MarkerView
                         id="to"
                         coordinate={[last?.longitude, last?.latitude]}
@@ -470,6 +487,8 @@ export default function List() {
     </>
   );
 }
+
+const DEFAULT_COORDINATES = [121.0003445, 14.5431078];
 
 const styles = StyleSheet.create({
   safeArea: {
