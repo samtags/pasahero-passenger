@@ -24,6 +24,7 @@ import { useMutation } from "@tanstack/react-query";
 import useGetDriver from "../../services/queries/useGetDriver";
 import { Skeleton } from "moti/skeleton";
 import { format } from "../../services/util/amount";
+import LottieView from "lottie-react-native";
 
 export default function Match() {
   const router = useRouter();
@@ -187,26 +188,46 @@ export default function Match() {
         <Mapbox.MapView
           scaleBarEnabled={false}
           style={styles.map}
+          // styleURL="mapbox://styles/mapbox/streets-v12"
+          // styleURL="mapbox://styles/mapbox/outdoors-v12"
+          // styleURL="mapbox://styles/mapbox/light-v11"
           styleURL="mapbox://styles/mapbox/navigation-day-v1"
           logoPosition={{ top: -100, left: 0 }}
           attributionEnabled={false}
         >
           <Optional condition={isCoordinatesReady}>
             <Mapbox.Camera
-              animationMode="none"
+              animationMode="flyTo"
               zoomLevel={13.79}
               centerCoordinate={initialCoordinates}
             />
+
             <Mapbox.MarkerView
               coordinate={[
                 match?.first_point?.longitude,
                 match?.first_point?.latitude,
               ]}
             >
-              <Image
-                style={styles.marker}
-                cachePolicy="memory-disk"
-                source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FRequest%20Origin.png?alt=media&token=d7bfb9da-845a-4e48-96f5-b785b248bbfb"
+              <View
+                style={{
+                  position: "absolute",
+                  height: 220,
+                  width: 220,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Image
+                  style={styles.marker}
+                  cachePolicy="memory-disk"
+                  source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FFrom.png?alt=media&token=0d152a8f-e9c4-4014-8816-6a5dc5660290"
+                />
+              </View>
+              <LottieView
+                autoPlay
+                loop
+                style={{ width: 220, height: 220 }}
+                source={require("../../assets/json/pulse.json")}
               />
             </Mapbox.MarkerView>
           </Optional>
@@ -580,7 +601,7 @@ function FareDetails({
 }) {
   const isEnableServiceCharge = useBoolVariation(
     "php-enable-service-charge",
-    false
+    false,
   );
 
   return (
@@ -728,7 +749,7 @@ const styles = StyleSheet.create({
   serviceContainer: {
     height: 24,
     width: 24,
-    borderRadius: 4,
+    borderRadius: 8,
     overflow: "hidden",
   },
   image: {
