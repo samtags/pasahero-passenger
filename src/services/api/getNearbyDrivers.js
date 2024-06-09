@@ -8,6 +8,7 @@ export default async function getNearbyDrivers(latitude, longitude) {
         latitude,
         longitude,
         km: 2.5,
+        limit: 5,
       },
     })
     .catch((err) => {

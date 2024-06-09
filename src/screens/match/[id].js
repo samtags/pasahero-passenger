@@ -62,8 +62,8 @@ export default function Match() {
 
   const { nearbyDriverIds } = useNearbyDrivers({
     payload: {
-      latitude: match?.first_point?.longitude ?? draft?.first?.latitude,
-      longitude: match?.first_point?.latitude ?? draft?.first?.latitude,
+      latitude: match?.first_point?.latitude ?? draft?.first?.latitude,
+      longitude: match?.first_point?.longitude ?? draft?.first?.longitude,
     },
   });
 
@@ -247,6 +247,10 @@ export default function Match() {
                   source={require("../../assets/json/pulse.json")}
                 />
               </Mapbox.MarkerView>
+
+              {nearbyDriverIds.map((id) => (
+                <DriverIcon key={id} id={id} />
+              ))}
             </Optional>
           </Optional>
         </Mapbox.MapView>
@@ -712,6 +716,35 @@ function Feedback({ onClose, onSubmit }) {
         </View>
       </View>
     </View>
+  );
+}
+
+function DriverIcon({ id }) {
+  const [locationString] = useMMKVString(`location.${id}`);
+  const location = JSON.parse(locationString || "{}");
+
+  if (
+    !location?.payload?.latitude ||
+    !location?.payload?.longitude ||
+    !location?.payload?.heading
+  ) {
+    return null;
+  }
+
+  return (
+    <Mapbox.MarkerView
+      coordinate={[location.payload.longitude, location.payload.latitude]}
+    >
+      <Image
+        cachePolicy="memory-disk"
+        style={{
+          width: 62,
+          height: 62,
+          transform: [{ rotate: `${location.payload.heading}deg` }],
+        }}
+        source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FMotorcycle.png?alt=media&token=c0c1290c-16aa-4e57-9a14-24f034b3ab9d"
+      />
+    </Mapbox.MarkerView>
   );
 }
 

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import getNearbyDrivers from "../api/getNearbyDrivers";
 import supabase from "../supabase";
 import log from "../log";
+import storage from "../storage";
 
 /**
  *
@@ -45,7 +46,7 @@ export default function useNearbyDrivers({ startOnMount = true, payload }) {
 
     timerRef.current = setInterval(() => {
       handleGetNearbyDriversAndSubscribe();
-    }, 1000 * 60); // every minute
+    }, 1000 * 20); // every minute
 
     log.debug("Started the nearby drivers service.");
   }
@@ -58,6 +59,8 @@ export default function useNearbyDrivers({ startOnMount = true, payload }) {
     setNearbyDriverIds([]);
 
     log.debug("Stopped the nearby drivers service.", { ids });
+
+    clearNearbyDrivers();
   }
 
   useEffect(() => {
@@ -103,13 +106,28 @@ function handleSubscribe(ids = []) {
 
     channel
       .on("broadcast", { event: "location_update" }, (data) => {
-        // todo: do something with the data
         log.debug("Received a location update.", { user_id, data });
+        storage.set(`location.${user_id}`, JSON.stringify(data));
       })
       .subscribe();
   });
 
   log.debug("Subscribed to the location updates channels.", { ids });
+}
+
+function clearNearbyDrivers() {
+  const deletedKeys = [];
+
+  storage.getAllKeys().forEach((key) => {
+    if (key === "location.current") return; // skip the current location
+
+    if (key.includes("location.")) {
+      storage.delete(key);
+      deletedKeys.push(key);
+    }
+  });
+
+  log.debug("Cleared the nearby drivers cache.", { deletedKeys });
 }
 
 /**
