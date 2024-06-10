@@ -273,7 +273,7 @@ function RequestedPreview({
       style={styles.previewContent}
       onHandlerStateChange={onHandlerStateChange}
     >
-      {/* <GrayBar /> */}
+      <GrayBar />
       <Text size={28} weight="bold" color="#353579">
         Looking for drivers
       </Text>
@@ -335,6 +335,7 @@ function FoundPreview({
       style={styles.previewContent}
       onHandlerStateChange={onHandlerStateChange}
     >
+      <GrayBar />
       <Text size={28} weight="bold" color="#353579">
         On the way
       </Text>
@@ -745,6 +746,28 @@ function DriverIcon({ id }) {
         source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FMotorcycle.png?alt=media&token=c0c1290c-16aa-4e57-9a14-24f034b3ab9d"
       />
     </Mapbox.MarkerView>
+  );
+}
+
+function GrayBar() {
+  return (
+    <View
+      style={{
+        justifyContent: "center",
+        alignItems: "center",
+        paddingBottom: 16,
+      }}
+    >
+      <View
+        style={{
+          width: 50,
+          height: 5.5,
+          borderRadius: 7,
+          backgroundColor: "#E8E8E8",
+          marginTop: -24,
+        }}
+      />
+    </View>
   );
 }
 
