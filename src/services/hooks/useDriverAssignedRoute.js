@@ -14,6 +14,7 @@ import getDistance from "../util/haversine/getDistance";
  */
 export default function useDriverAssignedRoute({ match_id }) {
   const originalCoordinatesRef = useRef();
+  const matchRef = useRef();
 
   const [coordinates, setCoordinates] = useState([]);
 
@@ -47,6 +48,8 @@ export default function useDriverAssignedRoute({ match_id }) {
     let _first, _last;
 
     if (match) {
+      matchRef.current = match;
+
       _first = match.initial_driver_location;
       _last = match.first_point;
 
@@ -113,12 +116,60 @@ export default function useDriverAssignedRoute({ match_id }) {
     handleStopWatchDriverLocation();
   }
 
-  function incomingLocationProcedure(prev, curr) {
+  async function incomingLocationProcedure(prev, curr) {
     const previousLocation = prev.driverLocation;
     const incomingLocation = curr.driverLocation;
 
     if (!previousLocation) {
       log.debug("Previous location is not available.", { previousLocation, incomingLocation }); // prettier-ignore
+      if (matchRef.current) {
+        const _first = incomingLocation;
+        const _last = matchRef?.current?.first_point;
+
+        if (_first && _last) {
+          setFirst(_first);
+
+          const origin = `${_first.latitude},${_first.longitude}`;
+          const destination = `${_last.latitude},${_last.longitude}`;
+
+          log.debug("Incoming Procedure. Getting directions", {
+            origin,
+            destination,
+          });
+          const direction = await handleGetDirections(origin, destination);
+
+          if (direction) {
+            const encoded = direction?.overview_polyline?.points;
+            log.debug("Incoming Procedure. Decoding encounted polyline", { encoded, direction }); // prettier-ignore
+            const points = Polyline.decode(encoded);
+            log.debug("Incoming Procedure. Decoded completed!", { points, encoded, direction }); // prettier-ignore
+
+            const _coordinates = points.map((point) => ({
+              latitude: point[0],
+              longitude: point[1],
+            }));
+
+            originalCoordinatesRef.current = _coordinates;
+            setCoordinates(_coordinates);
+
+            log.debug("Incoming Procedure. Overwrite initial coordinates", { coordinates: _coordinates, points, encoded, direction }); // prettier-ignore
+          } else {
+            log.warn("No direction found. Unable to draw route.", { _first, _last, origin, destination }); // prettier-ignore
+          }
+        } else {
+          log.warn("Unable to draw route.", {
+            _first,
+            _last,
+            matchRef: matchRef.current,
+            incomingLocation,
+          });
+        }
+      } else {
+        log.warn(
+          "Match is not available. Unable to draw route based on the incoming location."
+        );
+      }
+
       return;
     }
 

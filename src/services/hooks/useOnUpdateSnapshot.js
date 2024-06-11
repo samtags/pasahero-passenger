@@ -9,11 +9,13 @@ export default function useOnUpdateSnapshot(callback, deps) {
   }, []);
 
   useOnUpdate(() => {
-    const cleanup = callback(ref.current, deps);
+    const cleanup = callback?.(ref.current, deps);
 
     return () => {
       ref.current = deps;
-      cleanup?.();
+      if (typeof cleanup === "function") {
+        cleanup();
+      }
     };
   }, [JSON.stringify(deps)]);
 }

@@ -11,6 +11,7 @@ module.exports = ({ config }) => {
       clerkPublishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
       googleApiKey: process.env.EXPO_PUBLIC_GOOGLE_API_KEY,
       supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
+      newRelicKey: process.env.EXPO_PUBLIC_NEW_RELIC_KEY,
       supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
       mapBoxKey: process.env.EXPO_PUBLIC_MAPBOX_KEY,
       ldKey: process.env.EXPO_PUBLIC_LD_KEY,
