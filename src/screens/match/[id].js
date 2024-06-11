@@ -26,18 +26,23 @@ import { Skeleton } from "moti/skeleton";
 import { format } from "../../services/util/amount";
 import LottieView from "lottie-react-native";
 import useNearbyDrivers from "../../services/hooks/useNearbyDrivers";
+import useDriverAssignedRoute from "../../services/hooks/useDriverAssignedRoute";
 
 export default function Match() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const match = useMatch(params.id);
 
-  const [isMapInitialized, setIsMapInitialized] = useState(false);
+  const {coordinates, handleStart, isPending, isStarted, isError, error} = useDriverAssignedRoute({ match_id: params.id }); // prettier-ignore
+  console.log("🚀 ~ Match ~ coordinates:", {
+    coordinates,
+    isStarted,
+    isPending,
+    isError,
+    error,
+  });
 
-  function initializeMap() {
-    if (isMapInitialized) return;
-    setIsMapInitialized(true);
-  }
+  const [isMapInitialized, setIsMapInitialized] = useState(false);
 
   const { isPending: isCanceling, mutateAsync: handleCancel } = useMutation({
     mutationFn: () => cancelMatchRequest({ id: match?.id }),
@@ -60,12 +65,22 @@ export default function Match() {
   const isCoordinatesReady =
     match?.first_point?.longitude && match?.first_point?.latitude;
 
-  const { nearbyDriverIds } = useNearbyDrivers({
+  const {
+    nearbyDriverIds,
+    handleStop: handleStopWatchingNearbyDrivers,
+    handleStart: handleWatchNearbyDrivers,
+  } = useNearbyDrivers({
     payload: {
       latitude: match?.first_point?.latitude ?? draft?.first?.latitude,
       longitude: match?.first_point?.longitude ?? draft?.first?.longitude,
     },
+    startOnMount: false,
   });
+
+  function initializeMap() {
+    if (isMapInitialized) return;
+    setIsMapInitialized(true);
+  }
 
   function handleGoToMessages() {
     router.navigate({
@@ -109,6 +124,17 @@ export default function Match() {
   }
 
   useOnUpdate(() => {
+    if (match?.status === "REQUESTED") {
+      handleWatchNearbyDrivers();
+    }
+
+    if (match?.status === "FOUND") {
+      if (isStarted === false) {
+        handleStopWatchingNearbyDrivers();
+        handleStart();
+      }
+    }
+
     if (match?.status === "DONE") {
       const timer = setTimeout(() => {
         setShowFeedback(true);

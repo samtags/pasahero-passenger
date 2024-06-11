@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import log from "../log";
+import supabase from "../supabase";
+import useOnUpdate from "./useOnUpdate";
 
 /**
  *
@@ -7,14 +9,39 @@ import log from "../log";
  * @returns {Return}
  */
 export default function useWatchDriverLocation(driver_id) {
-  const [coordinates] = useState();
+  const channelRef = useRef(supabase.channel(`location.${driver_id}`));
+  const [coordinates, setCoordinates] = useState();
 
   useEffect(() => handleStop, []);
 
+  useOnUpdate(() => {
+    handleStop();
+    channelRef.current = supabase.channel(`location.${driver_id}`);
+    handleStart();
+  }, [driver_id]);
+
   function handleStart() {
     log.debug("Starting to watch for driver location", { driver_id });
+
+    const channel = channelRef.current;
+
+    channel
+      ?.on("broadcast", { event: "location_update" }, (data) => {
+        log.debug("Location update received.", { data, driver_id });
+        setCoordinates(data.payload);
+      })
+      .subscribe();
+
+    log.debug("Subscribed to the location updates channel.", {
+      driver_id,
+      channel: `location.${driver_id}`,
+    });
   }
-  function handleStop() {}
+
+  function handleStop() {
+    log.debug("Stopping to watch for driver location", { driver_id });
+    supabase.removeChannel(channelRef?.current);
+  }
 
   return {
     handleStart,

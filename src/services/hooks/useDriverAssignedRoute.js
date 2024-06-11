@@ -3,9 +3,9 @@ import getMatchById from "../api/getMatchById";
 import log from "../log";
 import useWatchDriverLocation from "./useDriverLocations";
 import getDirections from "../api/getDirections";
-import JSON from "../json";
 import * as Polyline from "@mapbox/polyline";
 import useOnUpdateSnapshot from "./useOnUpdateSnapshot";
+import getDistance from "../util/haversine/getDistance";
 
 /**
  *
@@ -28,7 +28,6 @@ export default function useDriverAssignedRoute({ match_id }) {
 
   const [driverId, setDriverId] = useState();
 
-  // todo: implement the subscription hook
   const {
     coordinates: driverLocation,
     handleStop: handleStopWatchDriverLocation,
@@ -36,9 +35,10 @@ export default function useDriverAssignedRoute({ match_id }) {
   } = useWatchDriverLocation(driverId);
 
   useEffect(() => handleStop, []);
-  useOnUpdateSnapshot(incomingLocationProcedure, driverLocation);
+  useOnUpdateSnapshot(incomingLocationProcedure, { driverLocation });
 
   async function handleStart() {
+    log.debug("Driver assigned route hook initiated.", { match_id });
     setIsStarted(true);
     setIsPending(true);
 
@@ -47,8 +47,8 @@ export default function useDriverAssignedRoute({ match_id }) {
     let _first, _last;
 
     if (match) {
-      _first = JSON.parse(match.initial_driver_location);
-      _last = JSON.parse(match.first_point);
+      _first = match.initial_driver_location;
+      _last = match.first_point;
 
       setFirst(_first);
       setLast(_last);
@@ -57,12 +57,14 @@ export default function useDriverAssignedRoute({ match_id }) {
       setDriverId(match.driver_id);
       handleWatchDriverLocation(match.driver_id);
 
-      if (!_first || !_last) {
+      log.debug("Initial driver location", { _first, _last, match });
+
+      if (_first && _last) {
         const origin = `${_first.latitude},${_first.longitude}`;
         const destination = `${_last.latitude},${_last.longitude}`;
 
         log.debug("Getting directions", { origin, destination });
-        const direction = await handleGetDirections();
+        const direction = await handleGetDirections(origin, destination);
 
         if (direction) {
           const encoded = direction?.overview_polyline?.points;
@@ -111,13 +113,57 @@ export default function useDriverAssignedRoute({ match_id }) {
     handleStopWatchDriverLocation();
   }
 
-  function incomingLocationProcedure(previousLocation, incomingLocation) {
+  function incomingLocationProcedure(prev, curr) {
+    const previousLocation = prev.driverLocation;
+    const incomingLocation = curr.driverLocation;
+
+    if (!previousLocation) {
+      log.debug("Previous location is not available.", { previousLocation, incomingLocation }); // prettier-ignore
+      return;
+    }
+
+    log.debug("Incoming location procedure initiated.", {previousLocation, incomingLocation}); // prettier-ignore
+
     // create distance representation of the coordinates
+    const distanceRepresentation = coordinates.map((item) => {
+      return getDistance(
+        previousLocation.latitude,
+        previousLocation.longitude,
+        item.latitude,
+        item.longitude
+      );
+    });
+
+    log.debug("Created distance representation of the coordinates", {
+      distanceRepresentation,
+      previousLocation,
+      incomingLocation,
+    });
+
     // get distance between previousLocation and incomingLocation
+    const distance = getDistance(
+      previousLocation.latitude,
+      previousLocation.longitude,
+      incomingLocation.latitude,
+      incomingLocation.longitude
+    );
+
+    log.debug("Got distance between previousLocation and incomingLocation", { distance, previousLocation, incomingLocation, }); // prettier-ignore
+
     // in distance representation, get the first index where the value is greater than the distance of previousLocation from incomingLocation
+    const index = distanceRepresentation.findIndex((value) => value > distance);
+    log.debug("Distance index found.", { index, distance, distanceRepresentation, coordinates }); // prettier-ignore
+
     // recreate the coordinates where the start of the new coordinates is the index we get from the previous step
+    const newCoordinates = coordinates.slice(index);
+    log.debug("New coordinates created.", { newCoordinates, index, coordinates }); // prettier-ignore
+
     // insert the incoming location to the start of the new coordinates
+    newCoordinates.unshift(incomingLocation);
+    log.debug("Incoming location inserted to the start of the new coordinates.", { newCoordinates, incomingLocation }); // prettier-ignore
+
     // set the new coordinates to the state
+    setCoordinates(newCoordinates);
   }
 
   return {
@@ -160,6 +206,8 @@ async function handleGetDirections(origin, destination) {
  * @property {boolean} isPending
  * @property {boolean} isStarted
  * @property {boolean} isStopped
+ * @property {boolean} isError
+ * @property {string} error
  * @property {Coordinates} [first]
  * @property {Coordinates} [last]
  */
