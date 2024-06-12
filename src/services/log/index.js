@@ -1,7 +1,5 @@
-import Const from "expo-constants";
-
 const headers = new Headers();
-headers.append("Api-Key", Const.expoConfig.extra.newRelicKey);
+headers.append("Api-Key", process.env.EXPO_PUBLIC_NEW_RELIC_KEY);
 headers.append("Content-Type", "application/json");
 
 const options = {

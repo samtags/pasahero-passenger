@@ -12,7 +12,7 @@ import getDistance from "../util/haversine/getDistance";
  * @param {Props} props
  * @returns {Return}
  */
-export default function useDriverAssignedRoute({ match_id }) {
+export default function useOnTheWayRoute({ match_id }) {
   const originalCoordinatesRef = useRef();
   const matchRef = useRef();
 
@@ -51,7 +51,7 @@ export default function useDriverAssignedRoute({ match_id }) {
       matchRef.current = match;
 
       _first = match.driver_location;
-      _last = match.first_point;
+      _last = match.last_point;
 
       setFirst(_first);
       setLast(_last);
@@ -92,20 +92,7 @@ export default function useDriverAssignedRoute({ match_id }) {
             { match_id, match, _first, _last, origin, destination }
           );
         }
-      } else {
-        setIsError(true);
-        setError("NO_INITIAL_DRIVER_LOCATION");
-        log.warn(
-          "Unable to get pickup location or initial driver location. No route is displayed upon driver assigned.",
-          { match_id, match, _first, _last }
-        );
       }
-    } else {
-      setError("NO_MATCH_FOUND");
-      setIsError(true);
-      log.warn(
-        "Unable to get match by id. No route is displayed upon driver assigned."
-      );
     }
 
     setIsPending(false);
@@ -122,15 +109,9 @@ export default function useDriverAssignedRoute({ match_id }) {
 
     if (!previousLocation) {
       log.debug("Previous location is not available.", { previousLocation, incomingLocation }); // prettier-ignore
-
-      if (!matchRef.current) {
-        const match = await getMatchById(match_id);
-        matchRef.current = match;
-      }
-
       if (matchRef.current) {
         const _first = incomingLocation;
-        const _last = matchRef?.current?.first_point;
+        const _last = matchRef?.current?.last_point;
 
         if (_first && _last) {
           setFirst(_first);
@@ -172,10 +153,7 @@ export default function useDriverAssignedRoute({ match_id }) {
         }
       } else {
         log.warn(
-          "Match is not available. Unable to draw route based on the incoming location.",
-          {
-            matchRef: matchRef.current,
-          }
+          "Match is not available. Unable to draw route based on the incoming location."
         );
       }
 

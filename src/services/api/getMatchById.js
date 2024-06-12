@@ -10,7 +10,7 @@ export default async function getMatchById(id) {
 
   const { error, data } = await supabase
     .from("matches")
-    .select("id, first_point, last_point, driver_id, initial_driver_location")
+    .select("id, first_point, last_point, driver_id, driver_location")
     .eq("id", id)
     .single();
 

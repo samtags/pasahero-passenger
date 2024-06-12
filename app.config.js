@@ -44,6 +44,7 @@ module.exports = ({ config }) => {
           RNMapboxMapsDownloadToken: process.env.EXPO_PUBLIC_MAPBOX_KEY,
         },
       ],
+      ["newrelic-react-native-agent"],
     ],
   };
 };

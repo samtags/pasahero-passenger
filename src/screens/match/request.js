@@ -113,7 +113,7 @@ export default function List() {
     let bounds = undefined;
     let animationMode = "none";
 
-    if (coordinates?.length > 0) {
+    if (coordinates?.length > 1) {
       boundingBox = calculateBoundingBox(coordinates);
 
       bounds = {
@@ -337,7 +337,7 @@ export default function List() {
                     onDidFinishRenderingMap={() => console.log("Map ready")}
                   >
                     <Mapbox.Camera animationDuration={2000} {...cameraConfig} />
-                    <Optional condition={coordinates?.length > 0}>
+                    <Optional condition={coordinates?.length > 1}>
                       <Mapbox.ShapeSource
                         id="route"
                         shape={{

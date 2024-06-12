@@ -11,7 +11,7 @@ import Mapbox from "@rnmapbox/maps";
 import useMatch from "../../services/supabase/realtime/useMatch";
 import Optional from "../../components/optional";
 import Text from "../../components/text";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Image } from "expo-image";
 import Cta from "../../components/cta";
 import Preview from "./components/Preview";
@@ -28,6 +28,9 @@ import LottieView from "lottie-react-native";
 import useNearbyDrivers from "../../services/hooks/useNearbyDrivers";
 import useDriverAssignedRoute from "../../services/hooks/useDriverAssignedRoute";
 import calculateBoundingBox from "../../services/util/map/calculateBoundingBox";
+import useOnTheWayRoute from "../../services/hooks/useOnTheWayRoute";
+import storage from "../../services/storage";
+import log from "../../services/log";
 
 const defaultLocation = {
   latitude: 14.5535991,
@@ -35,11 +38,27 @@ const defaultLocation = {
 };
 
 export default function Match() {
+  const scrollRef = useRef();
+
   const router = useRouter();
   const params = useLocalSearchParams();
   const match = useMatch(params.id);
+  console.log("🚀 ~ Match ~ match:", match);
 
-  const {coordinates: driverAssignedCoordinates, handleStart, isPending, isStarted, } = useDriverAssignedRoute({ match_id: params.id }); // prettier-ignore
+  const {
+    coordinates: driverAssignedCoordinates,
+    handleStart: handleStartAssignedRoute,
+    isPending: isAssignedRoutePending,
+    isStarted: isAssignedRouteStarted,
+    handleStop: handleStopAssignedRoute,
+  } = useDriverAssignedRoute({ match_id: params.id });
+
+  const {
+    coordinates: driverOnTheWayCoordinates,
+    handleStart: handleStartOnTheWayRoute,
+    isStarted: isOnTheWayRouteStarted,
+    handleStop: handleStopOnTheWayRoute,
+  } = useOnTheWayRoute({ match_id: params.id });
 
   const [screen, setScreen] = useState("PENDING"); // PENDING, REQUESTED, FOUND, ARRIVED, STARTED, DONE
 
@@ -59,7 +78,6 @@ export default function Match() {
   ];
 
   const [scrollEnabled, setScrollEnabled] = useState(false);
-  const scrollRef = useRef();
   const [showFeedback, setShowFeedback] = useState(false);
 
   const pointerEvents = scrollEnabled ? "auto" : "box-none";
@@ -125,6 +143,18 @@ export default function Match() {
     router.replace("/");
   }
 
+  function highlightPreview() {
+    scrollRef?.current?.scrollTo({ y: 0, animated: true });
+    setScrollEnabled(false);
+  }
+
+  useEffect(() => {
+    return () => {
+      handleStopAssignedRoute();
+      handleStopOnTheWayRoute();
+    };
+  }, []);
+
   useOnUpdate(() => {
     if (match?.status === "REQUESTED") {
       setScreen("REQUESTED");
@@ -132,15 +162,38 @@ export default function Match() {
     }
 
     if (match?.status === "FOUND") {
-      if (isStarted === false) {
+      if (isAssignedRouteStarted === false) {
         handleStopWatchingNearbyDrivers();
-        handleStart();
+        handleStartAssignedRoute();
       }
 
       setScreen("FOUND");
+      highlightPreview();
+    } else {
+      if (isAssignedRouteStarted) {
+        handleStopAssignedRoute();
+      }
+    }
+
+    if (match?.status === "ARRIVED") {
+      setScreen("ARRIVED");
+      highlightPreview();
+
+      handleChangePickupReference(match?.last_point);
+    }
+
+    if (match?.status === "STARTED") {
+      highlightPreview();
+      setScreen("STARTED");
+
+      if (isOnTheWayRouteStarted === false) {
+        handleStartOnTheWayRoute();
+      }
     }
 
     if (match?.status === "DONE") {
+      highlightPreview();
+
       const timer = setTimeout(() => {
         setShowFeedback(true);
       }, 1500);
@@ -149,7 +202,7 @@ export default function Match() {
     }
   }, [match]);
 
-  let bounds;
+  let driverAssignedCameraBounds, onTheWayCameraBounds;
 
   if (driverAssignedCoordinates.length > 0) {
     const boundingBox = calculateBoundingBox(driverAssignedCoordinates);
@@ -160,13 +213,33 @@ export default function Match() {
     const padding = 24;
 
     if (ne[0] && ne[1] && sw[0] && sw[1]) {
-      bounds = {
+      driverAssignedCameraBounds = {
         ne,
         sw,
         paddingTop: padding,
         paddingLeft: 32,
         paddingRight: 32,
-        paddingBottom: padding,
+        paddingBottom: padding + 290, // add preview height
+      };
+    }
+  }
+
+  if (driverOnTheWayCoordinates.length > 0) {
+    const boundingBox = calculateBoundingBox(driverOnTheWayCoordinates);
+
+    // check for invalid value of bounding box
+    const ne = boundingBox[1];
+    const sw = boundingBox[0];
+    const padding = 24;
+
+    if (ne[0] && ne[1] && sw[0] && sw[1]) {
+      onTheWayCameraBounds = {
+        ne,
+        sw,
+        paddingTop: padding,
+        paddingLeft: 32,
+        paddingRight: 32,
+        paddingBottom: padding + 215, // add preview height
       };
     }
   }
@@ -215,6 +288,8 @@ export default function Match() {
               onHandlerStateChange={onHandlerStateChange}
               services={match?.services}
               driver_id={match?.driver_id}
+              onMessage={handleGoToMessages}
+              onCall={handleCallDriver}
             />
           </Optional>
 
@@ -319,44 +394,48 @@ export default function Match() {
             </Optional>
 
             <Optional condition={screen === "FOUND"}>
-              <Optional condition={isPending === false}>
-                <Optional condition={bounds}>
-                  <Mapbox.Camera animationMode="flyTo" bounds={bounds} />
-                </Optional>
+              <Optional condition={isAssignedRoutePending === false}>
+                <Optional condition={driverAssignedCoordinates?.length > 1}>
+                  <Optional condition={driverAssignedCameraBounds}>
+                    <Mapbox.Camera
+                      animationMode="flyTo"
+                      bounds={driverAssignedCameraBounds}
+                    />
+                  </Optional>
 
-                <Mapbox.ShapeSource
-                  id="route"
-                  shape={{
-                    type: "Feature",
-                    properties: {},
-                    geometry: {
-                      type: "LineString",
-                      coordinates: driverAssignedCoordinates.map((coords) => [
-                        coords.longitude,
-                        coords.latitude,
-                      ]),
-                    },
-                  }}
-                >
-                  <Mapbox.LineLayer
-                    id="stroke"
-                    style={{
-                      lineColor: "#373BF4",
-                      lineWidth: 6.5,
-                      lineCap: "round",
-                      lineJoin: "round",
+                  <Mapbox.ShapeSource
+                    id="route"
+                    shape={{
+                      type: "Feature",
+                      properties: {},
+                      geometry: {
+                        type: "LineString",
+                        coordinates: driverAssignedCoordinates?.map(
+                          (coords) => [coords.longitude, coords.latitude]
+                        ),
+                      },
                     }}
-                  />
-                  <Mapbox.LineLayer
-                    id="routeLayer"
-                    style={{
-                      lineColor: "#6366F1",
-                      lineWidth: 3,
-                      lineCap: "round",
-                      lineJoin: "round",
-                    }}
-                  />
-                </Mapbox.ShapeSource>
+                  >
+                    <Mapbox.LineLayer
+                      id="stroke"
+                      style={{
+                        lineColor: "#373BF4",
+                        lineWidth: 6.5,
+                        lineCap: "round",
+                        lineJoin: "round",
+                      }}
+                    />
+                    <Mapbox.LineLayer
+                      id="routeLayer"
+                      style={{
+                        lineColor: "#6366F1",
+                        lineWidth: 3,
+                        lineCap: "round",
+                        lineJoin: "round",
+                      }}
+                    />
+                  </Mapbox.ShapeSource>
+                </Optional>
               </Optional>
 
               {(() => {
@@ -388,6 +467,143 @@ export default function Match() {
                 const coordinates =
                   driverAssignedCoordinates?.[
                     driverAssignedCoordinates?.length - 1
+                  ];
+
+                if (coordinates?.longitude && coordinates?.latitude) {
+                  return (
+                    <Mapbox.MarkerView
+                      id="FOUND_pickup-marker"
+                      coordinate={[coordinates.longitude, coordinates.latitude]}
+                    >
+                      <Image
+                        style={[styles.marker]}
+                        cachePolicy="memory-disk"
+                        source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FFrom.png?alt=media&token=0d152a8f-e9c4-4014-8816-6a5dc5660290"
+                      />
+                    </Mapbox.MarkerView>
+                  );
+                }
+
+                return null;
+              })()}
+            </Optional>
+
+            <Optional condition={screen === "ARRIVED"}>
+              {(() => {
+                const coordinates = driverAssignedCoordinates?.[0];
+
+                if (coordinates?.longitude && coordinates?.latitude) {
+                  return (
+                    <>
+                      <Mapbox.Camera
+                        animationMode="flyTo"
+                        zoomLevel={17}
+                        centerCoordinate={[
+                          coordinates?.longitude,
+                          coordinates?.latitude,
+                        ]}
+                      />
+                      <Mapbox.MarkerView
+                        id="FOUND_driver-marker"
+                        coordinate={[
+                          coordinates.longitude,
+                          coordinates.latitude,
+                        ]}
+                      >
+                        <Image
+                          cachePolicy="memory-disk"
+                          style={{
+                            width: 62,
+                            height: 62,
+                            transform: [{ rotate: `${coordinates?.heading || 0}deg` }], // prettier-ignore
+                          }}
+                          source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FMotorcycle.png?alt=media&token=c0c1290c-16aa-4e57-9a14-24f034b3ab9d"
+                        />
+                      </Mapbox.MarkerView>
+                    </>
+                  );
+                }
+
+                return null;
+              })()}
+            </Optional>
+
+            <Optional condition={screen === "STARTED"}>
+              <Optional condition={driverOnTheWayCoordinates?.length > 1}>
+                <Optional condition={onTheWayCameraBounds}>
+                  <Mapbox.Camera
+                    animationMode="flyTo"
+                    bounds={onTheWayCameraBounds}
+                  />
+                </Optional>
+
+                <Mapbox.ShapeSource
+                  id="route"
+                  shape={{
+                    type: "Feature",
+                    properties: {},
+                    geometry: {
+                      type: "LineString",
+                      coordinates: driverOnTheWayCoordinates?.map((coords) => [
+                        coords.longitude,
+                        coords.latitude,
+                      ]),
+                    },
+                  }}
+                >
+                  <Mapbox.LineLayer
+                    id="stroke"
+                    style={{
+                      lineColor: "#373BF4",
+                      lineWidth: 6.5,
+                      lineCap: "round",
+                      lineJoin: "round",
+                    }}
+                  />
+                  <Mapbox.LineLayer
+                    id="routeLayer"
+                    style={{
+                      lineColor: "#6366F1",
+                      lineWidth: 3,
+                      lineCap: "round",
+                      lineJoin: "round",
+                    }}
+                  />
+                </Mapbox.ShapeSource>
+              </Optional>
+
+              {(() => {
+                const coordinates = driverOnTheWayCoordinates?.[0];
+
+                if (coordinates?.longitude && coordinates?.latitude) {
+                  return (
+                    <Mapbox.MarkerView
+                      id="STARTED_driver-marker"
+                      coordinate={[
+                        coordinates?.longitude,
+                        coordinates?.latitude,
+                      ]}
+                    >
+                      <Image
+                        cachePolicy="memory-disk"
+                        style={{
+                          width: 62,
+                          height: 62,
+                          transform: [{ rotate: `${coordinates?.heading || 0}deg` }], // prettier-ignore
+                        }}
+                        source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FMotorcycle.png?alt=media&token=c0c1290c-16aa-4e57-9a14-24f034b3ab9d"
+                      />
+                    </Mapbox.MarkerView>
+                  );
+                }
+
+                return null;
+              })()}
+
+              {(() => {
+                const coordinates =
+                  driverOnTheWayCoordinates?.[
+                    driverOnTheWayCoordinates?.length - 1
                   ];
 
                 if (coordinates?.longitude && coordinates?.latitude) {
@@ -524,6 +740,10 @@ function FoundPreview({
         showCallOption
         showChatOption
       />
+
+      <View style={{ paddingTop: 16, backgroundColor: "#FFF" }}>
+        <Cta color="#6366F1">Transfer to [App]</Cta>
+      </View>
     </Preview>
   );
 }
@@ -565,6 +785,10 @@ function ArrivedPreview({
         showCallOption
         showChatOption
       />
+
+      <View style={{ paddingTop: 16, backgroundColor: "#FFF" }}>
+        <Cta color="#6366F1">Transfer to [App]</Cta>
+      </View>
     </Preview>
   );
 }
@@ -584,6 +808,7 @@ function StartedPreview({
       style={styles.previewContent}
       onHandlerStateChange={onHandlerStateChange}
     >
+      <GrayBar />
       <PreviewTitle>On your way</PreviewTitle>
 
       <Text size={14} color="#707070">
@@ -603,6 +828,10 @@ function StartedPreview({
         onMessage={onMessage}
         isLoading={isLoading}
       />
+
+      <View style={{ paddingTop: 16, backgroundColor: "#FFF" }}>
+        <Cta color="#6366F1">Arrived at Destination</Cta>
+      </View>
     </Preview>
   );
 }
@@ -925,6 +1154,23 @@ function GrayBar() {
         }}
       />
     </View>
+  );
+}
+
+/**
+ * Use case: Changing the next booking pick up reference to the current drop-off
+ * Anticipating that user will in the same location for the next booking
+ *
+ */
+function handleChangePickupReference(coordinates) {
+  log.debug("Changing pickup reference to current drop-off", { coordinates });
+  storage.set(
+    "location.current",
+    JSON.stringify({
+      ...(coordinates || {}),
+      shortAddress: coordinates?.short_address,
+      longAddress: coordinates?.long_address,
+    })
   );
 }
 
