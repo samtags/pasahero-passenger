@@ -226,6 +226,25 @@ export default function useDriverAssignedRoute({ match_id }) {
     setCoordinates(newCoordinates);
   }
 
+  function reset() {
+    log.debug("Initiated reset driver assigned route hook.");
+    originalCoordinatesRef.current = undefined;
+    matchRef.current = undefined;
+
+    setCoordinates([]);
+    setIsStarted(false);
+    setIsStopped(false);
+    setIsPending(false);
+    setIsError(false);
+    setError("");
+    setFirst(undefined);
+    setLast(undefined);
+    setDriverId(undefined);
+
+    handleStopWatchDriverLocation();
+    log.debug("Reset driver assigned route hook completed.");
+  }
+
   return {
     handleStart,
     handleStop,
@@ -237,6 +256,7 @@ export default function useDriverAssignedRoute({ match_id }) {
     error,
     first,
     last,
+    reset,
   };
 }
 
@@ -270,4 +290,5 @@ async function handleGetDirections(origin, destination) {
  * @property {string} error
  * @property {Coordinates} [first]
  * @property {Coordinates} [last]
+ * @property {Function} reset
  */

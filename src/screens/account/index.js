@@ -8,6 +8,7 @@ import {
   useUser,
   useAuth,
 } from "@clerk/clerk-expo";
+import { handleResetUser } from "../home";
 
 export default function Account() {
   const { signOut } = useAuth();
@@ -29,6 +30,11 @@ export default function Account() {
     }
   };
 
+  const handleSignOut = () => {
+    signOut();
+    handleResetUser();
+  };
+
   return (
     <ScrollView style={styles.full} contentContainerStyle={styles.full}>
       <View style={styles.container}>
@@ -42,7 +48,7 @@ export default function Account() {
         <Link href="/account">Send Feedback</Link>
         <Link href="/account">Contact Us</Link>
         <SignedIn>
-          <Link onPress={signOut} href="/account">
+          <Link onPress={handleSignOut} href="/account">
             Sign Out
           </Link>
         </SignedIn>

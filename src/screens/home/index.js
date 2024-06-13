@@ -9,6 +9,9 @@ import storage from "../../services/storage";
 import { Image } from "expo-image";
 import { useUser } from "@clerk/clerk-expo";
 import useIncomingCall from "../../services/hooks/useIncomingCall";
+import useOnUpdate from "../../services/hooks/useOnUpdate";
+import initializeUser from "../../services/api/initializeUser";
+import initializeWallet from "../../services/api/initializeWallet";
 
 export default function Home() {
   const user = useUser();
@@ -22,6 +25,14 @@ export default function Home() {
   };
 
   useIncomingCall(user?.user?.id);
+
+  useOnUpdate(() => {
+    const userInfo = user?.user;
+
+    if (userInfo) {
+      handleInitializeUser(userInfo);
+    }
+  }, [user?.user]);
 
   let greeting = "Hi,";
 
@@ -91,6 +102,45 @@ function handleInitializeDraft() {
 
   log.debug("User initialized draft", { ["match.draft"]: draft });
   storage.set("match.draft", JSON.stringify(draft));
+}
+
+function handleInitializeUser(userInfo) {
+  log.debug("Initializing user data.", { userInfo });
+
+  if (userInfo) {
+    const id = userInfo.id;
+    const name = userInfo.fullName;
+    const firstName = userInfo.firstName;
+    const lastName = userInfo.lastName;
+    const imageUrl = userInfo.imageUrl;
+    const email = userInfo.primaryEmailAddress?.emailAddress;
+
+    log.debug("Storing user data to state.", { userInfo, id, name, firstName, lastName, imageUrl, email }); // prettier-ignore
+
+    if (id) storage.set("user.id", id);
+    if (name) storage.set("user.name", name);
+    if (firstName) storage.set("user.firstName", firstName);
+    if (lastName) storage.set("user.lastName", lastName);
+    if (imageUrl) storage.set("user.imageUrl", imageUrl);
+    if (email) storage.set("user.email", email);
+
+    const payload = {};
+
+    if (name) payload.name = name;
+    if (imageUrl) payload.image_url = imageUrl;
+
+    initializeUser(id, payload);
+    initializeWallet(id);
+  }
+}
+
+export function handleResetUser() {
+  storage.delete("user.id");
+  storage.delete("user.name");
+  storage.delete("user.firstName");
+  storage.delete("user.lastName");
+  storage.delete("user.imageUrl");
+  storage.delete("user.email");
 }
 
 const styles = StyleSheet.create({

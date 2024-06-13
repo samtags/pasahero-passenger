@@ -6,6 +6,7 @@ import {
   Dimensions,
   TouchableOpacity,
   TextInput,
+  Alert,
 } from "react-native";
 import Mapbox from "@rnmapbox/maps";
 import useMatch from "../../services/supabase/realtime/useMatch";
@@ -31,6 +32,8 @@ import calculateBoundingBox from "../../services/util/map/calculateBoundingBox";
 import useOnTheWayRoute from "../../services/hooks/useOnTheWayRoute";
 import storage from "../../services/storage";
 import log from "../../services/log";
+import findNearby from "../../services/api/findNearby";
+import { useUser } from "@clerk/clerk-expo";
 
 const defaultLocation = {
   latitude: 14.5535991,
@@ -40,10 +43,10 @@ const defaultLocation = {
 export default function Match() {
   const scrollRef = useRef();
 
+  const { user } = useUser();
   const router = useRouter();
   const params = useLocalSearchParams();
   const match = useMatch(params.id);
-  console.log("🚀 ~ Match ~ match:", match);
 
   const {
     coordinates: driverAssignedCoordinates,
@@ -51,6 +54,7 @@ export default function Match() {
     isPending: isAssignedRoutePending,
     isStarted: isAssignedRouteStarted,
     handleStop: handleStopAssignedRoute,
+    reset: handleResetAssignedRoute,
   } = useDriverAssignedRoute({ match_id: params.id });
 
   const {
@@ -148,6 +152,45 @@ export default function Match() {
     setScrollEnabled(false);
   }
 
+  async function handleCreateTrip(attemp = 0) {
+    if (attemp > 2) {
+      log.warn("Unable to create trip after 3 attempts");
+      Alert.alert("Unable to find driver", "Please try again later.", [
+        {
+          text: "OK",
+          onPress: () => router.replace("/"),
+        },
+      ]);
+      throw new Error(500);
+    }
+
+    log.debug(`[${attemp}] Creating trip`, { match });
+    let error;
+
+    const createTripResponse = await findNearby({
+      user_id: user?.id,
+      first_point: match.first_point,
+      last_point: match.last_point,
+      services: match.services,
+      estimatePreview: match.estimatePreview,
+    }).catch(() => {
+      error = true;
+    });
+
+    if (error) {
+      log.warn(`[${attemp}] Failed to create trip`, { match });
+      return await handleCreateTrip(attemp + 1);
+    }
+
+    return createTripResponse;
+  }
+
+  async function handleRecreateTrip() {
+    const newMatch = await handleCreateTrip();
+    log.debug("Redirecting to the new match", { newMatch });
+    router.setParams({ id: newMatch.id });
+  }
+
   useEffect(() => {
     return () => {
       handleStopAssignedRoute();
@@ -156,6 +199,15 @@ export default function Match() {
   }, []);
 
   useOnUpdate(() => {
+    if (match.id === params.id) {
+      if (match?.status === "DRIVER_CANCELED") {
+        handleRecreateTrip();
+        handleResetAssignedRoute();
+        setScreen("PENDING");
+        Alert.alert("Driver Canceled", "The driver has canceled the ride.");
+      }
+    }
+
     if (match?.status === "REQUESTED") {
       setScreen("REQUESTED");
       handleWatchNearbyDrivers();
@@ -304,7 +356,9 @@ export default function Match() {
             />
           </Optional>
 
-          <Optional condition={match?.status === "REQUESTED"}>
+          <Optional
+            condition={match?.status === "REQUESTED" || screen === "PENDING"}
+          >
             <RequestedPreview
               onHandlerStateChange={onHandlerStateChange}
               services={match?.services}

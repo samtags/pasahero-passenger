@@ -45,6 +45,13 @@ module.exports = ({ config }) => {
         },
       ],
       ["newrelic-react-native-agent"],
+      [
+        "@config-plugins/react-native-dynamic-app-icon",
+        [
+          "./assets/Pasahero-icon.png",
+          "https://tbldsrfpqyqzrastjzoc.supabase.co/storage/v1/object/public/assets/Pasahero-icon.png",
+        ],
+      ],
     ],
   };
 };

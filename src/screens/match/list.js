@@ -1,9 +1,13 @@
 import { View, StyleSheet, Button, ScrollView } from "react-native";
 import useMatches from "../../services/queries/useMatches";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 
 export default function List() {
-  const { data } = useMatches();
+  const { data, refetch } = useMatches();
+
+  useFocusEffect(() => {
+    refetch();
+  });
 
   return (
     <ScrollView

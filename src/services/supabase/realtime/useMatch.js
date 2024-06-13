@@ -59,7 +59,7 @@ async function handleGetMatch(id) {
  * @property {string} created_at
  * @property {string} passenger_id
  * @property {string} driver_id
- * @property { "REQUESTED" | "FOUND" | "ARRIVED" | "STARTED" | "COMPLETED" | "PASSENGER_CANCELED" } status
+ * @property { "REQUESTED" | "FOUND" | "ARRIVED" | "STARTED" | "COMPLETED" | "PASSENGER_CANCELED" | "DRIVER_CANCELED" } status
  * @property {"JoyRideMcTaxi" | "MoveItMotoTaxi" | "AngkasPassenger"} services
  * @property {string} estimatePreview
  * @property {string} driver_id
