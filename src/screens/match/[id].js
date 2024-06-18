@@ -34,6 +34,7 @@ import storage from "../../services/storage";
 import log from "../../services/log";
 import findNearby from "../../services/api/findNearby";
 import { useUser } from "@clerk/clerk-expo";
+import * as Linking from "expo-linking";
 
 const defaultLocation = {
   latitude: 14.5535991,
@@ -47,6 +48,7 @@ export default function Match() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const match = useMatch(params.id);
+  const [showInstruction, setShowInstruction] = useState(false);
 
   const {
     coordinates: driverAssignedCoordinates,
@@ -342,6 +344,7 @@ export default function Match() {
               driver_id={match?.driver_id}
               onMessage={handleGoToMessages}
               onCall={handleCallDriver}
+              onTransfer={() => setShowInstruction(true)}
             />
           </Optional>
 
@@ -353,6 +356,7 @@ export default function Match() {
               driver_id={match?.driver_id}
               platform="Angkas"
               eta="2:35"
+              onTransfer={() => setShowInstruction(true)}
             />
           </Optional>
 
@@ -681,6 +685,78 @@ export default function Match() {
           </Optional>
         </Mapbox.MapView>
       </View>
+
+      <Optional condition={showInstruction}>
+        <View
+          style={{
+            position: "absolute",
+            backgroundColor: "#00000029",
+            height: "100%",
+            width: "100%",
+            zIndex: 4,
+          }}
+        >
+          <View style={{ flex: 1, justifyContent: "flex-end" }}>
+            <View
+              style={{
+                backgroundColor: "white",
+                paddingHorizontal: 18,
+                paddingVertical: 32,
+                borderTopLeftRadius: 34,
+                borderTopRightRadius: 34,
+              }}
+            >
+              <Text size={28} weight="bold" color="#353579">
+                H'wag mag habal
+              </Text>
+
+              <View style={{ marginVertical: 30, gap: 12 }}>
+                <Text size={18} weight="bold" color="#1B1B1B">
+                  Paano ilipat ang biyahe sa [profile]?
+                </Text>
+
+                <TouchableOpacity
+                  onPress={() => {
+                    Linking.openURL(
+                      "https://new-heights-software.notion.site/Transfer-to-trip-to-JoyRide-11fc2f2fc0b146db90ef4547f58d3613?pvs=74"
+                    );
+                  }}
+                >
+                  <Text size={14} color="#707070">
+                    <Text
+                      style={{ textDecorationLine: "underline" }}
+                      size={14}
+                      color="#707070"
+                      weight="700"
+                    >
+                      Bisitahin ang pahinang ito{" "}
+                    </Text>
+                    upang tingnan kung paano ilipat ang biyahe sa [profile].
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <Cta
+                onPress={() => setShowInstruction(false)}
+                textColor="#D1D5DB"
+                color="transparent"
+              >
+                Isara
+              </Cta>
+              <View style={{ marginBottom: 8 }} />
+              <Cta
+                onPress={() => {
+                  // todo: redirect to the app
+                  // todo: handle ios and android
+                }}
+                color="#6366F1"
+              >
+                Handa na
+              </Cta>
+            </View>
+          </View>
+        </View>
+      </Optional>
     </View>
   );
 }
@@ -751,6 +827,7 @@ function FoundPreview({
   onMessage,
   onCall,
   driver_id,
+  onTransfer,
 }) {
   // todo: store driver_info in the match data
   const { data: driver, isLoading } = useGetDriver(driver_id);
@@ -796,7 +873,9 @@ function FoundPreview({
       />
 
       <View style={{ paddingTop: 16, backgroundColor: "#FFF" }}>
-        <Cta color="#6366F1">Transfer to [App]</Cta>
+        <Cta onPress={() => onTransfer?.()} color="#6366F1">
+          Transfer to [App]
+        </Cta>
       </View>
     </Preview>
   );
@@ -807,6 +886,7 @@ function ArrivedPreview({
   onMessage,
   onCall,
   driver_id,
+  onTransfer,
 }) {
   // todo: store driver_info in the match data
   const { data: driver, isLoading } = useGetDriver(driver_id);
@@ -841,7 +921,9 @@ function ArrivedPreview({
       />
 
       <View style={{ paddingTop: 16, backgroundColor: "#FFF" }}>
-        <Cta color="#6366F1">Transfer to [App]</Cta>
+        <Cta onPress={() => onTransfer?.()} color="#6366F1">
+          Transfer to [App]
+        </Cta>
       </View>
     </Preview>
   );
