@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import getDriver from "../api/getDriver";
 
 /**
- *
+ * @deprecated - use useGetDriverProfile instead
  * @param {string} driver_id
  */
 export default function useGetDriver(driver_id) {
