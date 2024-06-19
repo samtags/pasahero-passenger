@@ -22,7 +22,7 @@ import { useMMKVString } from "react-native-mmkv";
 import { useBoolVariation } from "@launchdarkly/react-native-client-sdk";
 import cancelMatchRequest from "../../services/api/cancelMatchRequest";
 import { useMutation } from "@tanstack/react-query";
-import useGetDriver from "../../services/queries/useGetDriver";
+import useGetDriverProfile from "../../services/queries/useGetDriverProfile";
 import { Skeleton } from "moti/skeleton";
 import { format } from "../../services/util/amount";
 import LottieView from "lottie-react-native";
@@ -35,6 +35,8 @@ import log from "../../services/log";
 import findNearby from "../../services/api/findNearby";
 import { useUser } from "@clerk/clerk-expo";
 import * as Linking from "expo-linking";
+import getColorByPlatform from "../../services/util/colors/getColorByPlatform";
+import getStrokeColorByPlatform from "../../services/util/colors/getStokeColorByPlatform";
 
 const defaultLocation = {
   latitude: 14.5535991,
@@ -298,6 +300,10 @@ export default function Match() {
     }
   }
 
+  let driverIcon = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2Fmotor-angkas.png?alt=media&token=f30489fe-1495-41ec-8160-f048df15b602"; // prettier-ignore
+  if (match?.platform === "JoyRide") driverIcon = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2Fmotor-joyride.png?alt=media&token=26f5ab6b-dc4d-4870-bb29-b04ea2c21096"; // prettier-ignore
+  if (match?.platform === "Move It") driverIcon = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2Fmotor-moveit.png?alt=media&token=adfb7d67-03bc-4213-b3cc-22270a331f91"; // prettier-ignore
+
   return (
     <View style={styles.container}>
       <View style={styles.full}>
@@ -324,16 +330,14 @@ export default function Match() {
           <Optional condition={match?.status === "DONE"}>
             <DonePreview
               onHandlerStateChange={onHandlerStateChange}
-              driver_id={match?.driver_id}
+              profile_id={match?.profile_id}
             />
           </Optional>
 
           <Optional condition={match?.status === "STARTED"}>
             <StartedPreview
               onHandlerStateChange={onHandlerStateChange}
-              onMessage={handleGoToMessages}
-              onCall={handleCallDriver}
-              driver_id={match?.driver_id}
+              profile_id={match?.profile_id}
             />
           </Optional>
 
@@ -341,10 +345,10 @@ export default function Match() {
             <ArrivedPreview
               onHandlerStateChange={onHandlerStateChange}
               services={match?.services}
-              driver_id={match?.driver_id}
               onMessage={handleGoToMessages}
               onCall={handleCallDriver}
               onTransfer={() => setShowInstruction(true)}
+              profile_id={match?.profile_id}
             />
           </Optional>
 
@@ -354,9 +358,9 @@ export default function Match() {
               onMessage={handleGoToMessages}
               onCall={handleCallDriver}
               driver_id={match?.driver_id}
-              platform="Angkas"
               eta="2:35"
               onTransfer={() => setShowInstruction(true)}
+              profile_id={match?.profile_id}
             />
           </Optional>
 
@@ -477,7 +481,7 @@ export default function Match() {
                     <Mapbox.LineLayer
                       id="stroke"
                       style={{
-                        lineColor: "#373BF4",
+                        lineColor: getStrokeColorByPlatform(match?.platform),
                         lineWidth: 6.5,
                         lineCap: "round",
                         lineJoin: "round",
@@ -486,7 +490,7 @@ export default function Match() {
                     <Mapbox.LineLayer
                       id="routeLayer"
                       style={{
-                        lineColor: "#6366F1",
+                        lineColor: getColorByPlatform(match?.platform),
                         lineWidth: 3,
                         lineCap: "round",
                         lineJoin: "round",
@@ -512,7 +516,7 @@ export default function Match() {
                           height: 62,
                           transform: [{ rotate: `${coordinates?.heading || 0}deg` }], // prettier-ignore
                         }}
-                        source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FMotorcycle.png?alt=media&token=c0c1290c-16aa-4e57-9a14-24f034b3ab9d"
+                        source={driverIcon}
                       />
                     </Mapbox.MarkerView>
                   );
@@ -749,7 +753,7 @@ export default function Match() {
                   // todo: redirect to the app
                   // todo: handle ios and android
                 }}
-                color="#6366F1"
+                color={getColorByPlatform(match?.platform)}
               >
                 Handa na
               </Cta>
@@ -822,16 +826,17 @@ function RequestedPreview({
  */
 function FoundPreview({
   onHandlerStateChange,
-  platform,
   eta,
   onMessage,
   onCall,
-  driver_id,
   onTransfer,
+  profile_id,
 }) {
-  // todo: store driver_info in the match data
-  const { data: driver, isLoading } = useGetDriver(driver_id);
-  const { image_url, model, plate_number, display_name } = driver || {};
+  const { data: profile, isLoading: isProfileLoading } = useGetDriverProfile(profile_id); // prettier-ignore
+
+  const displayName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim(); // prettier-ignore
+  const { image_url, vehicle_model, vehicle_plate_number, platform } =
+    profile ?? {};
 
   return (
     <Preview
@@ -845,16 +850,16 @@ function FoundPreview({
       <View style={styles.driverInfoSubTitle}>
         <Text size={14} color="#707070">
           Your
-          <Text weight="bold" size={14} color="#0090F9">
+          <Text weight="bold" size={14} color={getColorByPlatform(platform)}>
             {" "}
-            <Optional condition={isLoading === false}>
+            <Optional condition={isProfileLoading === false}>
               {`${platform} `}
             </Optional>
           </Text>
           driver is on the way!
         </Text>
         <Optional condition={Boolean(eta)}>
-          <Text weight="bold" size={14} color="#0090F9">
+          <Text weight="bold" size={14} color={getColorByPlatform(platform)}>
             {eta}
           </Text>
         </Optional>
@@ -862,21 +867,26 @@ function FoundPreview({
 
       <DriverInfo
         image_url={image_url}
-        model={model}
-        plate_number={plate_number}
-        display_name={display_name}
+        model={vehicle_model}
+        plate_number={vehicle_plate_number}
+        display_name={displayName}
         onCall={onCall}
         onMessage={onMessage}
-        isLoading={isLoading}
+        isLoading={isProfileLoading}
         showCallOption
         showChatOption
       />
 
-      <View style={{ paddingTop: 16, backgroundColor: "#FFF" }}>
-        <Cta onPress={() => onTransfer?.()} color="#6366F1">
-          Transfer to [App]
-        </Cta>
-      </View>
+      <Optional condition={platform}>
+        <View style={{ paddingTop: 16, backgroundColor: "#FFF" }}>
+          <Cta
+            onPress={() => onTransfer?.()}
+            color={getColorByPlatform(platform)}
+          >
+            Transfer to {platform}
+          </Cta>
+        </View>
+      </Optional>
     </Preview>
   );
 }
@@ -885,12 +895,14 @@ function ArrivedPreview({
   onHandlerStateChange,
   onMessage,
   onCall,
-  driver_id,
   onTransfer,
+  profile_id,
 }) {
-  // todo: store driver_info in the match data
-  const { data: driver, isLoading } = useGetDriver(driver_id);
-  const { image_url, model, plate_number, display_name } = driver || {};
+  const { data: profile, isLoading: isProfileLoading } = useGetDriverProfile(profile_id); // prettier-ignore
+
+  const displayName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim(); // prettier-ignore
+  const { image_url, vehicle_model, vehicle_plate_number, platform } =
+    profile ?? {};
 
   return (
     <Preview
@@ -902,26 +914,29 @@ function ArrivedPreview({
 
       <Text size={14} color="#707070">
         Your
-        <Text weight="bold" size={14} color="#0090F9">
-          {` Angkas `}
+        <Text weight="bold" size={14} color={getColorByPlatform(platform)}>
+          {` ${platform ?? ""} `}
         </Text>
         driver arrived to the pickup location
       </Text>
 
       <DriverInfo
         image_url={image_url}
-        model={model}
-        plate_number={plate_number}
-        display_name={display_name}
+        model={vehicle_model}
+        plate_number={vehicle_plate_number}
+        display_name={displayName}
         onCall={onCall}
         onMessage={onMessage}
-        isLoading={isLoading}
+        isLoading={isProfileLoading}
         showCallOption
         showChatOption
       />
 
       <View style={{ paddingTop: 16, backgroundColor: "#FFF" }}>
-        <Cta onPress={() => onTransfer?.()} color="#6366F1">
+        <Cta
+          onPress={() => onTransfer?.()}
+          color={getColorByPlatform(platform)}
+        >
           Transfer to [App]
         </Cta>
       </View>
@@ -929,15 +944,12 @@ function ArrivedPreview({
   );
 }
 
-function StartedPreview({
-  onHandlerStateChange,
-  onMessage,
-  onCall,
-  driver_id,
-}) {
-  // todo: store driver_info in the match data
-  const { data: driver, isLoading } = useGetDriver(driver_id);
-  const { image_url, model, plate_number, display_name } = driver || {};
+function StartedPreview({ onHandlerStateChange, profile_id }) {
+  const { data: profile, isLoading: isProfileLoading } = useGetDriverProfile(profile_id); // prettier-ignore
+
+  const displayName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim(); // prettier-ignore
+  const { image_url, vehicle_model, vehicle_plate_number, platform } =
+    profile ?? {};
 
   return (
     <Preview
@@ -949,33 +961,33 @@ function StartedPreview({
 
       <Text size={14} color="#707070">
         You and your
-        <Text weight="bold" size={14} color="#0090F9">
-          {` Angkas `}
+        <Text weight="bold" size={14} color={getColorByPlatform(platform)}>
+          {` ${platform} `}
         </Text>
         is heading to the destination.
       </Text>
 
       <DriverInfo
         image_url={image_url}
-        model={model}
-        plate_number={plate_number}
-        display_name={display_name}
-        onCall={onCall}
-        onMessage={onMessage}
-        isLoading={isLoading}
+        model={vehicle_model}
+        plate_number={vehicle_plate_number}
+        display_name={displayName}
+        isLoading={isProfileLoading}
       />
 
       <View style={{ paddingTop: 16, backgroundColor: "#FFF" }}>
-        <Cta color="#6366F1">Arrived at Destination</Cta>
+        <Cta color={getColorByPlatform(platform)}>Arrived at Destination</Cta>
       </View>
     </Preview>
   );
 }
 
-function DonePreview({ onHandlerStateChange, driver_id }) {
-  // todo: store driver_info in the match data
-  const { data: driver, isLoading } = useGetDriver(driver_id);
-  const { image_url, model, plate_number, display_name } = driver || {};
+function DonePreview({ onHandlerStateChange, profile_id }) {
+  const { data: profile, isLoading: isProfileLoading } = useGetDriverProfile(profile_id); // prettier-ignore
+
+  const displayName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim(); // prettier-ignore
+  const { image_url, vehicle_model, vehicle_plate_number } = profile ?? {};
+
   return (
     <Preview
       style={styles.previewContent}
@@ -989,10 +1001,10 @@ function DonePreview({ onHandlerStateChange, driver_id }) {
 
       <DriverInfo
         image_url={image_url}
-        model={model}
-        plate_number={plate_number}
-        display_name={display_name}
-        isLoading={isLoading}
+        model={vehicle_model}
+        plate_number={vehicle_plate_number}
+        display_name={displayName}
+        isLoading={isProfileLoading}
       />
     </Preview>
   );
@@ -1017,6 +1029,10 @@ function DriverInfo({
   showCallOption,
   showChatOption,
 }) {
+  let plateNumber;
+
+  if (plate_number) plateNumber = `(${plate_number})`;
+
   return (
     <View style={styles.driverInfoContainer}>
       <View style={styles.driverInfoRow}>
@@ -1040,10 +1056,10 @@ function DriverInfo({
             </Optional>
             <Optional condition={isLoading === false}>
               <Text color="#363F59" size={18} weight="900">
-                {model} {`(${plate_number})`}
+                {model} {}
               </Text>
               <Text size={14} weight="bold" color="#707070">
-                {display_name}
+                {display_name} {plateNumber}
               </Text>
             </Optional>
           </View>
