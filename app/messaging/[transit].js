@@ -25,7 +25,7 @@ export default function Entry(props) {
         options={{
           headerTitle: () => (
             <Text size={19} weight="bold" color="#353579">
-              {driver.display_name}
+              {driver?.display_name}
             </Text>
           ),
           headerTitleAlign: "center",
