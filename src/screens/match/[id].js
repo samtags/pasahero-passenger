@@ -681,7 +681,7 @@ export default function Match() {
                       <Image
                         style={[styles.marker]}
                         cachePolicy="memory-disk"
-                        source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FFrom.png?alt=media&token=0d152a8f-e9c4-4014-8816-6a5dc5660290"
+                        source="https://console.firebase.google.com/u/0/project/pasahero-5c989/storage/pasahero-5c989.appspot.com/files/~2Fcom.pasahero.passenger"
                       />
                     </Mapbox.MarkerView>
                   );

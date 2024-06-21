@@ -12,7 +12,7 @@ function log(message, payload = {}) {
   payload.level = payload.level || "debug";
   payload.entity = payload.entity || {};
   payload.entity.name = "pasahero.passenger";
-  payload.message = message;
+  payload.message = payload?.message || message;
 
   const body = JSON.stringify(payload);
   options.body = body;

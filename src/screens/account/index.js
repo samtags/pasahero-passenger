@@ -39,7 +39,7 @@ export default function Account() {
     <ScrollView style={styles.full} contentContainerStyle={styles.full}>
       <View style={styles.container}>
         <SignedIn>
-          <Link href="/wallet">My Wallet</Link>
+          {/* <Link href="/wallet">My Wallet</Link> */}
           <Link href="/match/list">Requested Trips</Link>
         </SignedIn>
         <Link href="/account">Saved Locations</Link>

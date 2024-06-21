@@ -70,6 +70,8 @@ export default function Messaging() {
 
     handleClearSetInput();
     handleManualRerender();
+
+    refValue.current = "";
   };
 
   const handleChangeText = (v) => {
@@ -84,6 +86,9 @@ export default function Messaging() {
     if (incomingMessage) {
       handleAddMessage(incomingMessage);
       handleManualRerender();
+      setTimeout(() => {
+        scrollViewRef?.current?.scrollToEnd?.({ animated: false });
+      }, 250);
     }
   }
 
