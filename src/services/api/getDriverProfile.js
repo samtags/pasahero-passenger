@@ -9,7 +9,7 @@ export default async function getDriverProfile(profile_id) {
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "first_name, last_name, platform, image_url, vehicle_plate_number, vehicle_model"
+      "first_name, last_name, platform, image_url, vehicle_plate_number, vehicle_model, vehicle_make"
     )
     .eq("id", profile_id)
     .single();

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  Platform,
 } from "react-native";
 import Mapbox from "@rnmapbox/maps";
 import useMatch from "../../services/supabase/realtime/useMatch";
@@ -59,6 +60,7 @@ export default function Match() {
     isStarted: isAssignedRouteStarted,
     handleStop: handleStopAssignedRoute,
     reset: handleResetAssignedRoute,
+    eta: assignedEta,
   } = useDriverAssignedRoute({ match_id: params.id });
 
   const {
@@ -66,6 +68,7 @@ export default function Match() {
     handleStart: handleStartOnTheWayRoute,
     isStarted: isOnTheWayRouteStarted,
     handleStop: handleStopOnTheWayRoute,
+    eta: onTheWayEta,
   } = useOnTheWayRoute({ match_id: params.id });
 
   const [screen, setScreen] = useState("PENDING"); // PENDING, REQUESTED, FOUND, ARRIVED, STARTED, DONE
@@ -338,6 +341,7 @@ export default function Match() {
             <StartedPreview
               onHandlerStateChange={onHandlerStateChange}
               profile_id={match?.profile_id}
+              eta={onTheWayEta}
             />
           </Optional>
 
@@ -358,7 +362,7 @@ export default function Match() {
               onMessage={handleGoToMessages}
               onCall={handleCallDriver}
               driver_id={match?.driver_id}
-              eta="2:35"
+              eta={assignedEta}
               onTransfer={() => setShowInstruction(true)}
               profile_id={match?.profile_id}
             />
@@ -579,7 +583,7 @@ export default function Match() {
                             height: 62,
                             transform: [{ rotate: `${coordinates?.heading || 0}deg` }], // prettier-ignore
                           }}
-                          source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FMotorcycle.png?alt=media&token=c0c1290c-16aa-4e57-9a14-24f034b3ab9d"
+                          source={driverIcon}
                         />
                       </Mapbox.MarkerView>
                     </>
@@ -616,7 +620,7 @@ export default function Match() {
                   <Mapbox.LineLayer
                     id="stroke"
                     style={{
-                      lineColor: "#373BF4",
+                      lineColor: getStrokeColorByPlatform(match?.platform),
                       lineWidth: 6.5,
                       lineCap: "round",
                       lineJoin: "round",
@@ -625,7 +629,7 @@ export default function Match() {
                   <Mapbox.LineLayer
                     id="routeLayer"
                     style={{
-                      lineColor: "#6366F1",
+                      lineColor: getColorByPlatform(match?.platform),
                       lineWidth: 3,
                       lineCap: "round",
                       lineJoin: "round",
@@ -653,7 +657,7 @@ export default function Match() {
                           height: 62,
                           transform: [{ rotate: `${coordinates?.heading || 0}deg` }], // prettier-ignore
                         }}
-                        source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FMotorcycle.png?alt=media&token=c0c1290c-16aa-4e57-9a14-24f034b3ab9d"
+                        source={driverIcon}
                       />
                     </Mapbox.MarkerView>
                   );
@@ -750,8 +754,11 @@ export default function Match() {
               <View style={{ marginBottom: 8 }} />
               <Cta
                 onPress={() => {
-                  // todo: redirect to the app
-                  // todo: handle ios and android
+                  if (Platform.OS === "android") {
+                    if (match?.platform === "Angkas") Linking.openURL("todo://url.to.angkas"); // prettier-ignore
+                    if (match?.platform === "JoyRide") Linking.openURL("todo://url.to.joyride"); // prettier-ignore
+                    if (match?.platform === "Move It") Linking.openURL("todo://url.to.moveit"); // prettier-ignore
+                  }
                 }}
                 color={getColorByPlatform(match?.platform)}
               >
@@ -835,8 +842,13 @@ function FoundPreview({
   const { data: profile, isLoading: isProfileLoading } = useGetDriverProfile(profile_id); // prettier-ignore
 
   const displayName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim(); // prettier-ignore
-  const { image_url, vehicle_model, vehicle_plate_number, platform } =
-    profile ?? {};
+  const {
+    image_url,
+    vehicle_model,
+    vehicle_plate_number,
+    platform,
+    vehicle_make,
+  } = profile ?? {};
 
   return (
     <Preview
@@ -875,9 +887,10 @@ function FoundPreview({
         isLoading={isProfileLoading}
         showCallOption
         showChatOption
+        vehicle_make={vehicle_make}
       />
 
-      <Optional condition={platform}>
+      {/* <Optional condition={platform}>
         <View style={{ paddingTop: 16, backgroundColor: "#FFF" }}>
           <Cta
             onPress={() => onTransfer?.()}
@@ -886,7 +899,7 @@ function FoundPreview({
             Transfer to {platform}
           </Cta>
         </View>
-      </Optional>
+      </Optional> */}
     </Preview>
   );
 }
@@ -901,8 +914,13 @@ function ArrivedPreview({
   const { data: profile, isLoading: isProfileLoading } = useGetDriverProfile(profile_id); // prettier-ignore
 
   const displayName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim(); // prettier-ignore
-  const { image_url, vehicle_model, vehicle_plate_number, platform } =
-    profile ?? {};
+  const {
+    image_url,
+    vehicle_model,
+    vehicle_plate_number,
+    platform,
+    vehicle_make,
+  } = profile ?? {};
 
   return (
     <Preview
@@ -930,6 +948,7 @@ function ArrivedPreview({
         isLoading={isProfileLoading}
         showCallOption
         showChatOption
+        vehicle_make={vehicle_make}
       />
 
       <View style={{ paddingTop: 16, backgroundColor: "#FFF" }}>
@@ -944,12 +963,17 @@ function ArrivedPreview({
   );
 }
 
-function StartedPreview({ onHandlerStateChange, profile_id }) {
+function StartedPreview({ onHandlerStateChange, profile_id, eta }) {
   const { data: profile, isLoading: isProfileLoading } = useGetDriverProfile(profile_id); // prettier-ignore
 
   const displayName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim(); // prettier-ignore
-  const { image_url, vehicle_model, vehicle_plate_number, platform } =
-    profile ?? {};
+  const {
+    image_url,
+    vehicle_model,
+    vehicle_plate_number,
+    platform,
+    vehicle_make,
+  } = profile ?? {};
 
   return (
     <Preview
@@ -957,15 +981,19 @@ function StartedPreview({ onHandlerStateChange, profile_id }) {
       onHandlerStateChange={onHandlerStateChange}
     >
       <GrayBar />
+
       <PreviewTitle>On your way</PreviewTitle>
 
-      <Text size={14} color="#707070">
-        You and your
-        <Text weight="bold" size={14} color={getColorByPlatform(platform)}>
-          {` ${platform} `}
+      <View style={styles.driverInfoSubTitle}>
+        <Text size={14} color="#707070">
+          Now heading to the destination.
         </Text>
-        is heading to the destination.
-      </Text>
+        <Optional condition={Boolean(eta)}>
+          <Text weight="bold" size={14} color={getColorByPlatform(platform)}>
+            {eta}
+          </Text>
+        </Optional>
+      </View>
 
       <DriverInfo
         image_url={image_url}
@@ -973,6 +1001,7 @@ function StartedPreview({ onHandlerStateChange, profile_id }) {
         plate_number={vehicle_plate_number}
         display_name={displayName}
         isLoading={isProfileLoading}
+        vehicle_make={vehicle_make}
       />
 
       <View style={{ paddingTop: 16, backgroundColor: "#FFF" }}>
@@ -986,7 +1015,8 @@ function DonePreview({ onHandlerStateChange, profile_id }) {
   const { data: profile, isLoading: isProfileLoading } = useGetDriverProfile(profile_id); // prettier-ignore
 
   const displayName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim(); // prettier-ignore
-  const { image_url, vehicle_model, vehicle_plate_number } = profile ?? {};
+  const { image_url, vehicle_model, vehicle_plate_number, vehicle_make } =
+    profile ?? {};
 
   return (
     <Preview
@@ -1005,6 +1035,7 @@ function DonePreview({ onHandlerStateChange, profile_id }) {
         plate_number={vehicle_plate_number}
         display_name={displayName}
         isLoading={isProfileLoading}
+        vehicle_make={vehicle_make}
       />
     </Preview>
   );
@@ -1028,6 +1059,7 @@ function DriverInfo({
   onCall,
   showCallOption,
   showChatOption,
+  vehicle_make,
 }) {
   let plateNumber;
 
@@ -1056,7 +1088,7 @@ function DriverInfo({
             </Optional>
             <Optional condition={isLoading === false}>
               <Text color="#363F59" size={18} weight="900">
-                {model} {}
+                {`${vehicle_make ?? ""} ${model ?? ""}`.trim()}
               </Text>
               <Text size={14} weight="bold" color="#707070">
                 {display_name} {plateNumber}
@@ -1270,6 +1302,10 @@ function DriverIcon({ id }) {
     return null;
   }
 
+  let driverIcon = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2Fmotor-angkas.png?alt=media&token=f30489fe-1495-41ec-8160-f048df15b602"; // prettier-ignore
+  if (location?.platform === "JoyRide") driverIcon = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2Fmotor-joyride.png?alt=media&token=26f5ab6b-dc4d-4870-bb29-b04ea2c21096"; // prettier-ignore
+  if (location?.platform === "Move It") driverIcon = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2Fmotor-moveit.png?alt=media&token=adfb7d67-03bc-4213-b3cc-22270a331f91"; // prettier-ignore
+
   return (
     <Mapbox.MarkerView
       coordinate={[location.payload.longitude, location.payload.latitude]}
@@ -1281,7 +1317,7 @@ function DriverIcon({ id }) {
           height: 62,
           transform: [{ rotate: `${location.payload.heading}deg` }],
         }}
-        source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FMotorcycle.png?alt=media&token=c0c1290c-16aa-4e57-9a14-24f034b3ab9d"
+        source={driverIcon}
       />
     </Mapbox.MarkerView>
   );

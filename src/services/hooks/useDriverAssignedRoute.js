@@ -6,6 +6,7 @@ import getDirections from "../api/getDirections";
 import * as Polyline from "@mapbox/polyline";
 import useOnUpdateSnapshot from "./useOnUpdateSnapshot";
 import getDistance from "../util/haversine/getDistance";
+import moment from "moment";
 
 /**
  *
@@ -23,6 +24,7 @@ export default function useDriverAssignedRoute({ match_id }) {
   const [isPending, setIsPending] = useState(false);
   const [isError, setIsError] = useState(false);
   const [error, setError] = useState("");
+  const [eta, setEta] = useState(0);
 
   const [first, setFirst] = useState();
   const [last, setLast] = useState();
@@ -68,6 +70,12 @@ export default function useDriverAssignedRoute({ match_id }) {
 
         log.debug("Getting directions", { origin, destination });
         const direction = await handleGetDirections(origin, destination);
+
+        const _eta = direction?.legs?.[0]?.duration?.value;
+
+        if (_eta) {
+          setEta(moment().add(_eta, "seconds").format("hh:mm A"));
+        }
 
         if (direction) {
           const encoded = direction?.overview_polyline?.points;
@@ -143,6 +151,12 @@ export default function useDriverAssignedRoute({ match_id }) {
             destination,
           });
           const direction = await handleGetDirections(origin, destination);
+
+          const _eta = direction?.legs?.[0]?.duration?.value;
+
+          if (_eta) {
+            setEta(moment().add(_eta, "seconds").format("hh:mm A"));
+          }
 
           if (direction) {
             const encoded = direction?.overview_polyline?.points;
@@ -257,6 +271,7 @@ export default function useDriverAssignedRoute({ match_id }) {
     first,
     last,
     reset,
+    eta,
   };
 }
 
@@ -291,4 +306,5 @@ async function handleGetDirections(origin, destination) {
  * @property {Coordinates} [first]
  * @property {Coordinates} [last]
  * @property {Function} reset
+ * @property {string} eta
  */
