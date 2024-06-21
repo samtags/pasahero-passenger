@@ -15,6 +15,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import NewRelic from "newrelic-react-native-agent";
 import { Platform } from "react-native";
 import ErrorBoundary from "../src/services/error";
+import MessageProvider from "../src/services/messages/Provider";
 
 WebBrowser.maybeCompleteAuthSession();
 Mapbox.setAccessToken(Const.expoConfig.extra.mapBoxKey);
@@ -46,6 +47,7 @@ export default function Layout() {
           <LaunchdarklyProvider>
             <GestureHandlerRootView style={{ flex: 1 }}>
               <Stack />
+              <MessageProvider />
             </GestureHandlerRootView>
           </LaunchdarklyProvider>
         </QueryClientProvider>
