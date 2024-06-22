@@ -228,6 +228,8 @@ export default function List() {
   };
 
   const handleOnConfirm = () => {
+    // todo: check wallet balance here.
+
     mutateAsync()
       .then((res) => {
         navigation.dispatch(StackActions.popToTop());
@@ -393,7 +395,7 @@ export default function List() {
                         <Image
                           style={styles.marker}
                           cachePolicy="memory-disk"
-                          source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FTo.png?alt=media&token=5b8f1ebc-aaba-462c-b216-44c9a4a738be"
+                          source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FTo1.png?alt=media&token=7cb56012-bedd-416d-a01e-2dedfcd862d2"
                         />
                       </Mapbox.MarkerView>
                     </Optional>

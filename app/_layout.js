@@ -16,11 +16,14 @@ import NewRelic from "newrelic-react-native-agent";
 import { Platform } from "react-native";
 import ErrorBoundary from "../src/services/error";
 import MessageProvider from "../src/services/messages/Provider";
+import Cancelation from "../src/services/trip/Cancelation";
+import { UNSAFE_registerProperty } from "../src/services/global";
 
 WebBrowser.maybeCompleteAuthSession();
 Mapbox.setAccessToken(Const.expoConfig.extra.mapBoxKey);
 
 const queryClient = new QueryClient({});
+UNSAFE_registerProperty("__queryClient__", queryClient);
 
 export default function Layout() {
   const [fontsLoaded] = useFonts({
@@ -48,6 +51,7 @@ export default function Layout() {
             <GestureHandlerRootView style={{ flex: 1 }}>
               <Stack />
               <MessageProvider />
+              <Cancelation />
             </GestureHandlerRootView>
           </LaunchdarklyProvider>
         </QueryClientProvider>

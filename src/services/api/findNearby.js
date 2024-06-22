@@ -1,4 +1,5 @@
 import axios from "axios";
+import log from "../log";
 
 /**
  *
@@ -23,9 +24,10 @@ export default async function findNearby({
       estimatePreview,
     });
 
+    log.debug("Successfully created trip request.", { res });
     return res?.data;
   } catch (error) {
-    // todo: log
+    log.debug("Unable to find nearby drivers", { error });
     return null;
   }
 }
