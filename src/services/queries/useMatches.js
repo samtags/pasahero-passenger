@@ -8,6 +8,7 @@ import getMatches from "../api/getMatches";
  */
 export default function useMatches() {
   const user = useUser();
+
   return useQuery({
     queryKey: ["getMatches", user?.user?.id],
     queryFn: async () => {
