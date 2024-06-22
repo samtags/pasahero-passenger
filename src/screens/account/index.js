@@ -1,5 +1,5 @@
-import { Link as RNLink } from "expo-router";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Link as RNLink, useRouter } from "expo-router";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import Text from "../../components/text";
 import {
   SignedOut,
@@ -72,13 +72,20 @@ function Link({
   children,
   onPress = () => {}, //
 }) {
+  const router = useRouter();
+
+  const handleOnPress = () => {
+    if (href) router.navigate(href);
+    onPress?.();
+  };
+
   return (
     <View style={styles.item}>
-      <RNLink onPress={onPress?.bind(null)} href={href} style={styles.link}>
+      <TouchableOpacity onPress={handleOnPress} style={styles.link}>
         <Text size={18} color="#353579">
           {children}
         </Text>
-      </RNLink>
+      </TouchableOpacity>
     </View>
   );
 }
