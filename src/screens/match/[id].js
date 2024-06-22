@@ -725,9 +725,11 @@ export default function Match() {
 
                 <TouchableOpacity
                   onPress={() => {
-                    Linking.openURL(
-                      "https://new-heights-software.notion.site/Transfer-to-trip-to-JoyRide-11fc2f2fc0b146db90ef4547f58d3613?pvs=74"
-                    );
+                    if (Platform.OS === "android") {
+                      if (match?.platform === "Angkas") Linking.openURL("https://new-heights-software.notion.site/Transfer-trip-to-Angkas-7e46bd53fece48589422e8888d3fca26?pvs=4"); // prettier-ignore
+                      if (match?.platform === "JoyRide") Linking.openURL("https://new-heights-software.notion.site/Transfer-trip-to-JoyRide-1e809af1646a44449f81a4db668963dc?pvs=74"); // prettier-ignore
+                      if (match?.platform === "Move It") Linking.openURL("https://new-heights-software.notion.site/Transfer-trip-to-Move-It-3d099aa41b414670a6ad7613b812d6d3?pvs=4"); // prettier-ignore
+                    }
                   }}
                 >
                   <Text size={14} color="#707070">
@@ -755,9 +757,9 @@ export default function Match() {
               <Cta
                 onPress={() => {
                   if (Platform.OS === "android") {
-                    if (match?.platform === "Angkas") Linking.openURL("todo://url.to.angkas"); // prettier-ignore
-                    if (match?.platform === "JoyRide") Linking.openURL("todo://url.to.joyride"); // prettier-ignore
-                    if (match?.platform === "Move It") Linking.openURL("todo://url.to.moveit"); // prettier-ignore
+                    if (match?.platform === "Angkas") Linking.openURL("https://play.google.com/store/apps/details?id=com.angkas.customer"); // prettier-ignore
+                    if (match?.platform === "JoyRide") Linking.openURL("https://play.google.com/store/apps/details?id=com.joyride.rider&hl=en_US"); // prettier-ignore
+                    if (match?.platform === "Move It") Linking.openURL("https://play.google.com/store/apps/details?id=com.moveit.app.customer"); // prettier-ignore
                   }
                 }}
                 color={getColorByPlatform(match?.platform)}
@@ -1123,7 +1125,7 @@ function DriverInfo({
   );
 }
 
-function TransitPoints({
+export function TransitPoints({
   first_point, //
   last_point,
   showShareRide,
