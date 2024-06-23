@@ -15,6 +15,7 @@ import getRecentLocationByMatchDriver from "../api/getRecentLocationByMatchDrive
  * @returns {Return}
  */
 export default function useDriverToPickUpRouteProcedure({ match_id }) {
+  const isSettingCoordinates = useRef(false);
   const originalCoordinatesRef = useRef();
   const matchRef = useRef();
 
@@ -176,18 +177,28 @@ export default function useDriverToPickUpRouteProcedure({ match_id }) {
 
   async function handleSetCoordinates() {
     log.debug("Get coordinates started.", { match_id });
+    isSettingCoordinates.current = true;
 
     const match = await handleGetMatch();
-    if (!match) return; // exit
+    if (!match) {
+      isSettingCoordinates.current = false;
+      return; // exit
+    }
 
     const location = await handleGetLocations(match);
-    if (!location) return; // exit
+    if (!location) {
+      isSettingCoordinates.current = false;
+      return; // exit
+    }
 
     const [_first, _last] = location;
     log.debug("Initial driver location", { _first, _last, match });
 
     const direction = await handleDirections(_first, _last);
-    if (!direction) return; // exit
+    if (!direction) {
+      isSettingCoordinates.current = false;
+      return; // exit
+    }
 
     handleEta(direction);
 
@@ -199,6 +210,7 @@ export default function useDriverToPickUpRouteProcedure({ match_id }) {
     setCoordinates(_coordinates);
 
     log.debug("Coordinates", {coordinates: _coordinates, direction, location, match}); // prettier-ignore
+    isSettingCoordinates.current = false;
   }
 
   function handleStop() {
@@ -206,14 +218,93 @@ export default function useDriverToPickUpRouteProcedure({ match_id }) {
     handleStopWatchDriverLocation();
   }
 
+  /**
+   * @returns {boolean}
+   */
+  function handleIdentifyOffRoute(previousLocation, incomingLocation) {
+    // 1. Off route by distance - check if the distance of the current location to the next coordinate is far from the previous
+    // 2. Off route by angle - check if the angle of the previous location and the next coordinate is different from the angle of current location and next coordinate.
+
+    log.debug("Identifying off route."); // prettier-ignore
+
+    const nextCoordinate = coordinates?.[1];
+
+    if (!nextCoordinate) {
+      log.debug("No next coordinate found. Unable to identify off route.", { previousLocation, incomingLocation, coordinates }); // prettier-ignore
+      return false;
+    }
+
+    if (coordinates?.length <= 2) {
+      log.debug("To few coordinates to identify off route by angle.", { previousLocation, incomingLocation, coordinates }); // prettier-ignore
+      // return false;
+    }
+
+    // 1. distance
+
+    // legend:
+    // P - previous location
+    // N - next coordinate
+    // I - incoming location
+    // L - last coordinate
+
+    // Formula:
+    // off route if d2 is greater than d1 and
+    // d4 is greater than d3
+
+    // d1 = distance of P and N
+    // d2 = distance of I and N
+    // d3 = distance of P and L
+    // d4 = distance of I and L
+
+    const P = previousLocation;
+    const N = coordinates[1];
+    const I = incomingLocation;
+    const L = coordinates;
+
+    const d1 = handleGetDistance(P, N);
+    const d2 = handleGetDistance(I, N);
+    const d3 = handleGetDistance(P, L);
+    const d4 = handleGetDistance(I, L);
+
+    const isOffRouteByDistance = d2 > d1 && d4 > d3;
+
+    const adjacent = d2 > d1;
+    const overall = d4 > d3;
+
+    log.debug(
+      "Off route by distance calculated.",
+      { isOffRouteByDistance, d1, d2, d3, d4, P, N, I, L, adjacent, overall } // prettier-ignore
+    );
+
+    // todo: implement off route by angle
+    const offRouteByAngle = false;
+
+    return isOffRouteByDistance && offRouteByAngle;
+  }
+
   async function incomingLocationProcedure(prev, curr) {
     const previousLocation = prev.driverLocation;
     const incomingLocation = curr.driverLocation;
 
+    if (isSettingCoordinates.current) {
+      log.debug("Setting coordinates in progress. Aborting incoming location procedure."); // prettier-ignore
+      return;
+    }
+
     if (!previousLocation) {
       log.debug("Previous location is not available.", { previousLocation, incomingLocation }); // prettier-ignore
-
       await handleSetCoordinates();
+      return;
+    }
+
+    const isOffRoute = handleIdentifyOffRoute(
+      previousLocation,
+      incomingLocation
+    );
+    if (isOffRoute) {
+      log.debug("Off route detected.", { previousLocation, incomingLocation }); // prettier-ignore
+      log.debug("Recalculating coordinates based on driver's new location.");
+      handleSetCoordinates();
       return;
     }
 
@@ -304,6 +395,15 @@ export default function useDriverToPickUpRouteProcedure({ match_id }) {
 async function handleGetDirections(origin, destination) {
   const directions = await getDirections(origin, destination);
   return directions?.routes?.[0];
+}
+
+function handleGetDistance(coor1, coor2) {
+  return getDistance(
+    coor1.latitude,
+    coor1.longitude,
+    coor2.latitude,
+    coor2.longitude
+  );
 }
 
 /**
