@@ -9,6 +9,7 @@ import useOnUpdate from "./useOnUpdate";
  * @returns {Return}
  */
 export default function useWatchDriverLocation(driver_id) {
+  let prevTimestampRef = useRef();
   const channelRef = useRef(supabase.channel(`location.${driver_id}`));
   const [coordinates, setCoordinates] = useState();
 
@@ -28,6 +29,31 @@ export default function useWatchDriverLocation(driver_id) {
     channel
       ?.on("broadcast", { event: "location_update" }, (data) => {
         log.debug("Location update received.", { data, driver_id });
+
+        if (!prevTimestampRef.current) {
+          prevTimestampRef.current = data.payload.timestamp;
+          setCoordinates(data.payload);
+          log.debug("Initialize prevTimestamp reference", {
+            data: data.payload,
+            timestamp: prevTimestampRef.current,
+          });
+          return;
+        }
+
+        if (prevTimestampRef.current > data.payload.timestamp) {
+          log.debug("Ignoring location update because of a stale timestamp", {
+            location: data.payload,
+            driver_id,
+            previousTimestamp: prevTimestampRef.current,
+            currentTimestamp: data?.payload?.timestamp,
+          });
+          return;
+        }
+
+        log.debug("Saving location update.", {
+          location: data.payload,
+          driver_id,
+        });
         setCoordinates(data.payload);
       })
       .subscribe();
