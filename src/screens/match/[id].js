@@ -28,7 +28,6 @@ import { Skeleton } from "moti/skeleton";
 import { format } from "../../services/util/amount";
 import LottieView from "lottie-react-native";
 import useNearbyDrivers from "../../services/hooks/useNearbyDrivers";
-import useDriverAssignedRoute from "../../services/hooks/useDriverAssignedRoute";
 import calculateBoundingBox from "../../services/util/map/calculateBoundingBox";
 import useOnTheWayRoute from "../../services/hooks/useOnTheWayRoute";
 import storage from "../../services/storage";
@@ -38,6 +37,7 @@ import { useUser } from "@clerk/clerk-expo";
 import * as Linking from "expo-linking";
 import getColorByPlatform from "../../services/util/colors/getColorByPlatform";
 import getStrokeColorByPlatform from "../../services/util/colors/getStokeColorByPlatform";
+import useDriverToPickUpRouteProcedure from "../../services/hooks/useDriverToPickUpRouteProcedure";
 
 const defaultLocation = {
   latitude: 14.5535991,
@@ -61,7 +61,7 @@ export default function Match() {
     handleStop: handleStopAssignedRoute,
     reset: handleResetAssignedRoute,
     eta: assignedEta,
-  } = useDriverAssignedRoute({ match_id: params.id });
+  } = useDriverToPickUpRouteProcedure({ match_id: params.id });
 
   const {
     coordinates: driverOnTheWayCoordinates,
@@ -276,8 +276,8 @@ export default function Match() {
         ne,
         sw,
         paddingTop: padding,
-        paddingLeft: 32,
-        paddingRight: 32,
+        paddingLeft: 48,
+        paddingRight: 48,
         paddingBottom: padding + 290, // add preview height
       };
     }
