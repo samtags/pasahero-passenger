@@ -37,7 +37,9 @@ import { useUser } from "@clerk/clerk-expo";
 import * as Linking from "expo-linking";
 import getColorByPlatform from "../../services/util/colors/getColorByPlatform";
 import getStrokeColorByPlatform from "../../services/util/colors/getStokeColorByPlatform";
-import useDriverToPickUpRouteProcedure from "../../services/hooks/useDriverToPickUpRouteProcedure";
+import useDriverToPickUpRouteProcedure, {
+  handleGetDistance,
+} from "../../services/hooks/useDriverToPickUpRouteProcedure";
 
 const defaultLocation = {
   latitude: 14.5535991,
@@ -307,6 +309,15 @@ export default function Match() {
   if (match?.platform === "JoyRide") driverIcon = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2Fmotor-joyride.png?alt=media&token=26f5ab6b-dc4d-4870-bb29-b04ea2c21096"; // prettier-ignore
   if (match?.platform === "Move It") driverIcon = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2Fmotor-moveit.png?alt=media&token=adfb7d67-03bc-4213-b3cc-22270a331f91"; // prettier-ignore
 
+  let driverArrivedDistance = 999;
+
+  if (driverAssignedCoordinates[0] && driverAssignedCoordinates.at(-1)) {
+    driverArrivedDistance = handleGetDistance(
+      driverAssignedCoordinates[0],
+      driverAssignedCoordinates.at(-1)
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.full}>
@@ -469,38 +480,40 @@ export default function Match() {
                     />
                   </Optional>
 
-                  <Mapbox.ShapeSource
-                    id="route"
-                    shape={{
-                      type: "Feature",
-                      properties: {},
-                      geometry: {
-                        type: "LineString",
-                        coordinates: driverAssignedCoordinates?.map(
-                          (coords) => [coords.longitude, coords.latitude]
-                        ),
-                      },
-                    }}
-                  >
-                    <Mapbox.LineLayer
-                      id="stroke"
-                      style={{
-                        lineColor: getStrokeColorByPlatform(match?.platform),
-                        lineWidth: 6.5,
-                        lineCap: "round",
-                        lineJoin: "round",
+                  <Optional condition={driverArrivedDistance > 0.3}>
+                    <Mapbox.ShapeSource
+                      id="route"
+                      shape={{
+                        type: "Feature",
+                        properties: {},
+                        geometry: {
+                          type: "LineString",
+                          coordinates: driverAssignedCoordinates?.map(
+                            (coords) => [coords.longitude, coords.latitude]
+                          ),
+                        },
                       }}
-                    />
-                    <Mapbox.LineLayer
-                      id="routeLayer"
-                      style={{
-                        lineColor: getColorByPlatform(match?.platform),
-                        lineWidth: 3,
-                        lineCap: "round",
-                        lineJoin: "round",
-                      }}
-                    />
-                  </Mapbox.ShapeSource>
+                    >
+                      <Mapbox.LineLayer
+                        id="stroke"
+                        style={{
+                          lineColor: getStrokeColorByPlatform(match?.platform),
+                          lineWidth: 6.5,
+                          lineCap: "round",
+                          lineJoin: "round",
+                        }}
+                      />
+                      <Mapbox.LineLayer
+                        id="routeLayer"
+                        style={{
+                          lineColor: getColorByPlatform(match?.platform),
+                          lineWidth: 3,
+                          lineCap: "round",
+                          lineJoin: "round",
+                        }}
+                      />
+                    </Mapbox.ShapeSource>
+                  </Optional>
                 </Optional>
               </Optional>
 
