@@ -54,6 +54,7 @@ export default function Match() {
   const params = useLocalSearchParams();
   const match = useMatch(params.id);
   const [showInstruction, setShowInstruction] = useState(false);
+  const [showCancelationPrompt, setShowCancelationPrompt] = useState(false);
 
   const {
     coordinates: driverAssignedCoordinates,
@@ -200,6 +201,18 @@ export default function Match() {
     router.setParams({ id: newMatch.id });
   }
 
+  function handleConfirmFromCancelationPrompt() {
+    handleRecreateTrip();
+    handleResetAssignedRoute();
+    setScreen("PENDING");
+    setShowCancelationPrompt(false);
+    // todo: recenter the map
+  }
+
+  function handleCancelFromCancelationPrompt() {
+    router.replace("/");
+  }
+
   useEffect(() => {
     return () => {
       handleStopAssignedRoute();
@@ -210,10 +223,8 @@ export default function Match() {
   useOnUpdate(() => {
     if (match.id === params.id) {
       if (match?.status === "DRIVER_CANCELED") {
-        handleRecreateTrip();
-        handleResetAssignedRoute();
-        setScreen("PENDING");
-        Alert.alert("Driver Canceled", "The driver has canceled the ride.");
+        scrollRef?.current?.scrollTo({ y: 0, animated: false });
+        setShowCancelationPrompt(true);
       }
     }
 
@@ -380,7 +391,11 @@ export default function Match() {
           </Optional>
 
           <Optional
-            condition={match?.status === "REQUESTED" || screen === "PENDING"}
+            condition={
+              match?.status === "REQUESTED" ||
+              screen === "PENDING" ||
+              match?.status === "DRIVER_CANCELED"
+            }
           >
             <RequestedPreview
               onHandlerStateChange={onHandlerStateChange}
@@ -782,6 +797,13 @@ export default function Match() {
             </View>
           </View>
         </View>
+      </Optional>
+      <Optional condition={showCancelationPrompt}>
+        <CancelationPrompt
+          onCancel={handleCancelFromCancelationPrompt}
+          onProceed={handleConfirmFromCancelationPrompt}
+          match={match}
+        />
       </Optional>
     </View>
   );
@@ -1360,6 +1382,45 @@ function GrayBar() {
   );
 }
 
+function CancelationPrompt({ match, onProceed, onCancel }) {
+  return (
+    <View style={styles.promptContainer}>
+      <View style={styles.cancelationContent}>
+        <View style={{ paddingHorizontal: 16, paddingTop: 32 }}>
+          <Text size={28} weight="700" color="#353579">
+            Driver Canceled
+          </Text>
+
+          <Text size={14} color="#707070">
+            Do you want to continue this trip request?
+          </Text>
+        </View>
+
+        <TransitPoints
+          first_point={match?.first_point}
+          last_point={match?.last_point}
+        />
+
+        <View
+          style={{ paddingHorizontal: 16, paddingBottom: 16, paddingTop: 32 }}
+        >
+          <Cta
+            onPress={() => onCancel?.()}
+            color="transparent"
+            textColor="#353579"
+          >
+            No. Thank you
+          </Cta>
+
+          <Cta onPress={() => onProceed?.()} color="#6366F1">
+            Continue
+          </Cta>
+        </View>
+      </View>
+    </View>
+  );
+}
+
 /**
  * Use case: Changing the next booking pick up reference to the current drop-off
  * Anticipating that user will in the same location for the next booking
@@ -1497,6 +1558,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 32,
     gap: 16,
+  },
+  promptContainer: {
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
+    position: "absolute",
+    justifyContent: "flex-end",
+    backgroundColor: "#00000032",
+    zIndex: 2,
+  },
+  cancelationContent: {
+    backgroundColor: "white",
   },
 });
 
