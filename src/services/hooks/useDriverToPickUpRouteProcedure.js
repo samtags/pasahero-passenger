@@ -39,23 +39,8 @@ export default function useDriverToPickUpRouteProcedure({ match_id }) {
     handleStart: handleWatchDriverLocation,
   } = useWatchDriverLocation(driverId);
 
-  useEffect(init, []);
   useEffect(() => handleStop, []);
   useOnUpdateSnapshot(incomingLocationProcedure, { driverLocation });
-
-  function init() {
-    (async () => {
-      log.debug("Initializing Driver to Pickup route procedure.", { match_id });
-      const match = await getMatchById(match_id);
-      if (match) {
-        matchRef.current = match;
-        setLast(match.first_point);
-        log.debug("Route destination initialized.", { last, match, match_id });
-      } else {
-        log.warn("Driver to Pickup route procedure failed.");
-      }
-    })();
-  }
 
   async function handleGetMatch() {
     if (matchRef.current) {
@@ -76,8 +61,10 @@ export default function useDriverToPickUpRouteProcedure({ match_id }) {
       return undefined;
     }
 
-    log.debug("Initializing match reference.", { match, matchRef: matchRef.current }); // prettier-ignore
-    matchRef.current = match;
+    if (match.driver_location) {
+      log.debug("Initializing match reference.", { match, matchRef: matchRef.current }); // prettier-ignore
+      matchRef.current = match;
+    }
 
     return match;
   }
@@ -87,10 +74,12 @@ export default function useDriverToPickUpRouteProcedure({ match_id }) {
    */
   async function handleGetLocations(match) {
     const destination = match.first_point;
-    const origin = await getRecentLocationByMatchDriver({
+    let origin = await getRecentLocationByMatchDriver({
       match_id: match.id,
       driver_id: match.driver_id,
     });
+
+    if (!origin) origin = match?.driver_location;
 
     if (!origin && !destination) {
       setIsError(true);
@@ -234,11 +223,6 @@ export default function useDriverToPickUpRouteProcedure({ match_id }) {
       return false;
     }
 
-    if (coordinates?.length <= 2) {
-      log.debug("To few coordinates to identify off route by angle.", { previousLocation, incomingLocation, coordinates }); // prettier-ignore
-      // return false;
-    }
-
     // 1. distance
 
     // legend:
@@ -263,8 +247,8 @@ export default function useDriverToPickUpRouteProcedure({ match_id }) {
 
     const d1 = handleGetDistance(P, N);
     const d2 = handleGetDistance(I, N);
-    const d3 = handleGetDistance(P, L);
-    const d4 = handleGetDistance(I, L);
+    const d3 = handleGetDistance(P, last);
+    const d4 = handleGetDistance(I, last);
 
     const isOffRouteByDistance = d2 > d1 && d4 > d3;
 
@@ -276,10 +260,92 @@ export default function useDriverToPickUpRouteProcedure({ match_id }) {
       { isOffRouteByDistance, d1, d2, d3, d4, P, N, I, L, adjacent, overall } // prettier-ignore
     );
 
-    // todo: implement off route by angle
-    const offRouteByAngle = false;
+    // todo: check if off route by angle is applicable
 
-    return isOffRouteByDistance && offRouteByAngle;
+    // todo: implement off route by angle
+    // let offRouteByAngle = false;
+
+    // 2. angle
+
+    // Formula:
+    // off route by angle if incoming angle is not in the acceptable range of angle compared to the previous angle
+    // acceptable range: -15 degrees from the previous angle to +15 degrees from the previous angle
+
+    // legend:
+    // P - Point / Coordinate
+    // PA - Previous angle
+    // IA - Incoming angle
+    // Pp - Previous points
+    // Ip - Incoming points
+
+    // How to calculate the angle?
+    // 1. Calculate the vector from P1 to P2
+    // 2. Calculate the vector from P2 to P3
+    // 3. Calculate the vector from P3 to P1
+    // 4. Get the angle using Law of Cosines -> acos(A/C): Output is in radians
+    // 5. Convert the radians to degrees: radians * (180 / pi)
+
+    // let previousPointsIndexes = [0];
+
+    // // starts from the second coordinate
+    // for (let i = 1; i < coordinates.length; i++) {
+    //   const previousPoint = coordinates[previousPointsIndexes.at(-1)];
+    //   const currentPoint = coordinates[i];
+
+    //   const distance = handleGetDistance(previousPoint, currentPoint);
+
+    //   if (distance > 0) {
+    //     previousPointsIndexes.push(i);
+    //   }
+
+    //   if (previousPointsIndexes.length === 3) break;
+    // }
+
+    // const previousPoints = previousPointsIndexes.map((i) => coordinates[i]);
+
+    // if (previousPointsIndexes.length !== 3) {
+    //   log.warn("Off route by angle is not applicable.", { previousPointsIndexes, previousPoints, incomingPoints }); // prettier-ignore
+    // }
+
+    // const incomingPoints = [
+    //   incomingLocation,
+    //   previousPoints[1],
+    //   previousPoints[2],
+    // ];
+
+    // log.debug("Calculating angle.", { previousPoints, incomingPoints }); // prettier-ignore
+    // const previousAngle = handleCalculateAngle(...previousPoints);
+    // const incomingAngle = handleCalculateAngle(...incomingPoints);
+    // log.debug("Angles.", { previousAngle, incomingAngle }); // prettier-ignore
+
+    // const acceptableAngleFrom = previousAngle - 15;
+    // const acceptableAngleTo = previousAngle + 15;
+
+    // if (
+    //   incomingAngle < acceptableAngleFrom ||
+    //   incomingAngle > acceptableAngleTo
+    // ) {
+    //   offRouteByAngle = true;
+    // }
+
+    // log.debug("Degree calculated.", { previousAngle, incomingAngle, acceptableAngleFrom, acceptableAngleTo, offRouteByAngle, previousPoints, incomingPoints }); // prettier-ignore
+
+    // if (isOffRouteByDistance && !offRouteByAngle) {
+    //   log.debug(
+    //     "Off route by distance detected.",
+    //     { isOffRouteByDistance, d1, d2, d3, d4, P, N, I, L, adjacent, overall } // prettier-ignore
+    //   );
+    // }
+
+    // if (!isOffRouteByDistance && offRouteByAngle) {
+    //   log.debug(
+    //     "Off route by angle detected.",
+    //     { isOffRouteByDistance, d1, d2, d3, d4, P, N, I, L, adjacent, overall } // prettier-ignore
+    //   );
+    // }
+
+    return isOffRouteByDistance;
+    // return isOffRouteByDistance && offRouteByAngle;
   }
 
   async function incomingLocationProcedure(prev, curr) {
@@ -302,13 +368,20 @@ export default function useDriverToPickUpRouteProcedure({ match_id }) {
       incomingLocation
     );
     if (isOffRoute) {
-      log.debug("Off route detected.", { previousLocation, incomingLocation }); // prettier-ignore
-      log.debug("Recalculating coordinates based on driver's new location.");
-      handleSetCoordinates();
-      return;
+      const distance = handleGetDistance(incomingLocation, last);
+      if (distance > 0.3) {
+        log.debug("Off route detected.", { previousLocation, incomingLocation, distance: handleGetDistance(incomingLocation, last) }); // prettier-ignore
+        log.debug("Recalculating coordinates based on driver's new location.");
+        handleSetCoordinates();
+        return;
+      } else {
+        log.debug(
+          "No need to recalculate coordinate driver is near the last point."
+        );
+      }
     }
 
-    log.debug("Incoming location procedure initiated.", {previousLocation, incomingLocation}); // prettier-ignore
+    log.debug("Incoming location procedure initiated.", {previousLocation, incomingLocation, isOffRoute}); // prettier-ignore
 
     // create distance representation of the coordinates
     const distanceRepresentation = coordinates.map((item) => {
@@ -394,10 +467,36 @@ export default function useDriverToPickUpRouteProcedure({ match_id }) {
  */
 async function handleGetDirections(origin, destination) {
   const directions = await getDirections(origin, destination);
+  log.debug("Got directions.", { directions }); // prettier-ignore
   return directions?.routes?.[0];
 }
 
-function handleGetDistance(coor1, coor2) {
+function handleCalculateAngle(p1, p2, p3) {
+  log.debug("About to calculate Angle.", { p1, p2, p3 }); // prettier-ignore
+
+  const v12 = handleGetDistance(p1, p2);
+  log.debug("Got vector 1 and 2", { p1, p2, v12 }); // prettier-ignore
+  // 2. Calculate the vector from P2 to P3
+  const v23 = handleGetDistance(p2, p3);
+  log.debug("Got vector 2 and 3", { p2, p3, v23 }); // prettier-ignore
+  // 3. Calculate the vector from P3 to P1
+  const v31 = handleGetDistance(p3, p1);
+  log.debug("Got vector 3 and 1", { p3, p1, v31 }); // prettier-ignore
+
+  // 4. Get the angle using Law of Cosines -> acos(A/C): Output is in radians
+  const angleRad = Math.acos(
+    (v12 * v12 + v23 * v23 - v31 * v31) / (2 * v12 * v23)
+  );
+
+  // 5. Convert the radians to degrees: radians * (180 / pi)
+  const angleDeg = angleRad * (180 / Math.PI);
+
+  log.debug("Angle calculated.", { angleRad, angleDeg, v12, v23, v31, p1, p2, p3 }); // prettier-ignore
+
+  return angleDeg;
+}
+
+export function handleGetDistance(coor1, coor2) {
   return getDistance(
     coor1.latitude,
     coor1.longitude,
