@@ -87,7 +87,10 @@ export default function TransitSearchLastScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.heading}>
-        <View style={styles.inputContainer}>
+        <TouchableOpacity
+          onPress={() => textInputRef.current.focus?.()}
+          style={styles.inputContainer}
+        >
           <Image
             style={styles.indicator}
             cachePolicy="memory-disk"
@@ -105,7 +108,7 @@ export default function TransitSearchLastScreen() {
                 setSelection({ start: 0, end: q.length });
             }}
           />
-        </View>
+        </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
             const locationString = storage.getString("location.current");

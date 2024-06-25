@@ -91,7 +91,10 @@ export default function TransitSearchFirstScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.heading}>
-        <View style={styles.inputContainer}>
+        <TouchableOpacity
+          onPress={() => textInputRef.current.focus?.()}
+          style={styles.inputContainer}
+        >
           <Image
             style={styles.indicator}
             cachePolicy="memory-disk"
@@ -108,7 +111,7 @@ export default function TransitSearchFirstScreen() {
             }}
             placeholder="Search location"
           />
-        </View>
+        </TouchableOpacity>
         <TouchableOpacity onPress={handlePressPin} style={styles.pinButton}>
           <Image
             style={styles.pin}
