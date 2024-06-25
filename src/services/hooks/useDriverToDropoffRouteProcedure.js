@@ -73,7 +73,7 @@ export default function useDriverToPickUpRouteProcedure({ match_id }) {
    * @returns {Coordinates[] | undefined}
    */
   async function handleGetLocations(match) {
-    const destination = match.first_point;
+    const destination = match.last_point;
     let origin = await getRecentLocationByMatchDriver({
       match_id: match.id,
       driver_id: match.driver_id,
