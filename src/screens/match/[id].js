@@ -40,6 +40,7 @@ import getStrokeColorByPlatform from "../../services/util/colors/getStokeColorBy
 import useDriverToPickUpRouteProcedure, {
   handleGetDistance,
 } from "../../services/hooks/useDriverToPickUpRouteProcedure";
+import useDriverToDropoffRouteProcedure from "../../services/hooks/useDriverToDropoffRouteProcedure";
 
 const defaultLocation = {
   latitude: 14.5535991,
@@ -72,7 +73,7 @@ export default function Match() {
     isStarted: isOnTheWayRouteStarted,
     handleStop: handleStopOnTheWayRoute,
     eta: onTheWayEta,
-  } = useOnTheWayRoute({ match_id: params.id });
+  } = useDriverToDropoffRouteProcedure({ match_id: params.id });
 
   const [screen, setScreen] = useState("PENDING"); // PENDING, REQUESTED, FOUND, ARRIVED, STARTED, DONE
 
@@ -703,13 +704,13 @@ export default function Match() {
                 if (coordinates?.longitude && coordinates?.latitude) {
                   return (
                     <Mapbox.MarkerView
-                      id="FOUND_pickup-marker"
+                      id="STATED_dropoff-marker"
                       coordinate={[coordinates.longitude, coordinates.latitude]}
                     >
                       <Image
                         style={[styles.marker]}
                         cachePolicy="memory-disk"
-                        source="https://console.firebase.google.com/u/0/project/pasahero-5c989/storage/pasahero-5c989.appspot.com/files/~2Fcom.pasahero.passenger"
+                        source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FTo1.png?alt=media&token=7cb56012-bedd-416d-a01e-2dedfcd862d2"
                       />
                     </Mapbox.MarkerView>
                   );
