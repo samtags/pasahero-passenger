@@ -62,7 +62,9 @@ export default function Provider() {
           </View>
           <View>
             <Text weight="700" size={18} color="#363F59">
-              {`${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim()}
+              {`${profile?.first_name ?? ""} ${
+                profile?.last_name ?? ""
+              }`.trim()}
             </Text>
             <Text
               weight="700"
@@ -84,13 +86,16 @@ export default function Provider() {
             <Text color="#707070">{incoming?.message}</Text>
           </View>
 
-          <View style={{ marginTop: 16 }} />
+          <View style={{ marginTop: 32 }} />
 
           <Cta onPress={handleClose} color="transparent" textColor="#D1D5DB">
             Close
           </Cta>
 
-          <Cta onPress={handleReply} color="#6366F1">
+          <Cta
+            onPress={handleReply}
+            color={getColorByPlatform(profile?.platform)}
+          >
             Reply
           </Cta>
         </View>
@@ -144,7 +149,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    paddingVertical: 16,
+    paddingVertical: 24,
     paddingHorizontal: 16,
     borderColor: "#EAEAEA",
     borderBottomWidth: 1,

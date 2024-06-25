@@ -407,7 +407,7 @@ export default function Match() {
           <Optional condition={Boolean(match)}>
             <TransitPoints
               showShareRide={["FOUND", "ARRIVED", "STARTED"].includes(match?.status)} // prettier-ignore
-              onShareRide={() => {}}
+              onShareRide={() => router.navigate("/soon")}
               first_point={match?.first_point}
               last_point={match?.last_point}
             />
