@@ -142,7 +142,7 @@ export default function Match() {
               <MapViewDirections
                 origin={first}
                 destination={last}
-                apikey={Const.expoConfig.extra.googleApiKey}
+                apikey={process.env.EXPO_PUBLIC_GOOGLE_API_KEY}
                 strokeWidth={5}
                 strokeColor="gray"
                 onReady={(result) => setCoordinates(result.coordinates)}

@@ -12,7 +12,7 @@ import reverseGeocode from "../../services/api/reverseGeocoding";
 import { Image } from "expo-image";
 import Const from "expo-constants";
 import Mapbox from "@rnmapbox/maps";
-Mapbox.setAccessToken(Const.expoConfig.extra.mapBoxKey);
+Mapbox.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_KEY);
 
 export default function Pin() {
   const params = useLocalSearchParams();
