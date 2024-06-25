@@ -14,7 +14,7 @@ import * as WebBrowser from "expo-web-browser";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import NewRelic from "newrelic-react-native-agent";
 import { Platform } from "react-native";
-import ErrorBoundary from "../src/services/error";
+// import ErrorBoundary from "../src/services/error";
 import MessageProvider from "../src/services/messages/Provider";
 import Cancelation from "../src/services/trip/Cancelation";
 import { UNSAFE_registerProperty } from "../src/services/global";
@@ -41,22 +41,20 @@ export default function Layout() {
   if (!fontsLoaded) return null;
 
   return (
-    <ErrorBoundary>
-      <ClerkProvider
-        tokenCache={tokenCache}
-        publishableKey={Const.expoConfig.extra.clerkPublishableKey}
-      >
-        <QueryClientProvider client={queryClient}>
-          <LaunchdarklyProvider>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <Stack />
-              <MessageProvider />
-              <Cancelation />
-            </GestureHandlerRootView>
-          </LaunchdarklyProvider>
-        </QueryClientProvider>
-      </ClerkProvider>
-    </ErrorBoundary>
+    <ClerkProvider
+      tokenCache={tokenCache}
+      publishableKey={Const.expoConfig.extra.clerkPublishableKey}
+    >
+      <QueryClientProvider client={queryClient}>
+        <LaunchdarklyProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <Stack />
+            <MessageProvider />
+            <Cancelation />
+          </GestureHandlerRootView>
+        </LaunchdarklyProvider>
+      </QueryClientProvider>
+    </ClerkProvider>
   );
 }
 
