@@ -255,7 +255,8 @@ function Prediction({ shortAddress, longAddress, onPress }) {
         style={{
           flexDirection: "row",
           alignItems: "center",
-          gap: 16,
+          gap: 8,
+          paddingLeft: 8,
           paddingVertical: 16,
           borderBottomWidth: 1,
           borderBottomColor: "#EAEAEA",
@@ -264,10 +265,10 @@ function Prediction({ shortAddress, longAddress, onPress }) {
         <Image
           style={{ width: 24, height: 24 }}
           cachePolicy="memory-disk"
-          source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FLocation.png?alt=media&token=d410e0c5-41d3-4a7a-a98e-333727a1820f"
+          source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FPrediction.png?alt=media&token=21bbdf2d-1513-4245-ba1f-b6083baf5d5c"
         />
 
-        <View style={{ gap: 6, flex: 1 }}>
+        <View style={{ gap: 6, flex: 1, paddingRight: 16 }}>
           <Text numberOfLines={1} color="#1B1B1B" weight="bold" size={18}>
             {shortAddress}
           </Text>

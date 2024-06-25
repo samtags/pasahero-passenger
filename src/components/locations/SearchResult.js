@@ -13,7 +13,7 @@ export default function SearchResult({ shortAddress, longAddress, onPress }) {
         <Image
           style={styles.indicator}
           cachePolicy="memory-disk"
-          source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FLocation.png?alt=media&token=d410e0c5-41d3-4a7a-a98e-333727a1820f"
+          source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FPrediction.png?alt=media&token=21bbdf2d-1513-4245-ba1f-b6083baf5d5c"
         />
         <View style={styles.content}>
           <Text numberOfLines={1} color="#1B1B1B" weight="bold" size={18}>
@@ -32,8 +32,9 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    gap: 8,
     paddingVertical: 16,
+    paddingLeft: 8,
     borderBottomWidth: 1,
     borderBottomColor: "#EAEAEA",
   },
@@ -44,6 +45,7 @@ const styles = StyleSheet.create({
   content: {
     gap: 6,
     flex: 1,
+    paddingRight: 16,
   },
 });
 
