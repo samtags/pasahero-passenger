@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 import { Image } from "expo-image";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SearchResult from "../../../components/locations/SearchResult";
 import useDelayedValue from "../../../services/hooks/useDelayedValue";
 import useAutoComplete from "../../../services/queries/useAutoComplete";
@@ -74,6 +74,16 @@ export default function TransitSearchLastScreen() {
       });
   }
 
+  useEffect(() => {
+    if (isFromMatchRequest && isModified === false) {
+      textInputRef.current.blur();
+
+      setTimeout(() => {
+        textInputRef.current.focus();
+      }, 150);
+    }
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.heading}>
@@ -84,7 +94,6 @@ export default function TransitSearchLastScreen() {
             source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FDestination.png?alt=media&token=e92cc2d1-77c3-486f-9793-3c0827ca5aef"
           />
           <TextInput
-            autoFocus={isFromMatchRequest === false}
             ref={textInputRef}
             style={styles.textInput}
             onChangeText={handleChangeText}

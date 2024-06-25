@@ -39,7 +39,11 @@ export default function TransitSearchFirstScreen() {
 
   useEffect(() => {
     if (isFromMatchRequest && isModified === false) {
-      textInputRef.current.focus();
+      textInputRef.current.blur();
+
+      setTimeout(() => {
+        textInputRef.current.focus();
+      }, 150);
     }
   }, []);
 
@@ -95,7 +99,6 @@ export default function TransitSearchFirstScreen() {
           />
           <TextInput
             ref={textInputRef}
-            autoFocus={isFromMatchRequest === false}
             style={styles.textInput}
             onChangeText={handleChangeText}
             value={q}
