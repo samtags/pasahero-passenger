@@ -87,7 +87,8 @@ export default function Pin() {
           style={styles.map}
           logoPosition={{ top: -100, left: 0 }}
           scaleBarEnabled={false}
-          styleURL="mapbox://styles/mapbox/light-v11"
+          styleURL="mapbox://styles/mapbox/streets-v12"
+          // styleURL="mapbox://styles/mapbox/light-v11"
           onRegionDidChange={() => setIsDragging(true)}
           onTouchStart={() => setIsDragging(false)}
         >

@@ -427,7 +427,7 @@ export default function Match() {
           // styleURL="mapbox://styles/mapbox/streets-v12"
           // styleURL="mapbox://styles/mapbox/outdoors-v12"
           // styleURL="mapbox://styles/mapbox/light-v11"
-          styleURL="mapbox://styles/mapbox/navigation-day-v1"
+          styleURL="mapbox://styles/mapbox/streets-v12"
           logoPosition={{ top: -100, left: 0 }}
           attributionEnabled={false}
           regionDidChangeDebounceTime={1000}

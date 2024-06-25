@@ -295,6 +295,7 @@ export default function List() {
                             shortAddress: match?.first?.shortAddress,
                             latitude: match?.first?.latitude,
                             longitude: match?.first?.longitude,
+                            isFromMatchRequest: 1,
                           },
                         });
                       }}
@@ -314,14 +315,14 @@ export default function List() {
                             longitude: match?.last?.longitude,
                           },
                         });
-                        router.replace({
-                          pathname: "/transit/search/last",
-                          params: {
-                            shortAddress: match?.last?.shortAddress,
-                            latitude: match?.last?.latitude,
-                            longitude: match?.last?.longitude,
-                          },
-                        });
+                        // router.replace({
+                        //   pathname: "/transit/search/last",
+                        //   params: {
+                        //     shortAddress: match?.last?.shortAddress,
+                        //     latitude: match?.last?.latitude,
+                        //     longitude: match?.last?.longitude,
+                        //   },
+                        // });
                       }}
                       color="#1B1B1B"
                     >
@@ -334,6 +335,7 @@ export default function List() {
                     scaleBarEnabled={false}
                     style={styles.map}
                     styleURL="mapbox://styles/mapbox/light-v11"
+                    // styleURL="mapbox://styles/mapbox/streets-v12"
                     logoPosition={{ top: -100, left: 0 }}
                     attributionEnabled={false}
                     onDidFinishRenderingMap={() => console.log("Map ready")}

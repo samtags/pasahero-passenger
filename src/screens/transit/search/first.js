@@ -15,13 +15,16 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import storage from "../../../services/storage";
 import getCoordinatesByPlaceId from "../../../services/api/getCoordinatesByPlaceId";
 import log from "../../../services/log";
+import LottieView from "lottie-react-native";
+import Optional from "../../../components/optional";
+import Cta from "../../../components/cta";
 
 export default function TransitSearchFirstScreen() {
   const router = useRouter();
   const textInputRef = useRef(null);
 
   const params = useLocalSearchParams();
-  const isFromMatchRequest = Boolean(params?.shortAddress);
+  const isFromMatchRequest = Boolean(params?.isFromMatchRequest);
 
   const [isModified, setIsModified] = useState(false);
   const [selection, setSelection] = useState({ start: 0, end: 0 });
@@ -30,7 +33,8 @@ export default function TransitSearchFirstScreen() {
   const debouncedInputValue = useDelayedValue(q, 750);
   const inputValue = isModified ? debouncedInputValue : "";
 
-  const { data: autoCompleteResults = [] } = useAutoComplete(inputValue);
+  const { data: autoCompleteResults = [], isPending } =
+    useAutoComplete(inputValue);
 
   function handleChangeText(text) {
     setIsModified(true);
@@ -38,7 +42,7 @@ export default function TransitSearchFirstScreen() {
   }
 
   useEffect(() => {
-    if (isFromMatchRequest && isModified === false) {
+    if (isModified === false) {
       textInputRef.current.blur();
 
       setTimeout(() => {
@@ -46,6 +50,10 @@ export default function TransitSearchFirstScreen() {
       }, 150);
     }
   }, []);
+
+  function handleConfirm() {
+    router.replace("/match/request");
+  }
 
   function handleSelect(item) {
     getCoordinatesByPlaceId(item?.place_id)
@@ -124,15 +132,42 @@ export default function TransitSearchFirstScreen() {
         style={styles.full}
         contentContainerStyle={styles.contentContainerStyle}
       >
-        {autoCompleteResults?.map((item) => (
-          <SearchResult
-            key={item?.place_id}
-            shortAddress={item?.structured_formatting?.main_text}
-            longAddress={item?.description}
-            onPress={() => handleSelect(item)}
-          />
-        ))}
+        <Optional condition={isPending}>
+          <View style={{ justifyContent: "center", alignItems: "center" }}>
+            <LottieView
+              autoPlay
+              loop
+              style={{
+                width: 220,
+                height: 220,
+                marginTop: -64,
+                marginBottom: -88,
+              }}
+              source={require("../../../assets/json/autocomplete-preloader.json")}
+            />
+          </View>
+        </Optional>
+
+        <Optional condition={isPending === false}>
+          {autoCompleteResults?.map((item) => (
+            <SearchResult
+              key={item?.place_id}
+              shortAddress={item?.structured_formatting?.main_text}
+              longAddress={item?.description}
+              onPress={() => handleSelect(item)}
+            />
+          ))}
+        </Optional>
       </ScrollView>
+      <Optional
+        condition={isModified === false && isFromMatchRequest === false}
+      >
+        <View style={{ padding: 16 }}>
+          <Cta onPress={handleConfirm} color="#6366F1">
+            Confirm Pickup
+          </Cta>
+        </View>
+      </Optional>
     </SafeAreaView>
   );
 }

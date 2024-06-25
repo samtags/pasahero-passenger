@@ -16,6 +16,8 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import storage from "../../../services/storage";
 import log from "../../../services/log";
 import getCoordinatesByPlaceId from "../../../services/api/getCoordinatesByPlaceId";
+import LottieView from "lottie-react-native";
+import Optional from "../../../components/optional";
 
 export default function TransitSearchLastScreen() {
   const router = useRouter();
@@ -23,6 +25,7 @@ export default function TransitSearchLastScreen() {
 
   const params = useLocalSearchParams();
   const isFromMatchRequest = Boolean(params?.shortAddress);
+
   const latitude = params?.latitude;
   const longitude = params?.longitude;
 
@@ -33,7 +36,8 @@ export default function TransitSearchLastScreen() {
   const debouncedInputValue = useDelayedValue(q, 750);
   const inputValue = isModified ? debouncedInputValue : "";
 
-  const { data: autoCompleteResults = [] } = useAutoComplete(inputValue);
+  const { data: autoCompleteResults = [], isPending } =
+    useAutoComplete(inputValue);
 
   function handleChangeText(text) {
     setIsModified(true);
@@ -47,8 +51,6 @@ export default function TransitSearchLastScreen() {
       shortAddress: item?.structured_formatting?.main_text,
       longAddress: item?.description,
     });
-
-    router.replace("/match/request");
 
     getCoordinatesByPlaceId(item?.place_id)
       .then((res) => {
@@ -72,10 +74,24 @@ export default function TransitSearchLastScreen() {
 
         router.replace("/transit/search/last");
       });
+
+    if (isFromMatchRequest === false) {
+      const currentLocationString = storage.getString("location.current");
+      const location = JSON.parse(currentLocationString || "{}");
+
+      router.navigate({
+        pathname: "/transit/search/first",
+        params: location,
+      });
+
+      return;
+    }
+
+    router.replace("/match/request");
   }
 
   useEffect(() => {
-    if (isFromMatchRequest && isModified === false) {
+    if (isModified === false) {
       textInputRef.current.blur();
 
       setTimeout(() => {
@@ -141,14 +157,32 @@ export default function TransitSearchLastScreen() {
           paddingHorizontal: 16,
         }}
       >
-        {autoCompleteResults?.map((item) => (
-          <SearchResult
-            key={item?.place_id}
-            shortAddress={item?.structured_formatting?.main_text}
-            longAddress={item?.description}
-            onPress={() => handleSelect(item)}
-          />
-        ))}
+        <Optional condition={isPending}>
+          <View style={{ justifyContent: "center", alignItems: "center" }}>
+            <LottieView
+              autoPlay
+              loop
+              style={{
+                width: 220,
+                height: 220,
+                marginTop: -64,
+                marginBottom: -88,
+              }}
+              source={require("../../../assets/json/autocomplete-preloader.json")}
+            />
+          </View>
+        </Optional>
+
+        <Optional condition={isPending === false}>
+          {autoCompleteResults?.map((item) => (
+            <SearchResult
+              key={item?.place_id}
+              shortAddress={item?.structured_formatting?.main_text}
+              longAddress={item?.description}
+              onPress={() => handleSelect(item)}
+            />
+          ))}
+        </Optional>
       </ScrollView>
     </SafeAreaView>
   );
