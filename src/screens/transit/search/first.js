@@ -100,7 +100,7 @@ export default function TransitSearchFirstScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.heading}>
         <TouchableOpacity
-          onPress={() => textInputRef.current.focus?.()}
+          onPress={() => textInputRef?.current?.focus?.()}
           style={styles.inputContainer}
         >
           <Image

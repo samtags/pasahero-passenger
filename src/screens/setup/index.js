@@ -22,6 +22,7 @@ import getCoordinatesByPlaceId from "../../services/api/getCoordinatesByPlaceId"
 import log from "../../services/log";
 import reverseGeocode from "../../services/api/reverseGeocoding";
 import Optional from "../../components/optional";
+import LottieView from "lottie-react-native";
 
 export default function Setup() {
   const [_, setLocation] = useMMKVString("location.current");
@@ -42,7 +43,8 @@ export default function Setup() {
   let autoCompleteInput = debouncedInput;
 
   if (selected?.description === q) autoCompleteInput = "";
-  const { data: autoCompleteResults = [] } = useAutoComplete(autoCompleteInput);
+  const { data: autoCompleteResults = [], isPending } =
+    useAutoComplete(autoCompleteInput);
 
   const handleUseCurrentLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -148,7 +150,8 @@ export default function Setup() {
         <View
           style={{ flexDirection: "row", paddingHorizontal: 16, marginTop: 16 }}
         >
-          <View
+          <TouchableOpacity
+            onPress={() => textInputRef?.current?.focus?.()}
             style={{
               backgroundColor: "#F0F0F0",
               borderRadius: 10,
@@ -188,7 +191,7 @@ export default function Setup() {
               value={q}
               placeholder="Search location"
             />
-          </View>
+          </TouchableOpacity>
           <Optional condition={isGettingLocation === false}>
             <TouchableOpacity
               onPress={handleUseCurrentLocation}
@@ -217,18 +220,36 @@ export default function Setup() {
             paddingHorizontal: 16,
           }}
         >
-          {autoCompleteResults?.map((item) => (
-            <Prediction
-              key={item?.place_id}
-              shortAddress={item?.structured_formatting?.main_text}
-              longAddress={item?.description}
-              onPress={() => {
-                setSelected(item);
-                setQ(item?.description);
-                setSelection({ start: 0, end: 0 });
-              }}
-            />
-          ))}
+          <Optional condition={isPending}>
+            <View style={{ justifyContent: "center", alignItems: "center" }}>
+              <LottieView
+                autoPlay
+                loop
+                style={{
+                  width: 220,
+                  height: 220,
+                  marginTop: -64,
+                  marginBottom: -88,
+                }}
+                source={require("../../assets/json/autocomplete-preloader.json")}
+              />
+            </View>
+          </Optional>
+
+          <Optional condition={isPending === false}>
+            {autoCompleteResults?.map((item) => (
+              <Prediction
+                key={item?.place_id}
+                shortAddress={item?.structured_formatting?.main_text}
+                longAddress={item?.description}
+                onPress={() => {
+                  setSelected(item);
+                  setQ(item?.description);
+                  setSelection({ start: 0, end: 0 });
+                }}
+              />
+            ))}
+          </Optional>
         </ScrollView>
       </KeyboardAvoidingView>
       <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
