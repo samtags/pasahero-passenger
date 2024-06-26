@@ -20,7 +20,7 @@ import Cancelation from "../src/services/trip/Cancelation";
 import { UNSAFE_registerProperty } from "../src/services/global";
 
 WebBrowser.maybeCompleteAuthSession();
-Mapbox.setAccessToken(Const.expoConfig.extra.mapBoxKey);
+Mapbox.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_KEY);
 
 const queryClient = new QueryClient({});
 UNSAFE_registerProperty("__queryClient__", queryClient);
@@ -43,7 +43,7 @@ export default function Layout() {
   return (
     <ClerkProvider
       tokenCache={tokenCache}
-      publishableKey={Const.expoConfig.extra.clerkPublishableKey}
+      publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}
     >
       <QueryClientProvider client={queryClient}>
         <LaunchdarklyProvider>
