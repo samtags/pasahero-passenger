@@ -13,9 +13,7 @@ module.exports = ({ config }) => {
     updates: {
       url: "https://u.expo.dev/2edea32b-6502-426d-bbd6-bfbe43e700a5",
     },
-    runtimeVersion: {
-      policy: "appVersion",
-    },
+    runtimeVersion: "1.0.1",
     plugins: [
       "expo-router",
       [
