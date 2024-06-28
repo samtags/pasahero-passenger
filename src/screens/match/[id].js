@@ -41,6 +41,7 @@ import useDriverToPickUpRouteProcedure, {
   handleGetDistance,
 } from "../../services/hooks/useDriverToPickUpRouteProcedure";
 import useDriverToDropoffRouteProcedure from "../../services/hooks/useDriverToDropoffRouteProcedure";
+import completeMatch from "../../services/api/completeMatch";
 
 const defaultLocation = {
   latitude: 14.5535991,
@@ -365,6 +366,7 @@ export default function Match() {
               onHandlerStateChange={onHandlerStateChange}
               profile_id={match?.profile_id}
               eta={onTheWayEta}
+              match_id={match?.id}
             />
           </Optional>
 
@@ -749,7 +751,7 @@ export default function Match() {
 
               <View style={{ marginVertical: 30, gap: 12 }}>
                 <Text size={18} weight="bold" color="#1B1B1B">
-                  Paano ilipat ang biyahe sa [profile]?
+                  Paano ilipat ang biyahe sa {match?.platform || "[platform]"}?
                 </Text>
 
                 <TouchableOpacity
@@ -770,7 +772,8 @@ export default function Match() {
                     >
                       Bisitahin ang pahinang ito{" "}
                     </Text>
-                    upang tingnan kung paano ilipat ang biyahe sa [profile].
+                    upang tingnan kung paano ilipat ang biyahe sa{" "}
+                    {match?.platform || "[platform]"}.
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -790,6 +793,8 @@ export default function Match() {
                     if (match?.platform === "JoyRide") Linking.openURL("https://play.google.com/store/apps/details?id=com.joyride.rider&hl=en_US"); // prettier-ignore
                     if (match?.platform === "Move It") Linking.openURL("https://play.google.com/store/apps/details?id=com.moveit.app.customer"); // prettier-ignore
                   }
+
+                  setShowInstruction(false);
                 }}
                 color={getColorByPlatform(match?.platform)}
               >
@@ -994,14 +999,14 @@ function ArrivedPreview({
           onPress={() => onTransfer?.()}
           color={getColorByPlatform(platform)}
         >
-          Transfer to [App]
+          Transfer to {platform || "[App]"}
         </Cta>
       </View>
     </Preview>
   );
 }
 
-function StartedPreview({ onHandlerStateChange, profile_id, eta }) {
+function StartedPreview({ onHandlerStateChange, profile_id, eta, match_id }) {
   const { data: profile, isLoading: isProfileLoading } = useGetDriverProfile(profile_id); // prettier-ignore
 
   const displayName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim(); // prettier-ignore
@@ -1012,6 +1017,14 @@ function StartedPreview({ onHandlerStateChange, profile_id, eta }) {
     platform,
     vehicle_make,
   } = profile ?? {};
+
+  const { isPending, mutate: handleArriveAtDestination } = useMutation({
+    mutationFn: handleCompleteMatch,
+  });
+
+  async function handleCompleteMatch() {
+    await completeMatch({ id: match_id });
+  }
 
   return (
     <Preview
@@ -1043,7 +1056,17 @@ function StartedPreview({ onHandlerStateChange, profile_id, eta }) {
       />
 
       <View style={{ paddingTop: 16, backgroundColor: "#FFF" }}>
-        <Cta color={getColorByPlatform(platform)}>Arrived at Destination</Cta>
+        <Cta
+          disabled={isPending}
+          style={{ opacity: isPending ? 0.25 : 1 }}
+          onPress={() => {
+            // todo: add location validation. check if the location is near to the destination
+            handleArriveAtDestination();
+          }}
+          color={getColorByPlatform(platform)}
+        >
+          Arrived at Destination
+        </Cta>
       </View>
     </Preview>
   );

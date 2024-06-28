@@ -13,10 +13,11 @@ export default function cta({
   children,
   onPress,
   disabled,
+  style = {},
 }) {
   return (
     <TouchableOpacity disabled={disabled} onPress={() => onPress?.()}>
-      <View style={[styles.container, { backgroundColor: color }]}>
+      <View style={[styles.container, { backgroundColor: color }, style]}>
         <Text
           size={18}
           weight="bold"
