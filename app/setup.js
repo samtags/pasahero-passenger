@@ -7,6 +7,7 @@ export default function Entry(props) {
     <>
       <Stack.Screen
         options={{
+          animation: "ios",
           headerTitle: () => (
             <Text size={19} weight="bold" color="#353579">
               Setup your initial location

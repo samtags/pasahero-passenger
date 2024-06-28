@@ -53,6 +53,7 @@ export default function Pin() {
       <Stack.Screen
         options={{
           headerShown: false,
+          animation: "ios",
         }}
       />
 

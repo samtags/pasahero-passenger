@@ -6,6 +6,7 @@ export default function Request() {
     <>
       <Stack.Screen
         options={{
+          animation: "ios",
           headerShown: false,
         }}
       />
