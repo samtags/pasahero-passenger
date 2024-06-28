@@ -62,7 +62,7 @@ export default function Home() {
           style={styles.accountIcon}
         >
           <Image
-            style={{ width: 44, height: 44 }}
+            style={{ width: 56, height: 56 }}
             cachePolicy="memory-disk"
             source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FUser.png?alt=media&token=88972e31-48ef-4dc4-bc63-2eca23074831"
           />
@@ -178,8 +178,7 @@ const styles = StyleSheet.create({
   accountIcon: {
     position: "absolute",
     zIndex: 1,
-    right: 0,
     padding: 16,
-    top: 16,
+    paddingTop: 40,
   },
 });
