@@ -1061,7 +1061,18 @@ function StartedPreview({ onHandlerStateChange, profile_id, eta, match_id }) {
           style={{ opacity: isPending ? 0.25 : 1 }}
           onPress={() => {
             // todo: add location validation. check if the location is near to the destination
-            handleArriveAtDestination();
+            Alert.alert(
+              "Confirm trip arrival",
+              "Doing this will complete your the trip. Do you want to continue this action?",
+              [
+                { text: "Close", style: "default", onPress: () => {} },
+                {
+                  text: "Confirm",
+                  style: "destructive",
+                  onPress: handleArriveAtDestination,
+                },
+              ]
+            );
           }}
           color={getColorByPlatform(platform)}
         >
