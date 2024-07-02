@@ -15,7 +15,7 @@ export default function Entry(props) {
         options={{
           headerTitle: () => (
             <Text size={19} weight="bold" color="#353579">
-              Transfer to Angkas
+              Contact Us
             </Text>
           ),
           headerTitleAlign: "center",
@@ -48,7 +48,7 @@ export default function Entry(props) {
           }}
           style={[styles.container, { opacity: showWebview ? 1 : 0 }]}
           source={{
-            uri: `https://pasahero.notion.site/Transfer-trip-to-Angkas-7e46bd53fece48589422e8888d3fca26`,
+            uri: `https://pasahero.notion.site/Contact-us-cb3ddbe6b42f445b85e01a88fa0edefb`,
           }}
         />
       </View>

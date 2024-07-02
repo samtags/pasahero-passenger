@@ -42,11 +42,11 @@ export default function Account() {
           {/* <Link href="/wallet">My Wallet</Link> */}
           <Link href="/match/list">Requested Trips</Link>
         </SignedIn>
-        <Link href="/account">Saved Locations</Link>
-        <Link href="/account">Notification Options</Link>
-        <Link href="/account">Privacy Policy</Link>
+        {/* <Link href="/account">Saved Locations</Link> */}
+        <Link href="/faqs">FAQs</Link>
+        {/* <Link href="/account">Privacy Policy</Link> */}
         <Link href="/feedback">Send Feedback</Link>
-        <Link href="/account">Contact Us</Link>
+        <Link href="/contact-us">Contact Us</Link>
         <SignedIn>
           <Link onPress={handleSignOut} href="/account">
             Sign Out
