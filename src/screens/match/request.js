@@ -12,7 +12,7 @@ import { SignedOut, SignedIn, useOAuth, useUser } from "@clerk/clerk-expo";
 import EstimateItem from "../../components/estimate/Result";
 import useGetEstimate from "../../services/queries/useGetEstimate";
 import amount from "../../services/util/amount";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import findNearby from "../../services/api/findNearby";
 import { useMutation } from "@tanstack/react-query";
 import log from "../../services/log";
@@ -24,12 +24,14 @@ import { useWarmUpBrowser } from "../../services/hooks/useWarmUpBrowser";
 import useGetDirections from "../../services/hooks/useGetDirections";
 import * as Polyline from "@mapbox/polyline";
 import useOnUpdate from "../../services/hooks/useOnUpdate";
+import useOnUpdateSnapshot from "../../services/hooks/useOnUpdateSnapshot";
 
 WebBrowser.maybeCompleteAuthSession();
 export default function List() {
   useWarmUpBrowser();
 
   const router = useRouter();
+  const isFromAuth = useRef(false);
   const navigation = useNavigation();
 
   const user = useUser();
@@ -42,6 +44,7 @@ export default function List() {
   ]);
 
   const [matchDraft] = useMMKVString("match.draft");
+
   const match = JSON.parse(matchDraft || "{}");
   const first = match?.first;
   const last = match?.last;
@@ -133,8 +136,8 @@ export default function List() {
         setCameraConfig((prev) => {
           if (prev.isMutated === false) {
             return {
-          bounds,
-          animationMode,
+              bounds,
+              animationMode,
             };
           }
 
@@ -143,6 +146,17 @@ export default function List() {
       }, 250);
     }
   }, [coordinates]);
+
+  useOnUpdateSnapshot(
+    (prev, curr) => {
+      if (!prev.user?.user && curr.user?.user) {
+        if (isFromAuth.current === true) {
+          handleOnConfirm();
+        }
+      }
+    },
+    { user }
+  );
 
   let fares = [];
 
@@ -207,6 +221,7 @@ export default function List() {
 
   const handleSignIn = async () => {
     try {
+      isFromAuth.current = true;
       const flow = await startOAuthFlow();
 
       const { createdSessionId, signUp, setActive } = flow;
@@ -218,6 +233,7 @@ export default function List() {
       }
     } catch (err) {
       log.error("OAuth error", { error: err });
+      isFromAuth.current = false;
     }
   };
 
