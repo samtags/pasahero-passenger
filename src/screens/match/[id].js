@@ -765,9 +765,9 @@ export default function Match() {
                 <TouchableOpacity
                   onPress={() => {
                     if (Platform.OS === "android") {
-                      if (match?.platform === "Angkas") Linking.openURL("https://pasahero.notion.site/Transfer-trip-to-Angkas-7e46bd53fece48589422e8888d3fca26?pvs=4"); // prettier-ignore
-                      if (match?.platform === "JoyRide") Linking.openURL("https://pasahero.notion.site/Transfer-trip-to-JoyRide-1e809af1646a44449f81a4db668963dc?pvs=74"); // prettier-ignore
-                      if (match?.platform === "Move It") Linking.openURL("https://pasahero.notion.site/Transfer-trip-to-Move-It-3d099aa41b414670a6ad7613b812d6d3?pvs=4"); // prettier-ignore
+                      if (match?.platform === "Angkas") router.navigate("/transfer-angkas"); // prettier-ignore
+                      if (match?.platform === "JoyRide") router.navigate("/transfer-joyride"); // prettier-ignore
+                      if (match?.platform === "Move It") router.navigate("/transfer-move-it"); // prettier-ignore
                     }
                   }}
                 >
