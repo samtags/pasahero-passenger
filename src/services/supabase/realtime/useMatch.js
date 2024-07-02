@@ -6,16 +6,15 @@ import supabase from "../index";
 /**
  *
  * @param {*} id
- * @returns { Match | undefined }
  */
 export default function useMatch(id) {
   const [match, setMatch] = useState(undefined);
-
-  if (!id) return undefined;
+  const [toggle, setToggler] = useState(false);
 
   useEffect(() => {
     (async () => {
       if (id) {
+        log.debug("Getting initial match data", { id });
         const match = await handleGetMatch(id);
         if (match) setMatch(match);
       }
@@ -30,9 +29,22 @@ export default function useMatch(id) {
     return () => {
       unsubscribe();
     };
-  }, [id]);
+  }, [id, toggle]);
 
-  return match;
+  function refetch() {
+    setToggler((prev) => !prev);
+    log.debug("Triggering a refetch.");
+  }
+
+  let returnValue = {
+    match,
+    setMatch,
+    refetch,
+  };
+
+  if (!id) returnValue.match = undefined;
+
+  return { match, setMatch, refetch };
 }
 
 async function handleGetMatch(id) {

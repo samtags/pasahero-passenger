@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import {
   View,
   StyleSheet,
@@ -42,6 +42,7 @@ import useDriverToPickUpRouteProcedure, {
 } from "../../services/hooks/useDriverToPickUpRouteProcedure";
 import useDriverToDropoffRouteProcedure from "../../services/hooks/useDriverToDropoffRouteProcedure";
 import completeMatch from "../../services/api/completeMatch";
+import useOnAppFocus from "../../services/hooks/useFocus";
 
 const defaultLocation = {
   latitude: 14.5535991,
@@ -54,9 +55,13 @@ export default function Match() {
   const { user } = useUser();
   const router = useRouter();
   const params = useLocalSearchParams();
-  const match = useMatch(params.id);
+  const { match, refetch } = useMatch(params.id);
   const [showInstruction, setShowInstruction] = useState(false);
   const [showCancelationPrompt, setShowCancelationPrompt] = useState(false);
+
+  // refetch the match data when the app is in focus
+  // to handle websocket reconnection esp when the app is in background for a long time
+  useOnAppFocus(refetch);
 
   const {
     coordinates: driverAssignedCoordinates,
