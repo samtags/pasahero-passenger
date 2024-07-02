@@ -23,6 +23,7 @@ import * as WebBrowser from "expo-web-browser";
 import { useWarmUpBrowser } from "../../services/hooks/useWarmUpBrowser";
 import useGetDirections from "../../services/hooks/useGetDirections";
 import * as Polyline from "@mapbox/polyline";
+import useOnUpdate from "../../services/hooks/useOnUpdate";
 
 WebBrowser.maybeCompleteAuthSession();
 export default function List() {
@@ -58,6 +59,7 @@ export default function List() {
       first?.longitude || DEFAULT_COORDINATES[0],
       first?.latitude || DEFAULT_COORDINATES[1],
     ],
+    isMutated: false,
   });
 
   const { data: angkasPassenger, isLoading: isLoadingAngkas } = useGetEstimate("AngkasPassenger", origin, destination); // prettier-ignore
@@ -108,7 +110,7 @@ export default function List() {
     }
   }, []);
 
-  useEffect(() => {
+  useOnUpdate(() => {
     let boundingBox = undefined;
     let bounds = undefined;
     let animationMode = "none";
@@ -128,9 +130,15 @@ export default function List() {
       animationMode = "flyTo";
 
       setTimeout(() => {
-        setCameraConfig({
+        setCameraConfig((prev) => {
+          if (prev.isMutated === false) {
+            return {
           bounds,
           animationMode,
+            };
+          }
+
+          return prev;
         });
       }, 250);
     }
