@@ -798,7 +798,7 @@ export default function Match() {
                 }}
                 color={getColorByPlatform(match?.platform)}
               >
-                Handa na
+                Ilipat sa {match?.platform || "[App]"}
               </Cta>
             </View>
           </View>
