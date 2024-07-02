@@ -16,6 +16,8 @@ import Cancelation from "../src/services/trip/Cancelation";
 import { UNSAFE_registerProperty } from "../src/services/global";
 import usePushNotification from "../src/services/notification/usePushNotification";
 import * as Notifications from "expo-notifications";
+import { useEffect } from "react";
+import onFetchUpdateAsync from "../src/services/updates";
 
 Notifications.setNotificationHandler({
   handleNotification: () => ({
@@ -39,6 +41,10 @@ export default function Layout() {
     "Lato-Bold": require("../assets/fonts/Lato/Lato-Bold.ttf"),
     "Lato-Black": require("../assets/fonts/Lato/Lato-Black.ttf"),
   });
+
+  useEffect(() => {
+    onFetchUpdateAsync(); // check for codepush updates
+  }, []);
 
   useReactQueryDevTools(queryClient);
   useWarmUpBrowser();

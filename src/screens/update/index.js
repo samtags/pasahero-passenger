@@ -1,8 +1,11 @@
-import { Platform, View } from "react-native";
+import { Platform, TouchableOpacity, View } from "react-native";
 import Text from "../../components/text";
-import { Link, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useStringVariation } from "@launchdarkly/react-native-client-sdk";
+import storage from "../../services/storage";
+import * as Updates from "expo-updates";
+import log from "../../services/log";
 
 export default function Update() {
   const googlePlayUrl = useStringVariation("phd-google-play-url", "");
@@ -13,6 +16,23 @@ export default function Update() {
   if (Platform.OS === "ios") {
     url = appStoreUrl;
   }
+
+  const onPressUpdate = () => {
+    const isUpdateAvailable = storage.getBoolean("app.updateAvailable");
+    if (isUpdateAvailable === true) {
+      Updates.reloadAsync()
+        .catch((err) => {
+          log.debug("Error while updating the app.", { error: err });
+        })
+        .finally(() => {
+          storage.set("app.updateAvailable", false);
+          log.debug("Update completed.");
+        });
+      return;
+    }
+
+    storage.set("app.updateAvailable", false);
+  };
 
   return (
     <>
@@ -49,7 +69,7 @@ export default function Update() {
 
         <View style={{ marginTop: 24 }} />
 
-        <Link href={url}>
+        <TouchableOpacity onPress={onPressUpdate}>
           <Text
             style={{ maxWidth: 380, textDecorationLine: "underline" }}
             textAlign="justified"
@@ -57,7 +77,7 @@ export default function Update() {
           >
             Update now!
           </Text>
-        </Link>
+        </TouchableOpacity>
       </View>
     </>
   );
