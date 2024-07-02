@@ -376,7 +376,11 @@ export default function Match() {
               services={match?.services}
               onMessage={handleGoToMessages}
               onCall={handleCallDriver}
-              onTransfer={() => setShowInstruction(true)}
+              onTransfer={() => {
+                setShowInstruction(true);
+                scrollRef?.current?.scrollTo({ y: 0, animated: true });
+                setScrollEnabled(false);
+              }}
               profile_id={match?.profile_id}
             />
           </Optional>
@@ -388,7 +392,11 @@ export default function Match() {
               onCall={handleCallDriver}
               driver_id={match?.driver_id}
               eta={assignedEta}
-              onTransfer={() => setShowInstruction(true)}
+              onTransfer={() => {
+                setShowInstruction(true);
+                scrollRef?.current?.scrollTo({ y: 0, animated: true });
+                setScrollEnabled(false);
+              }}
               profile_id={match?.profile_id}
             />
           </Optional>
