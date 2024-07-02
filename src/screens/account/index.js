@@ -45,7 +45,7 @@ export default function Account() {
         <Link href="/account">Saved Locations</Link>
         <Link href="/account">Notification Options</Link>
         <Link href="/account">Privacy Policy</Link>
-        <Link href="/account">Send Feedback</Link>
+        <Link href="/feedback">Send Feedback</Link>
         <Link href="/account">Contact Us</Link>
         <SignedIn>
           <Link onPress={handleSignOut} href="/account">
