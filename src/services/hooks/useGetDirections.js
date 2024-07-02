@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import getDirections from "../api/getDirections";
-import log from "../log";
 
 export default function useGetDirections(origin, destination) {
   return useQuery({
