@@ -142,7 +142,7 @@ export default function Match() {
       if (prev === false) return true;
       return prev;
     });
-    scrollRef?.current?.scrollTo({ y: 50, animated: true });
+    // scrollRef?.current?.scrollTo({ y: 50, animated: true });
   }
 
   function handleOnPressCancel() {
