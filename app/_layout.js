@@ -48,7 +48,6 @@ export default function Layout() {
 
   useReactQueryDevTools(queryClient);
   useWarmUpBrowser();
-  usePushNotification();
 
   // todo: splash screen
   if (!fontsLoaded) return null;

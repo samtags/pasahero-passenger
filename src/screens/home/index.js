@@ -12,6 +12,7 @@ import useIncomingCall from "../../services/hooks/useIncomingCall";
 import useOnUpdate from "../../services/hooks/useOnUpdate";
 import initializeUser from "../../services/api/initializeUser";
 import initializeWallet from "../../services/api/initializeWallet";
+import usePushNotification from "../../services/notification/usePushNotification";
 
 export default function Home() {
   const user = useUser();
@@ -24,6 +25,7 @@ export default function Home() {
     router.navigate("/transit/search/last");
   };
 
+  usePushNotification(user?.user?.id);
   useIncomingCall(user?.user?.id);
 
   useOnUpdate(() => {

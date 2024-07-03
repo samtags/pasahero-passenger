@@ -1,35 +1,52 @@
 import { useEffect } from "react";
 import * as Notifications from "expo-notifications";
 import log from "../log";
-import handler from "./handlers";
 import * as Device from "expo-device";
-import { Platform } from "react-native";
+import messaging from "@react-native-firebase/messaging";
+import useOnUpdate from "../hooks/useOnUpdate";
 
-export default function usePushNotification() {
+export default function usePushNotification(userId) {
+  useOnUpdate(() => {
+    if (userId) {
+      messaging()
+        .subscribeToTopic(userId)
+        .then(() =>
+          log.debug("Subscribed to firebase cloud messaging via topic.", {
+            userId,
+            topic: userId,
+          })
+        )
+        .catch(
+          (err) => log.warn("Unable to subscribe to topic.", { userId, topic: userId, error: err }) // prettier-ignore
+        );
+
+      return () => {
+        messaging()
+          .unsubscribeFromTopic(userId)
+          .finally(() =>
+            log.debug("Unsubscribed from topic.", { userId, topic: userId })
+          );
+      };
+    }
+  }, [userId]);
+
   useEffect(() => {
     registerForPushNotificationsAsync();
 
-    Notifications.addNotificationReceivedListener((notification) => {
-      log.debug("Push notification received.", notification);
-      handler(notification);
-    });
+    const onForegroundMessageSubscription = messaging().onMessage(
+      async (remoteMessage) => {
+        log.debug("Incoming push notification", remoteMessage);
+      }
+    );
 
-    Notifications.addNotificationResponseReceivedListener((response) => {
-      log.debug("Push notification response received", response);
-    });
+    return () => {
+      log.debug("Unsubscribing to foreground message subscription.");
+      onForegroundMessageSubscription?.();
+    };
   }, []);
 }
 
 async function registerForPushNotificationsAsync() {
-  if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync("default", {
-      name: "default",
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#FF231F7C",
-    });
-  }
-
   if (Device.isDevice) {
     const { status: existingStatus } = await Notifications.getPermissionsAsync(); // prettier-ignore
     let finalStatus = existingStatus;
