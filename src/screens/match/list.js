@@ -9,7 +9,6 @@ import useGetDriverProfile from "../../services/queries/useGetDriverProfile";
 
 export default function List() {
   const { data } = useMatches();
-  log.debug("Matches", { data });
 
   return (
     <View style={styles.container}>
