@@ -408,7 +408,7 @@ export default function List() {
                         <Image
                           style={styles.marker}
                           cachePolicy="memory-disk"
-                          source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FFrom.png?alt=media&token=0d152a8f-e9c4-4014-8816-6a5dc5660290"
+                          source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FFrom%20v2.png?alt=media&token=b44cc62e-5546-41eb-8259-c9510c02a8a8"
                         />
                       </Mapbox.MarkerView>
                     </Optional>
@@ -421,7 +421,7 @@ export default function List() {
                         <Image
                           style={styles.marker}
                           cachePolicy="memory-disk"
-                          source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FTo1.png?alt=media&token=7cb56012-bedd-416d-a01e-2dedfcd862d2"
+                          source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FTo%20v2.png?alt=media&token=d719e588-0fb3-4ade-a4b5-a37fccdf538d"
                         />
                       </Mapbox.MarkerView>
                     </Optional>
