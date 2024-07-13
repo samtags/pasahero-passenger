@@ -12,10 +12,10 @@ const useOnAppFocus = (cb = () => {}) => {
   }, [appState]);
 
   useEffect(() => {
-    AppState.addEventListener("change", handleAppStateChange);
+    AppState?.addEventListener?.("change", handleAppStateChange);
 
     return () => {
-      AppState.removeEventListener("change", handleAppStateChange);
+      AppState?.removeEventListener?.("change", handleAppStateChange);
     };
   }, []);
 

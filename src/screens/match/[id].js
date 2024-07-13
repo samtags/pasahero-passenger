@@ -463,7 +463,7 @@ export default function Match() {
           >
             <Mapbox.Camera
               animationMode="none"
-              zoomLevel={13.79}
+              zoomLevel={16.75}
               centerCoordinate={initialCoordinates}
             />
             <Optional condition={screen === "REQUESTED"}>
