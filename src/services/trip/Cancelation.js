@@ -141,7 +141,7 @@ function useCancelTripListener(callback) {
 
       log.debug("Subscribed to canceled match event", {
         userId,
-        channel: "msg.incoming",
+        channel: "matches.canceled",
         filter: `passenger_id=eq.${userId}`,
         table: "matches",
         schema: "public",
