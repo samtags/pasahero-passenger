@@ -29,7 +29,6 @@ import { format } from "../../services/util/amount";
 import LottieView from "lottie-react-native";
 import useNearbyDrivers from "../../services/hooks/useNearbyDrivers";
 import calculateBoundingBox from "../../services/util/map/calculateBoundingBox";
-import useOnTheWayRoute from "../../services/hooks/useOnTheWayRoute";
 import storage from "../../services/storage";
 import log from "../../services/log";
 import findNearby from "../../services/api/findNearby";
@@ -58,6 +57,7 @@ export default function Match() {
   const { match, refetch } = useMatch(params.id);
   const [showInstruction, setShowInstruction] = useState(false);
   const [showCancelationPrompt, setShowCancelationPrompt] = useState(false);
+  const [showRequestTimeoutPrompt, setShowRequestTimeoutPrompt] = useState(false); // prettier-ignore
 
   // refetch the match data when the app is in focus
   // to handle websocket reconnection esp when the app is in background for a long time
@@ -216,7 +216,19 @@ export default function Match() {
     // todo: recenter the map
   }
 
+  function handleConfirmFromRequestTimeoutPrompt() {
+    handleRecreateTrip();
+    handleResetAssignedRoute();
+    setScreen("PENDING");
+    setShowCancelationPrompt(false);
+    // todo: recenter the map
+  }
+
   function handleCancelFromCancelationPrompt() {
+    router.replace("/");
+  }
+
+  function handleCancelFromRequestTimeoutPrompt() {
     router.replace("/");
   }
 
@@ -232,6 +244,11 @@ export default function Match() {
       if (match?.status === "DRIVER_CANCELED") {
         scrollRef?.current?.scrollTo({ y: 0, animated: false });
         setShowCancelationPrompt(true);
+      }
+
+      if (match?.status === "REQUEST_TIMEOUT") {
+        scrollRef?.current?.scrollTo({ y: 0, animated: false });
+        setShowRequestTimeoutPrompt(true);
       }
     }
 
@@ -410,7 +427,8 @@ export default function Match() {
             condition={
               match?.status === "REQUESTED" ||
               screen === "PENDING" ||
-              match?.status === "DRIVER_CANCELED"
+              match?.status === "DRIVER_CANCELED" ||
+              match?.status === "REQUEST_TIMEOUT"
             }
           >
             <RequestedPreview
@@ -822,6 +840,14 @@ export default function Match() {
           onCancel={handleCancelFromCancelationPrompt}
           onProceed={handleConfirmFromCancelationPrompt}
           match={match}
+        />
+      </Optional>
+
+      <Optional condition={showRequestTimeoutPrompt}>
+        <TimeoutRequestPromp
+          match={match}
+          onCancel={handleCancelFromRequestTimeoutPrompt}
+          onProceed={handleConfirmFromRequestTimeoutPrompt}
         />
       </Optional>
     </View>
@@ -1441,6 +1467,45 @@ function CancelationPrompt({ match, onProceed, onCancel }) {
 
           <Text size={14} color="#707070">
             Do you want to continue this trip request?
+          </Text>
+        </View>
+
+        <TransitPoints
+          first_point={match?.first_point}
+          last_point={match?.last_point}
+        />
+
+        <View
+          style={{ paddingHorizontal: 16, paddingBottom: 16, paddingTop: 32 }}
+        >
+          <Cta
+            onPress={() => onCancel?.()}
+            color="transparent"
+            textColor="#353579"
+          >
+            No. Thank you
+          </Cta>
+
+          <Cta onPress={() => onProceed?.()} color="#6366F1">
+            Continue
+          </Cta>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function TimeoutRequestPromp({ match, onProceed, onCancel }) {
+  return (
+    <View style={styles.promptContainer}>
+      <View style={styles.cancelationContent}>
+        <View style={{ paddingHorizontal: 16, paddingTop: 32 }}>
+          <Text size={28} weight="700" color="#353579">
+            No drivers nearby
+          </Text>
+
+          <Text size={14} color="#707070">
+            Do you want to continue searching?
           </Text>
         </View>
 
