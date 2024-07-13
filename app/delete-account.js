@@ -17,7 +17,7 @@ export default function Entry(props) {
         options={{
           headerTitle: () => (
             <Text size={19} weight="bold" color="#353579">
-              Feedback
+              Delete Account
             </Text>
           ),
           headerTitleAlign: "center",
@@ -48,7 +48,7 @@ export default function Entry(props) {
           }}
           style={[styles.container, { opacity: showWebview ? 1 : 0 }]}
           source={{
-            uri: `https://airtable.com/appXQd7rSsw0l222y/shrL4mayOt6R1EdKp?prefill_Email=${
+            uri: `https://airtable.com/appXQd7rSsw0l222y/shrDdLOAUg0OWZ2Io?prefill_Email=${
               user?.primaryEmailAddress?.emailAddress ?? ""
             }`,
           }}
