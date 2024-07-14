@@ -13,8 +13,8 @@ import * as WebBrowser from "expo-web-browser";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import MessageProvider from "../src/services/messages/Provider";
 import Cancelation from "../src/services/trip/Cancelation";
+import RequestTimeout from "../src/services/trip/RequestTimeout";
 import { UNSAFE_registerProperty } from "../src/services/global";
-import usePushNotification from "../src/services/notification/usePushNotification";
 import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
 import onFetchUpdateAsync from "../src/services/updates";
@@ -63,6 +63,7 @@ export default function Layout() {
             <Stack />
             <MessageProvider />
             <Cancelation />
+            <RequestTimeout />
           </GestureHandlerRootView>
         </LaunchdarklyProvider>
       </QueryClientProvider>

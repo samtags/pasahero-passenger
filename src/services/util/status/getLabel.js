@@ -11,6 +11,8 @@ export default function getLabel(status) {
     case "PASSENGER_CANCELED":
     case "DRIVER_CANCELED":
       return "Canceled";
+    case "REQUEST_TIMEOUT":
+      return "Timeout";
     case "DONE":
       return "Done";
     default:

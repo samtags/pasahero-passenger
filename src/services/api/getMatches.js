@@ -9,6 +9,7 @@ export default async function getMatches(id) {
     .eq("passenger_id", id)
     .neq("status", "PASSENGER_CANCELED")
     .neq("status", "DRIVER_CANCELED")
+    .not("status.eq.REQUEST_TIMEOUT")
     .neq("status", "DONE");
 
   if (error) return [];

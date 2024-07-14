@@ -220,7 +220,7 @@ export default function Match() {
     handleRecreateTrip();
     handleResetAssignedRoute();
     setScreen("PENDING");
-    setShowCancelationPrompt(false);
+    setShowRequestTimeoutPrompt(false);
     // todo: recenter the map
   }
 
@@ -509,7 +509,11 @@ export default function Match() {
                 <LottieView
                   autoPlay
                   loop
-                  style={{ width: 220, height: 220 }}
+                  style={{
+                    width: 220,
+                    height: 220,
+                    opacity: match?.status === "REQUESTED" ? 1 : 0,
+                  }}
                   source={require("../../assets/json/pulse.json")}
                 />
               </Mapbox.MarkerView>

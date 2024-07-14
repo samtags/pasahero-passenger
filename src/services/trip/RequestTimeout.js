@@ -11,17 +11,17 @@ import findNearby from "../api/findNearby";
 import { useMutation } from "@tanstack/react-query";
 import { useMMKVString } from "react-native-mmkv";
 
-export default function Cancelation() {
+export default function RequestTimeout() {
   const router = useRouter();
   const segments = useSegments();
   const isInMatchScreen = segments.join("/") === "match/[id]";
 
   const [incoming, setIncoming] = useState();
-  useCancelTripListener((data) => setIncoming(data));
+  useRequestTimeoutTripListener((data) => setIncoming(data));
 
   function handleClosePrompt() {
     setIncoming();
-    log.debug("Trip cancelation prompt closed.");
+    log.debug("Request timeout prompt closed.");
   }
 
   const { isPending, mutateAsync: handleRequestTrip } = useMutation({
@@ -31,13 +31,13 @@ export default function Cancelation() {
   });
 
   function onSuccess(data) {
-    log.debug("Recreated trip from cancelation", { data });
+    log.debug("Recreated trip from request timeout", { data });
     router.navigate({ pathname: `match/${data?.id}` });
     setTimeout(handleClosePrompt, 500);
   }
 
   function onError() {
-    log.warn("Unable to recreate trip from cancelation", { incoming });
+    log.warn("Unable to recreate trip from request timeout", { incoming });
   }
 
   function mutationFn() {
@@ -55,27 +55,19 @@ export default function Cancelation() {
   if (Boolean(incoming) === false) return null;
 
   // show the message prompt
-  log.debug("Showing trip canceled prompt.", { incoming });
+  log.debug("Showing trip timeout prompt.", { incoming });
 
   return (
     <View style={styles.promptContainer}>
       <View style={styles.content}>
         <View style={{ gap: 16 }}>
           <Text size={28} weight="700" color="#353579">
-            Oh no!
-          </Text>
-
-          <Text weight="700" size={18} color="#1B1B1B">
-            Driver canceled
+            No drivers nearby
           </Text>
 
           <Text size={14} color="#707070">
-            We&apos;re sorry. While you are away, the driver requested to cancel
-            the trip.{" "}
-          </Text>
-
-          <Text weight="700" size={14} color="#707070">
-            Do you want to continue this trip request?
+            It seems there are no available drivers nearby in your area. Do you
+            want to continue searching?
           </Text>
         </View>
 
@@ -105,7 +97,7 @@ export default function Cancelation() {
   );
 }
 
-function useCancelTripListener(callback) {
+function useRequestTimeoutTripListener(callback) {
   const [userId] = useMMKVString("user.id");
   const segments = useSegments();
   const isInMatchScreen = segments.join("/") === "match/[id]";
@@ -116,7 +108,7 @@ function useCancelTripListener(callback) {
     if (userId) {
       if (isInMatchScreen === false) {
         channel = supabase
-          .channel("matches.canceled")
+          .channel("matches.request_timeout")
           .on(
             "postgres_changes",
             {
@@ -127,22 +119,17 @@ function useCancelTripListener(callback) {
             },
             (payload) => {
               const data = payload?.new;
-              log.debug("Received canceled match event", data);
-              if (
-                [
-                  "DRIVER_CANCELED",
-                  // todo: add other canceled status here
-                ].includes(data?.status)
-              ) {
+              if (data?.status === "REQUEST_TIMEOUT") {
+                log.debug("Received request timeout match event", data);
                 callback(data);
               }
             }
           )
           .subscribe();
 
-        log.debug("Subscribed to canceled match event", {
+        log.debug("Subscribed to request timeout match event", {
           userId,
-          channel: "matches.canceled",
+          channel: "matches.request_timeout",
           filter: `passenger_id=eq.${userId}`,
           table: "matches",
           schema: "public",
@@ -151,9 +138,9 @@ function useCancelTripListener(callback) {
     }
     return () => {
       channel?.unsubscribe?.();
-      log.debug("Unsubscribed from canceled match event");
+      log.debug("Unsubscribed from request timeout match event");
     };
-  }, [isInMatchScreen]);
+  }, [isInMatchScreen, userId]);
 }
 
 const styles = StyleSheet.create({
