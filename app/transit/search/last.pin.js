@@ -10,6 +10,7 @@ import { StatusBar } from "expo-status-bar";
 import useReverseGeocoding from "../../../src/services/queries/useReverseGeocoding";
 import useDelayedValue from "../../../src/services/hooks/useDelayedValue";
 import { handleSetTransitLast } from "../../../src/screens/transit/search/last";
+import { oldPin } from "../../../src/services/images/remote";
 
 export default function Pin() {
   const params = useLocalSearchParams();
@@ -70,7 +71,7 @@ export default function Pin() {
         <View style={styles.marker}>
           <Image
             style={{ height: 98, width: 98, marginBottom: 49 }}
-            source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FLocation.png?alt=media&token=c6c91f9e-1ea6-4205-9292-506bfdc25a05"
+            source={oldPin}
             contentFit="cover"
           />
         </View>

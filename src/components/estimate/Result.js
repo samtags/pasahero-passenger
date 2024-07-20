@@ -2,6 +2,10 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Text from "../../components/text";
 import { Image } from "expo-image";
 import { Skeleton } from "moti/skeleton";
+import {
+  checkBoxChecked,
+  checkBoxUnchecked,
+} from "../../services/images/remote";
 
 /**
  *
@@ -62,11 +66,7 @@ export default function EstimateItem({
           <Image
             style={styles.image}
             cachePolicy="memory-disk"
-            source={
-              isSelected
-                ? "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FChecked.png?alt=media&token=37eb6137-cea4-4e8d-bfbf-47c72141c546"
-                : "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FUnchecked.png?alt=media&token=0d879712-7900-4de4-9ec8-02720b88cf71"
-            }
+            source={isSelected ? checkBoxChecked : checkBoxUnchecked}
           />
         </View>
       </View>

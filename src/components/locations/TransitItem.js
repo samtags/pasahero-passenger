@@ -10,6 +10,7 @@ import Optional from "../optional";
 import { useState } from "react";
 import useOnUpdate from "../../services/hooks/useOnUpdate";
 import { Image } from "expo-image";
+import { pinWhite } from "../../services/images/remote";
 
 /**
  * @typedef Props
@@ -99,7 +100,7 @@ export default function TransitItem(props) {
           >
             <Image
               style={{ height: 20, width: 20 }}
-              source="https://tbldsrfpqyqzrastjzoc.supabase.co/storage/v1/object/public/assets/pin.svg?t=2024-04-22T14%3A05%3A19.748Z"
+              source={pinWhite}
               contentFit="cover"
             />
             <Text style={{ fontWeight: "700", fontSize: 9 }}>Pin</Text>

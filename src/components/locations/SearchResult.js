@@ -1,6 +1,7 @@
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import Text from "../../components/text";
 import { Image } from "expo-image";
+import { origin } from "../../services/images/remote";
 
 /**
  *
@@ -13,7 +14,7 @@ export default function SearchResult({ shortAddress, longAddress, onPress }) {
         <Image
           style={styles.indicator}
           cachePolicy="memory-disk"
-          source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FPrediction.png?alt=media&token=21bbdf2d-1513-4245-ba1f-b6083baf5d5c"
+          source={origin}
         />
         <View style={styles.content}>
           <Text numberOfLines={1} color="#1B1B1B" weight="bold" size={18}>

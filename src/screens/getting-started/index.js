@@ -4,6 +4,7 @@ import Text from "../../components/text";
 import Mapbox from "@rnmapbox/maps";
 import Cta from "../../components/cta";
 import { Image } from "expo-image";
+import { gettingStarted } from "../../services/images/remote";
 
 export default function GettingStarted() {
   const router = useRouter();
@@ -24,7 +25,7 @@ export default function GettingStarted() {
           <View style={styles.content}>
             <Image
               style={styles.image}
-              source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FSet%20Location.png?alt=media&token=738ac137-7924-4a27-af89-118bd05bf6ed"
+              source={gettingStarted}
               transition={500}
             />
             <Text textAlign="center" size={28} weight="bold" color="#353579">

@@ -1,6 +1,7 @@
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Text from "../text";
 import { Image } from "expo-image";
+import { to } from "../../services/images/remote";
 
 /**
  *
@@ -8,8 +9,7 @@ import { Image } from "expo-image";
  * @returns
  */
 export default function Transit({ onPress, children, indicatorSrc, color }) {
-  let indicator =
-    "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FDestination.png?alt=media&token=e92cc2d1-77c3-486f-9793-3c0827ca5aef";
+  let indicator = to;
 
   if (indicatorSrc) {
     indicator = indicatorSrc;

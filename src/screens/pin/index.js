@@ -12,6 +12,8 @@ import reverseGeocode from "../../services/api/reverseGeocoding";
 import { Image } from "expo-image";
 import Const from "expo-constants";
 import Mapbox from "@rnmapbox/maps";
+import { pinWhite } from "../../services/images/remote";
+
 Mapbox.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_KEY);
 
 export default function Pin() {
@@ -66,7 +68,7 @@ export default function Pin() {
           <View style={styles.marker}>
             <Image
               style={{ height: 56, width: 56 }}
-              source="https://tbldsrfpqyqzrastjzoc.supabase.co/storage/v1/object/public/assets/pin.svg?t=2024-04-22T14%3A05%3A19.748Z"
+              source={pinWhite}
               contentFit="cover"
             />
           </View>

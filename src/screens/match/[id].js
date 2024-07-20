@@ -42,6 +42,18 @@ import useDriverToPickUpRouteProcedure, {
 import useDriverToDropoffRouteProcedure from "../../services/hooks/useDriverToDropoffRouteProcedure";
 import completeMatch from "../../services/api/completeMatch";
 import useOnAppFocus from "../../services/hooks/useFocus";
+import {
+  angkasIcon,
+  call,
+  first,
+  from,
+  joyrideIcon,
+  last,
+  message,
+  moveItIcon,
+  share,
+  to,
+} from "../../services/images/remote";
 
 const defaultLocation = {
   latitude: 14.5535991,
@@ -503,7 +515,7 @@ export default function Match() {
                   <Image
                     style={styles.marker}
                     cachePolicy="memory-disk"
-                    source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FFrom%20v2.png?alt=media&token=b44cc62e-5546-41eb-8259-c9510c02a8a8"
+                    source={first}
                   />
                 </View>
                 <LottieView
@@ -610,7 +622,7 @@ export default function Match() {
                       <Image
                         style={[styles.marker]}
                         cachePolicy="memory-disk"
-                        source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FFrom%20v2.png?alt=media&token=b44cc62e-5546-41eb-8259-c9510c02a8a8"
+                        source={first}
                       />
                     </Mapbox.MarkerView>
                   );
@@ -747,7 +759,7 @@ export default function Match() {
                       <Image
                         style={[styles.marker]}
                         cachePolicy="memory-disk"
-                        source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FTo%20v2.png?alt=media&token=d719e588-0fb3-4ade-a4b5-a37fccdf538d"
+                        source={last}
                       />
                     </Mapbox.MarkerView>
                   );
@@ -883,7 +895,7 @@ function RequestedPreview({
         <Optional condition={services?.includes("AngkasPassenger")}>
           <View style={styles.serviceContainer}>
             <Image
-              source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FAngkas.png?alt=media&token=6790cdbc-7cf7-456b-8e3e-2fed2c4193dc"
+              source={angkasIcon}
               cachePolicy="memory-disk"
               style={styles.image}
             />
@@ -892,7 +904,7 @@ function RequestedPreview({
         <Optional condition={services?.includes("JoyRideMcTaxi")}>
           <View style={styles.serviceContainer}>
             <Image
-              source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FJoyRide%20McTaxi.png?alt=media&token=86c9d45f-aca9-458d-8079-0fc73cfd6ad7"
+              source={joyrideIcon}
               cachePolicy="memory-disk"
               style={styles.image}
             />
@@ -901,7 +913,7 @@ function RequestedPreview({
         <Optional condition={services?.includes("MoveItMotoTaxi")}>
           <View style={styles.serviceContainer}>
             <Image
-              source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FMove%20it.png?alt=media&token=b19e275e-820b-4b45-98d0-e54e56b48246"
+              source={moveItIcon}
               cachePolicy="memory-disk"
               style={styles.image}
             />
@@ -1215,20 +1227,14 @@ function DriverInfo({
           <Optional condition={showChatOption}>
             <TouchableOpacity onPress={onMessage}>
               <View style={styles.iconContainer}>
-                <Image
-                  style={{ width: 22, height: 22 }}
-                  source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FChat.png?alt=media&token=5f0ac4b3-d2ac-4af4-ba83-db9adb4027cb"
-                />
+                <Image style={{ width: 22, height: 22 }} source={message} />
               </View>
             </TouchableOpacity>
           </Optional>
           <Optional condition={showCallOption}>
             <TouchableOpacity onPress={onCall}>
               <View style={styles.iconContainer}>
-                <Image
-                  style={{ width: 22, height: 22 }}
-                  source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FPhone.png?alt=media&token=f27c1ca8-c601-4f37-905c-61ac9ab0c9e5"
-                />
+                <Image style={{ width: 22, height: 22 }} source={call} />
               </View>
             </TouchableOpacity>
           </Optional>
@@ -1253,7 +1259,7 @@ export function TransitPoints({
           <Image
             style={styles.indicator}
             cachePolicy="memory-disk"
-            source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FOrigin.png?alt=media&token=7913bdfb-7b7f-41aa-aecb-433a275c92b8"
+            source={from}
           />
           <Text weight="900" size={18} color="#1B1B1B">
             {first_point?.short_address}
@@ -1268,7 +1274,7 @@ export function TransitPoints({
           <Image
             style={styles.indicator}
             cachePolicy="memory-disk"
-            source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FDestination.png?alt=media&token=e92cc2d1-77c3-486f-9793-3c0827ca5aef"
+            source={to}
           />
           <Text weight="900" size={18} color="#1B1B1B">
             {last_point?.short_address}
@@ -1287,7 +1293,7 @@ export function TransitPoints({
                 <Image
                   style={{ height: 16, width: 18, resizeMode: "contain" }}
                   cachePolicy="memory-disk"
-                  source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FShare.png?alt=media&token=4e75220d-0bc9-44ee-8aae-a8526df4d141"
+                  source={share}
                 />
               </View>
               <Text weight="900" color="#10B981">

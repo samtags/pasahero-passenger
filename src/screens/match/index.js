@@ -23,6 +23,7 @@ import { useUser } from "@clerk/clerk-expo";
 import log from "../../services/log";
 import useGetEstimate from "../../services/queries/useGetEstimate";
 import generateRandomNumberFromTo from "../../services/util/random/generateNumberFromTo";
+import { pinWhite } from "../../services/images/remote";
 
 export default function Match() {
   const user = useUser();
@@ -123,7 +124,7 @@ export default function Match() {
               <Marker identifier="first" coordinate={first}>
                 <Image
                   style={{ height: 32, width: 32 }}
-                  source="https://tbldsrfpqyqzrastjzoc.supabase.co/storage/v1/object/public/assets/pin.svg?t=2024-04-22T14%3A05%3A19.748Z"
+                  source={pinWhite}
                   contentFit="cover"
                 />
               </Marker>
@@ -132,7 +133,7 @@ export default function Match() {
               <Marker identifier="last" coordinate={last}>
                 <Image
                   style={{ height: 56, width: 56 }}
-                  source="https://tbldsrfpqyqzrastjzoc.supabase.co/storage/v1/object/public/assets/pin.svg?t=2024-04-22T14%3A05%3A19.748Z"
+                  source={pinWhite}
                   contentFit="cover"
                 />
               </Marker>

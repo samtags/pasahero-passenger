@@ -6,6 +6,7 @@ import { Image } from "expo-image";
 import getLabel from "../../services/util/status/getLabel";
 import log from "../../services/log";
 import useGetDriverProfile from "../../services/queries/useGetDriverProfile";
+import { dropoff, pickup, star } from "../../services/images/remote";
 
 export default function List() {
   const { data } = useMatches();
@@ -149,7 +150,7 @@ function TripCard({
                   }}
                 >
                   <Image
-                    source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.driver%2FStar.png?alt=media&token=7fc04bb8-b8a9-43da-a138-ac6ba3ca6338"
+                    source={star}
                     style={{ width: 16, height: 16 }}
                     cachePolicy="memory-disk"
                   />
@@ -181,7 +182,7 @@ function TripCard({
         <View style={{ paddingVertical: 16 }}>
           <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
             <Image
-              source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.driver%2FFirst.png?alt=media&token=560476c4-fecd-4cb3-bc5b-0a8bb33129b4"
+              source={pickup}
               style={{ width: 20, height: 20 }}
               cachePolicy="memory-disk"
             />
@@ -208,7 +209,7 @@ function TripCard({
           </View>
           <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
             <Image
-              source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.driver%2FLast.png?alt=media&token=231bb33a-e74a-4b50-ab19-107fc79dfe47"
+              source={dropoff}
               style={{ width: 20, height: 20 }}
               cachePolicy="memory-disk"
             />

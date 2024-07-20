@@ -11,6 +11,7 @@ import { Image } from "expo-image";
 import Optional from "../../components/optional";
 import { StatusBar } from "expo-status-bar";
 import useTimer from "../../services/hooks/useTimer";
+import { hangUp, mute, unmute } from "../../services/images/remote";
 
 export default function Dial() {
   const router = useRouter();
@@ -91,11 +92,7 @@ export default function Dial() {
             {userStream && (
               <TouchableOpacity onPress={handleToggleMute}>
                 <Image
-                  source={
-                    isMuted
-                      ? "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FUnmute%20Call.png?alt=media&token=c3ad548f-32d2-4fba-ae1b-802923a7cf41"
-                      : "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FMute%20Call.png?alt=media&token=da54782a-004b-45d1-ac35-82255fa28c59"
-                  }
+                  source={isMuted ? mute : unmute}
                   style={{ width: 50, height: 50 }}
                   cachePolicy="memory-disk"
                 />
@@ -104,7 +101,7 @@ export default function Dial() {
 
             <TouchableOpacity onPress={handleEndCall}>
               <Image
-                source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FEnd%20Call.png?alt=media&token=b8157725-8b9b-488e-8441-4d21591dd566"
+                source={hangUp}
                 style={{ width: 50, height: 50 }}
                 cachePolicy="memory-disk"
               />

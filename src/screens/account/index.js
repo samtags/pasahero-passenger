@@ -36,29 +36,37 @@ export default function Account() {
   };
 
   return (
-    <ScrollView style={styles.full} contentContainerStyle={styles.full}>
-      <View style={styles.container}>
-        <SignedIn>
-          {/* <Link href="/wallet">My Wallet</Link> */}
-          <Link href="/match/list">Requested Trips</Link>
-        </SignedIn>
-        {/* <Link href="/account">Saved Locations</Link> */}
-        <Link href="/faqs">FAQs</Link>
-        {/* <Link href="/account">Privacy Policy</Link> */}
-        <Link href="/feedback">Send Feedback</Link>
-        <Link href="/contact-us">Contact Us</Link>
-        <SignedIn>
-          <Link onPress={handleSignOut} href="/account">
-            Sign Out
-          </Link>
-        </SignedIn>
-        <SignedOut>
-          <Link onPress={handleSignIn} href="/account">
-            Sign In
-          </Link>
-        </SignedOut>
+    <View style={[styles.full, { backgroundColor: "white" }]}>
+      <ScrollView
+        style={styles.full}
+        contentContainerStyle={{ paddingBottom: 24 }}
+      >
+        <View style={styles.container}>
+          <SignedIn>
+            {/* <Link href="/wallet">My Wallet</Link> */}
+            <Link href="/match/list">Requested Trips</Link>
+          </SignedIn>
+          {/* <Link href="/account">Saved Locations</Link> */}
+          <Link href="/faqs">FAQs</Link>
+          {/* <Link href="/account">Privacy Policy</Link> */}
+          <Link href="/feedback">Send Feedback</Link>
+          <Link href="/contact-us">Contact Us</Link>
+          <SignedIn>
+            <Link onPress={handleSignOut} href="/account">
+              Sign Out
+            </Link>
+          </SignedIn>
+          <SignedOut>
+            <Link onPress={handleSignIn} href="/account">
+              Sign In
+            </Link>
+          </SignedOut>
+        </View>
+      </ScrollView>
+      <View style={{ padding: 24 }}>
+        <Text color="#bbbbbb">Beta 1.0.3</Text>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 

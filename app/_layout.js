@@ -18,7 +18,7 @@ import { UNSAFE_registerProperty } from "../src/services/global";
 import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
 import onFetchUpdateAsync from "../src/services/updates";
-// import ImagePreRenderer from "../src/services/images/PreRenderer";
+import ImagePreRenderer from "../src/services/images/PreRenderer";
 import GrowthBook from "../src/services/growthbook";
 
 Notifications.setNotificationHandler({
@@ -63,7 +63,7 @@ export default function Layout() {
         <GrowthBook>
           <LaunchdarklyProvider>
             <GestureHandlerRootView style={{ flex: 1 }}>
-              {/* <ImagePreRenderer /> */}
+              <ImagePreRenderer />
               <Stack />
               <MessageProvider />
               <Cancelation />

@@ -8,6 +8,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import Text from "../../components/text";
 import { Image } from "expo-image";
 import Optional from "../../components/optional";
+import { answer, hangUp } from "../../services/images/remote";
 
 export default function Ring() {
   const router = useRouter();
@@ -94,14 +95,14 @@ export default function Ring() {
           >
             <TouchableOpacity onPress={handleAccept}>
               <Image
-                source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FJoin%20Call.png?alt=media&token=9c12bedb-1922-4f88-aa8f-8dda4834b183"
+                source={answer}
                 style={{ width: 50, height: 50 }}
                 cachePolicy="memory-disk"
               />
             </TouchableOpacity>
             <TouchableOpacity onPress={handleReject}>
               <Image
-                source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FEnd%20Call.png?alt=media&token=b8157725-8b9b-488e-8441-4d21591dd566"
+                source={hangUp}
                 style={{ width: 50, height: 50 }}
                 cachePolicy="memory-disk"
               />

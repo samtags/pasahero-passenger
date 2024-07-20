@@ -23,6 +23,7 @@ import log from "../../services/log";
 import reverseGeocode from "../../services/api/reverseGeocoding";
 import Optional from "../../components/optional";
 import LottieView from "lottie-react-native";
+import { from, origin, target } from "../../services/images/remote";
 
 export default function Setup() {
   const [_, setLocation] = useMMKVString("location.current");
@@ -167,7 +168,7 @@ export default function Setup() {
             <Image
               style={{ width: 12, height: 12 }}
               cachePolicy="memory-disk"
-              source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FOrigin.png?alt=media&token=7913bdfb-7b7f-41aa-aecb-433a275c92b8"
+              source={from}
             />
             <TextInput
               selection={selected ? selection : undefined}
@@ -204,7 +205,7 @@ export default function Setup() {
               <Image
                 style={{ width: 22, height: 22 }}
                 cachePolicy="memory-disk"
-                source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FTarget.png?alt=media&token=d6c31afa-5308-43e8-a8cd-291cb7316009"
+                source={target}
               />
             </TouchableOpacity>
           </Optional>
@@ -286,7 +287,7 @@ function Prediction({ shortAddress, longAddress, onPress }) {
         <Image
           style={{ width: 24, height: 24 }}
           cachePolicy="memory-disk"
-          source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FPrediction.png?alt=media&token=21bbdf2d-1513-4245-ba1f-b6083baf5d5c"
+          source={origin}
         />
 
         <View style={{ gap: 6, flex: 1, paddingRight: 16 }}>

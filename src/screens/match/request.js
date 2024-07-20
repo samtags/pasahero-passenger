@@ -25,6 +25,14 @@ import useGetDirections from "../../services/hooks/useGetDirections";
 import * as Polyline from "@mapbox/polyline";
 import useOnUpdate from "../../services/hooks/useOnUpdate";
 import useOnUpdateSnapshot from "../../services/hooks/useOnUpdateSnapshot";
+import {
+  angkasIcon,
+  arrowLeftWhite,
+  first as firstIcon,
+  joyrideIcon,
+  last as lastIcon,
+  moveItIcon,
+} from "../../services/images/remote";
 
 WebBrowser.maybeCompleteAuthSession();
 export default function List() {
@@ -288,7 +296,7 @@ export default function List() {
               <Image
                 style={styles.back}
                 cachePolicy="memory-disk"
-                source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FBack%20White.png?alt=media&token=10db1ea7-bf9a-403f-86f1-359e7eefa187"
+                source={arrowLeftWhite}
               />
             </TouchableOpacity>
             <Text size={19} weight="bold" color="#fff">
@@ -408,7 +416,7 @@ export default function List() {
                         <Image
                           style={styles.marker}
                           cachePolicy="memory-disk"
-                          source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FFrom%20v2.png?alt=media&token=b44cc62e-5546-41eb-8259-c9510c02a8a8"
+                          source={firstIcon}
                         />
                       </Mapbox.MarkerView>
                     </Optional>
@@ -421,7 +429,7 @@ export default function List() {
                         <Image
                           style={styles.marker}
                           cachePolicy="memory-disk"
-                          source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FTo%20v2.png?alt=media&token=d719e588-0fb3-4ade-a4b5-a37fccdf538d"
+                          source={lastIcon}
                         />
                       </Mapbox.MarkerView>
                     </Optional>
@@ -437,7 +445,7 @@ export default function List() {
                     highlightColor="#2BBEF1"
                     isLoading={isLoadingAngkas}
                     estimatedFare={angkasEstimatedFare}
-                    serviceImage="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FAngkas.png?alt=media&token=6790cdbc-7cf7-456b-8e3e-2fed2c4193dc"
+                    serviceImage={angkasIcon}
                     isSelected={selectedPlatforms.includes(angkasPassenger?.serviceName)} // prettier-ignore
                     onSelect={() => handleOnSelect(angkasPassenger?.serviceName)} // prettier-ignore
                   />
@@ -447,7 +455,7 @@ export default function List() {
                     highlightColor="#171ACB"
                     isLoading={isLoadingJoyRide}
                     estimatedFare={joyRideEstimatedFare}
-                    serviceImage="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FJoyRide%20McTaxi.png?alt=media&token=86c9d45f-aca9-458d-8079-0fc73cfd6ad7"
+                    serviceImage={joyrideIcon}
                     isSelected={selectedPlatforms.includes(joyRideMcTaxi?.serviceName)} // prettier-ignore
                     onSelect={() => handleOnSelect(joyRideMcTaxi?.serviceName)} // prettier-ignore
                   />
@@ -458,7 +466,7 @@ export default function List() {
                     highlightColor="#9B282D"
                     isLoading={isLoadingMoveIt}
                     estimatedFare={moveItEstimatedFare}
-                    serviceImage="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FMove%20it.png?alt=media&token=b19e275e-820b-4b45-98d0-e54e56b48246"
+                    serviceImage={moveItIcon}
                     isSelected={selectedPlatforms.includes(moveItMotoTaxi?.serviceName)} // prettier-ignore
                     onSelect={() => handleOnSelect(moveItMotoTaxi?.serviceName)} // prettier-ignore
                   />

@@ -13,6 +13,7 @@ import useOnUpdate from "../../services/hooks/useOnUpdate";
 import initializeUser from "../../services/api/initializeUser";
 import initializeWallet from "../../services/api/initializeWallet";
 import usePushNotification from "../../services/notification/usePushNotification";
+import { account } from "../../services/images/remote";
 
 export default function Home() {
   const user = useUser();
@@ -66,7 +67,7 @@ export default function Home() {
           <Image
             style={{ width: 56, height: 56 }}
             cachePolicy="memory-disk"
-            source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FUser.png?alt=media&token=88972e31-48ef-4dc4-bc63-2eca23074831"
+            source={account}
           />
         </TouchableOpacity>
 

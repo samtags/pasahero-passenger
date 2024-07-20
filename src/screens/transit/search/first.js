@@ -18,6 +18,7 @@ import log from "../../../services/log";
 import LottieView from "lottie-react-native";
 import Optional from "../../../components/optional";
 import Cta from "../../../components/cta";
+import { from, pinEntry } from "../../../services/images/remote";
 
 export default function TransitSearchFirstScreen() {
   const router = useRouter();
@@ -106,7 +107,7 @@ export default function TransitSearchFirstScreen() {
           <Image
             style={styles.indicator}
             cachePolicy="memory-disk"
-            source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FOrigin.png?alt=media&token=7913bdfb-7b7f-41aa-aecb-433a275c92b8"
+            source={from}
           />
           <TextInput
             ref={textInputRef}
@@ -124,7 +125,7 @@ export default function TransitSearchFirstScreen() {
           <Image
             style={styles.pin}
             cachePolicy="memory-disk"
-            source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FPin.png?alt=media&token=0a4a96e6-d58c-4749-a315-9955f0f7e415"
+            source={pinEntry}
           />
         </TouchableOpacity>
       </View>

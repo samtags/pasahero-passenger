@@ -10,6 +10,7 @@ import { TouchableOpacity, View } from "react-native";
 import { Image } from "expo-image";
 import useGetDriver from "../../src/services/queries/useGetDriver";
 import { useEffect } from "react";
+import { call } from "../../src/services/images/remote";
 
 export default function Entry(props) {
   const router = useRouter();
@@ -70,10 +71,7 @@ export default function Entry(props) {
                   alignItems: "center",
                 }}
               >
-                <Image
-                  style={{ width: 22, height: 22 }}
-                  source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FPhone.png?alt=media&token=f27c1ca8-c601-4f37-905c-61ac9ab0c9e5"
-                />
+                <Image style={{ width: 22, height: 22 }} source={call} />
               </View>
             </TouchableOpacity>
           ),

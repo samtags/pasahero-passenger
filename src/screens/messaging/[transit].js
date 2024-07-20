@@ -17,6 +17,7 @@ import moment from "moment";
 import log from "../../services/log";
 import { Image } from "expo-image";
 import Text from "../../components/text";
+import { send } from "../../services/images/remote";
 
 export default function Messaging() {
   const messageMap = useRef(new OrderedMap());
@@ -161,7 +162,7 @@ export default function Messaging() {
             onPress={handleSendMessage}
           >
             <Image
-              source="https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FSend.png?alt=media&token=3db4600b-40b0-4f4c-a0fe-e202e0ee9e15"
+              source={send}
               cachePolicy="memory-disk"
               style={{
                 width: 28,
