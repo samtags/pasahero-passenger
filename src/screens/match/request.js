@@ -370,7 +370,7 @@ export default function List() {
                     // styleURL="mapbox://styles/mapbox/streets-v12"
                     logoPosition={{ top: -100, left: 0 }}
                     attributionEnabled={false}
-                    onDidFinishRenderingMap={() => console.log("Map ready")}
+                    // onDidFinishRenderingMap={() => console.log("Map ready")}
                   >
                     <Mapbox.Camera animationDuration={2000} {...cameraConfig} />
                     <Optional condition={coordinates?.length > 1}>
@@ -501,14 +501,18 @@ export default function List() {
                 </Text>
               </View>
               <SignedOut>
-                <Cta onPress={handleSignIn} color="#6366F1">
+                <Cta
+                  onPress={handleSignIn}
+                  disabled={disableSubmit}
+                  color={disableSubmit ? "#B9BAF9" : "#6366F1"}
+                >
                   Sign in to Continue
                 </Cta>
               </SignedOut>
               <SignedIn>
                 <Cta
-                  disabled={disableSubmit}
                   onPress={handleOnConfirm}
+                  disabled={disableSubmit}
                   color={disableSubmit ? "#B9BAF9" : "#6366F1"}
                 >
                   Request a Ride
