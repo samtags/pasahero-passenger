@@ -29,6 +29,7 @@ export default function ImagePreRenderer() {
       renderingImages.delete(key);
 
       if (renderingImages.size === 0) {
+        log.debug("Pre-render Image Completed in cache.");
         setIsCompleted(true);
       }
     };
