@@ -18,6 +18,8 @@ import { UNSAFE_registerProperty } from "../src/services/global";
 import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
 import onFetchUpdateAsync from "../src/services/updates";
+// import ImagePreRenderer from "../src/services/images/PreRenderer";
+import GrowthBook from "../src/services/growthbook";
 
 Notifications.setNotificationHandler({
   handleNotification: () => ({
@@ -58,14 +60,17 @@ export default function Layout() {
       publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}
     >
       <QueryClientProvider client={queryClient}>
-        <LaunchdarklyProvider>
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <Stack />
-            <MessageProvider />
-            <Cancelation />
-            <RequestTimeout />
-          </GestureHandlerRootView>
-        </LaunchdarklyProvider>
+        <GrowthBook>
+          <LaunchdarklyProvider>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              {/* <ImagePreRenderer /> */}
+              <Stack />
+              <MessageProvider />
+              <Cancelation />
+              <RequestTimeout />
+            </GestureHandlerRootView>
+          </LaunchdarklyProvider>
+        </GrowthBook>
       </QueryClientProvider>
     </ClerkProvider>
   );
