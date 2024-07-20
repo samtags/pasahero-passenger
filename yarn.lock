@@ -1888,6 +1888,20 @@
   resolved "https://registry.yarnpkg.com/@graphql-typed-document-node/core/-/core-3.2.0.tgz#5f3d96ec6b2354ad6d8a28bf216a1d97b5426861"
   integrity sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ==
 
+"@growthbook/growthbook-react@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@growthbook/growthbook-react/-/growthbook-react-1.1.0.tgz#88bc2c10be7a825cbc56122e2c4fcbc7f36a684f"
+  integrity sha512-LR6PKqoPLIZN7pqSlkRvbwOARn1jKXyVYUhyCUyxLz3XIFihomTk90S2F95ec+jkMqzmMxL36iDRMP4o0stFvQ==
+  dependencies:
+    "@growthbook/growthbook" "^1.1.0"
+
+"@growthbook/growthbook@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@growthbook/growthbook/-/growthbook-1.1.0.tgz#3b9503a1e774c2888637152b0679d8a0df3d50cf"
+  integrity sha512-TBgUnMcYxOVo4dDDZJ8J2Z9DjDy9PlL+J2GpLMMD6SPpw66gSDcnnwGk9H6diHS/IuUmDXNkU+24+L/bXulWww==
+  dependencies:
+    dom-mutator "^0.6.0"
+
 "@hapi/hoek@^9.0.0", "@hapi/hoek@^9.3.0":
   version "9.3.0"
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.3.0.tgz#8368869dcb735be2e7f5cb7647de78e167a251fb"
@@ -4176,6 +4190,11 @@ dir-glob@^3.0.1:
   integrity sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==
   dependencies:
     path-type "^4.0.0"
+
+dom-mutator@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/dom-mutator/-/dom-mutator-0.6.0.tgz#079d7a4b3e8981a562cd777548b99baab51d65c5"
+  integrity sha512-iCt9o0aYfXMUkz/43ZOAUFQYotjGB+GNbYJiJdz4TgXkyToXbbRy5S6FbTp72lRBtfpUMwEc1KmpFEU4CZeoNg==
 
 dotenv-expand@~11.0.6:
   version "11.0.6"
@@ -7708,6 +7727,13 @@ rimraf@~2.6.2:
   integrity sha512-mwqeW5XsA2qAejG46gYdENaxXjx9onRNCfn7L0duuP4hCuTIi/QO7PDK07KJfp1d+izWPrzEJDcSqBa0OZQriA==
   dependencies:
     glob "^7.1.3"
+
+rn-eventsource@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/rn-eventsource/-/rn-eventsource-1.0.0.tgz#4ee4a573c7f6c999a494cd2aba5efaee43b41b50"
+  integrity sha512-Uw3MjQgaOWhT8lT1qCRaJ44dMc1eAtOC0dxuNrk39qcAaSI78rC2BgVXqwcfv1ctFH4pSi1WXDjMDJH4ucjmDg==
+  dependencies:
+    event-target-shim "^5.0.1"
 
 run-parallel@^1.1.9:
   version "1.2.0"
