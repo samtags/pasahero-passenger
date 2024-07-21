@@ -11,7 +11,7 @@ import useReverseGeocoding from "../../../src/services/queries/useReverseGeocodi
 import useDelayedValue from "../../../src/services/hooks/useDelayedValue";
 import log from "../../../src/services/log";
 import storage from "../../../src/services/storage";
-import { oldPin } from "../../../src/services/images/remote";
+import { pin } from "../../../src/services/images/remote";
 
 export default function Pin() {
   const params = useLocalSearchParams();
@@ -68,6 +68,8 @@ export default function Pin() {
       />
 
       <StatusBar backgroundColor="white" />
+      <BackButton />
+
       <View
         style={{
           flex: 1,
@@ -76,12 +78,11 @@ export default function Pin() {
           alignItems: "center",
         }}
       >
-        <BackButton />
         <View style={styles.marker}>
           <Image
-            style={{ height: 98, width: 98, marginBottom: 49 }}
-            source={oldPin}
-            contentFit="cover"
+            style={{ height: 98, width: 98 }}
+            source={pin}
+            contentFit="contain"
           />
         </View>
         <Mapbox.MapView

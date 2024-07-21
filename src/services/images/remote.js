@@ -3,7 +3,7 @@ export const from = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.
 export const target = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FTarget.png?alt=media&token=d6c31afa-5308-43e8-a8cd-291cb7316009"; // prettier-ignore
 export const to = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FDestination.png?alt=media&token=e92cc2d1-77c3-486f-9793-3c0827ca5aef"; // prettier-ignore
 export const pinEntry = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FPin.png?alt=media&token=0a4a96e6-d58c-4749-a315-9955f0f7e415"; // prettier-ignore
-export const oldPin = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FLocation.png?alt=media&token=c6c91f9e-1ea6-4205-9292-506bfdc25a05"; // prettier-ignore
+export const pin = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FFrom%20Primary.png?alt=media&token=d9ed8081-45cd-4519-9f09-5472531d1983"; // prettier-ignore
 export const backCircle = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FCircle%20Back.png?alt=media&token=bff546fa-0686-4949-ab46-08bd9510dc4d"; // prettier-ignore
 export const checkBoxChecked = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FChecked.png?alt=media&token=37eb6137-cea4-4e8d-bfbf-47c72141c546"; // prettier-ignore
 export const checkBoxUnchecked = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FUnchecked.png?alt=media&token=0d879712-7900-4de4-9ec8-02720b88cf71"; // prettier-ignore
@@ -30,3 +30,6 @@ export const pinOutlined = "https://firebasestorage.googleapis.com/v0/b/pasahero
 export const call = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FPhone.png?alt=media&token=f27c1ca8-c601-4f37-905c-61ac9ab0c9e5"; // prettier-ignore
 
 export const center = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.driver%2FCenter.png?alt=media&token=3bd8ec3f-f3b3-4eab-9919-8cc8b2acacd6"; // prettier-ignore
+
+/** * @deprecated - use pin instead */
+export const oldPin = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FLocation.png?alt=media&token=c6c91f9e-1ea6-4205-9292-506bfdc25a05"; // prettier-ignore
