@@ -48,17 +48,35 @@ export default function Setup() {
     useAutoComplete(autoCompleteInput);
 
   const handleUseCurrentLocation = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
+    const { status } = await Location.getForegroundPermissionsAsync();
     const granted = status === "granted";
 
     if (!granted) {
       Alert.alert(
         "Permission required",
-        "Please enable location permission to use your current location."
+        "Please enable location permission to use current location. Do you want to open permission settings?",
+        [
+          { text: "Close", style: "cancel", onPress: () => {} },
+          {
+            text: "OK",
+            style: "default",
+            onPress: async () => {
+              const { status } = await Location.requestForegroundPermissionsAsync(); // prettier-ignore
+
+              if (status === "granted") {
+                handleSetCurrentLocation();
+              }
+            },
+          },
+        ]
       );
       return;
     }
 
+    handleSetCurrentLocation();
+  };
+
+  const handleSetCurrentLocation = async () => {
     setIsGettingLocation(true);
 
     const data = await Location.getCurrentPositionAsync({
