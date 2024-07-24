@@ -3,7 +3,7 @@
     "name": "PasaHero",
     "slug": "pasahero",
     "scheme": "pasahero",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/icon-ph.png",
     "userInterfaceStyle": "light",
