@@ -81,7 +81,7 @@ export default function Home() {
         >
           <Mapbox.Camera
             animationMode="none"
-            zoomLevel={13.79}
+            zoomLevel={15}
             centerCoordinate={[location.longitude, location.latitude]}
           />
         </Mapbox.MapView>
