@@ -28,6 +28,8 @@ export const arrowLeftWhite = "https://firebasestorage.googleapis.com/v0/b/pasah
 export const send = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FSend.png?alt=media&token=3db4600b-40b0-4f4c-a0fe-e202e0ee9e15"; // prettier-ignore
 export const pinOutlined = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FRequest%20Origin.png?alt=media&token=d7bfb9da-845a-4e48-96f5-b785b248bbfb"; // prettier-ignore
 export const call = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FPhone.png?alt=media&token=f27c1ca8-c601-4f37-905c-61ac9ab0c9e5"; // prettier-ignore
+export const ongoing =
+  "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.driver%2FOngoing.png?alt=media&token=d9b9dfa7-2d9d-4bcb-be2c-4a3b4d250b4a"; // prettier-ignore
 
 export const center = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.driver%2FCenter.png?alt=media&token=3bd8ec3f-f3b3-4eab-9919-8cc8b2acacd6"; // prettier-ignore
 
