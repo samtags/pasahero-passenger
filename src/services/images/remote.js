@@ -1,10 +1,11 @@
-export const gettingStarted = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FSet%20Location.png?alt=media&token=738ac137-7924-4a27-af89-118bd05bf6ed"; // prettier-ignore
-export const from = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FOrigin.png?alt=media&token=7913bdfb-7b7f-41aa-aecb-433a275c92b8"; // prettier-ignore
-export const target = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FTarget.png?alt=media&token=d6c31afa-5308-43e8-a8cd-291cb7316009"; // prettier-ignore
-export const to = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FDestination.png?alt=media&token=e92cc2d1-77c3-486f-9793-3c0827ca5aef"; // prettier-ignore
-export const pinEntry = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FPin.png?alt=media&token=0a4a96e6-d58c-4749-a315-9955f0f7e415"; // prettier-ignore
-export const pin = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FFrom%20Primary.png?alt=media&token=d9ed8081-45cd-4519-9f09-5472531d1983"; // prettier-ignore
-export const backCircle = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FCircle%20Back.png?alt=media&token=bff546fa-0686-4949-ab46-08bd9510dc4d"; // prettier-ignore
+export const gettingStarted = require("../../assets/png/getting-started.png");
+export const from = require("../../assets/png/from.png");
+export const target = require("../../assets/png/current-location.png");
+export const account = require("../../assets/png/account.png");
+export const to = require("../../assets/png/to.png");
+export const pinEntry = require("../../assets/png/pin-entry.png");
+export const pin = require("../../assets/png/pin.png");
+export const backCircle = require("../../assets/png/back-circle.png");
 export const checkBoxChecked = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FChecked.png?alt=media&token=37eb6137-cea4-4e8d-bfbf-47c72141c546"; // prettier-ignore
 export const checkBoxUnchecked = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FUnchecked.png?alt=media&token=0d879712-7900-4de4-9ec8-02720b88cf71"; // prettier-ignore
 export const origin = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FPrediction.png?alt=media&token=21bbdf2d-1513-4245-ba1f-b6083baf5d5c"; // prettier-ignore
@@ -13,7 +14,6 @@ export const mute = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.
 export const unmute = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FMute%20Call.png?alt=media&token=da54782a-004b-45d1-ac35-82255fa28c59"; // prettier-ignore
 export const hangUp = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FEnd%20Call.png?alt=media&token=b8157725-8b9b-488e-8441-4d21591dd566"; // prettier-ignore
 export const answer = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FJoin%20Call.png?alt=media&token=9c12bedb-1922-4f88-aa8f-8dda4834b183"; // prettier-ignore
-export const account = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FUser.png?alt=media&token=88972e31-48ef-4dc4-bc63-2eca23074831"; // prettier-ignore
 export const first = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FFrom%20v2.png?alt=media&token=b44cc62e-5546-41eb-8259-c9510c02a8a8"; // prettier-ignore
 export const last = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FTo%20v2.png?alt=media&token=d719e588-0fb3-4ade-a4b5-a37fccdf538d"; // prettier-ignore
 export const angkasIcon = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FAngkas.png?alt=media&token=6790cdbc-7cf7-456b-8e3e-2fed2c4193dc"; // prettier-ignore
