@@ -17,7 +17,7 @@ import { account } from "../../services/images/remote";
 import { ongoing } from "../../services/images/remote";
 import useMatches from "../../services/queries/useMatches";
 import Optional from "../../components/optional";
-import { IfFeatureEnabled, useFeatureIsOn } from "@growthbook/growthbook-react";
+import { IfFeatureEnabled } from "@growthbook/growthbook-react";
 
 export default function Home() {
   const user = useUser();
@@ -25,9 +25,6 @@ export default function Home() {
   const [loc] = useMMKVString("location.current");
   const location = JSON.parse(loc || "{}");
   const { data: matches = [] } = useMatches();
-  const enabled = useFeatureIsOn("passenger-ongoing-trip-indicator");
-
-  console.log(enabled);
 
   const handleOnPressWhereTo = () => {
     handleInitializeDraft();
