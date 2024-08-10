@@ -14,12 +14,17 @@ import initializeUser from "../../services/api/initializeUser";
 import initializeWallet from "../../services/api/initializeWallet";
 import usePushNotification from "../../services/notification/usePushNotification";
 import { account } from "../../services/images/remote";
+import { ongoing } from "../../services/images/remote";
+import useMatches from "../../services/queries/useMatches";
+import Optional from "../../components/optional";
+import { IfFeatureEnabled } from "@growthbook/growthbook-react";
 
 export default function Home() {
   const user = useUser();
   const router = useRouter();
   const [loc] = useMMKVString("location.current");
   const location = JSON.parse(loc || "{}");
+  const { data: matches = [] } = useMatches();
 
   const handleOnPressWhereTo = () => {
     handleInitializeDraft();
@@ -70,6 +75,29 @@ export default function Home() {
             source={account}
           />
         </TouchableOpacity>
+
+        <IfFeatureEnabled feature="passenger-ongoing-trip-indicator">
+          <Optional condition={matches?.length > 0}>
+            <TouchableOpacity
+              onPress={router.navigate.bind(null, "/match/list")}
+              style={styles.ongoingTripIcon}
+            >
+              <View style={{ position: "relative" }}>
+                <View style={styles.badge}>
+                  <Text size={12} color="white">
+                    {matches.length}
+                  </Text>
+                </View>
+              </View>
+              <Image
+                style={{ width: 65, height: 65 }}
+                cachePolicy="memory-disk"
+                contentFit="contain"
+                source={ongoing}
+              />
+            </TouchableOpacity>
+          </Optional>
+        </IfFeatureEnabled>
 
         <Mapbox.MapView
           scaleBarEnabled={false}
@@ -183,5 +211,23 @@ const styles = StyleSheet.create({
     zIndex: 1,
     padding: 16,
     paddingTop: 40,
+  },
+  ongoingTripIcon: {
+    position: "absolute",
+    zIndex: 1,
+    padding: 16,
+    bottom: 158,
+  },
+  badge: {
+    position: "absolute",
+    top: -4,
+    right: 0,
+    backgroundColor: "#EF4444",
+    zIndex: 2,
+    justifyContent: "center",
+    alignItems: "center",
+    width: 20,
+    borderRadius: 20,
+    height: 20,
   },
 });
