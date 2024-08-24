@@ -1,7 +1,7 @@
 import "react-native-gesture-handler";
 import "react-native-reanimated";
 import { Stack } from "expo-router/stack";
-import { ClerkProvider } from "@clerk/clerk-expo";
+import { ClerkProvider, ClerkLoaded, ClerkLoading } from "@clerk/clerk-expo";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useReactQueryDevTools } from "@dev-plugins/react-query";
 import tokenCache from "../src/services/auth/tokenCache";
@@ -19,6 +19,7 @@ import { useEffect } from "react";
 import onFetchUpdateAsync from "../src/services/updates";
 import ImagePreRenderer from "../src/services/images/PreRenderer";
 import GrowthBook from "../src/services/growthbook";
+import SplashScreen from "../src/components/splash";
 
 Notifications.setNotificationHandler({
   handleNotification: () => ({
@@ -51,21 +52,35 @@ export default function Layout() {
   useWarmUpBrowser();
 
   return (
-    <ClerkProvider
-      tokenCache={tokenCache}
-      publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}
-    >
+    <>
+      <ImagePreRenderer />
+
       <QueryClientProvider client={queryClient}>
         <GrowthBook>
+          
           <GestureHandlerRootView style={{ flex: 1 }}>
-            <ImagePreRenderer />
-            <Stack />
+            
+            <ClerkProvider
+              tokenCache={tokenCache}
+              publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}
+            >
+              <ClerkLoading>
+                <SplashScreen />
+              </ClerkLoading>
+              
+              <ClerkLoaded>
+                <Stack />
+              </ClerkLoaded>
+            </ClerkProvider>
+
             <MessageProvider />
             <Cancelation />
             <RequestTimeout />
+
           </GestureHandlerRootView>
+          
         </GrowthBook>
       </QueryClientProvider>
-    </ClerkProvider>
+    </>
   );
 }
