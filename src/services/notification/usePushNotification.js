@@ -4,8 +4,36 @@ import log from "../log";
 import * as Device from "expo-device";
 import messaging from "@react-native-firebase/messaging";
 import useOnUpdate from "../hooks/useOnUpdate";
+import { useRouter } from "expo-router";
 
 export default function usePushNotification(userId) {
+  const router = useRouter();
+
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        log.debug("Received notification response.", response);
+
+        const notificationRoute =
+          response.notification.request.content?.data?.route;
+
+        if (notificationRoute) {
+          const params =
+            response.notification.request.content.data.params || {};
+
+          router.replace({
+            pathname: notificationRoute,
+            params,
+          });
+        }
+      }
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   useOnUpdate(() => {
     if (userId) {
       messaging()
