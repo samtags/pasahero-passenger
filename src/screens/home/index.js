@@ -19,6 +19,8 @@ import useMatches from "../../services/queries/useMatches";
 import Optional from "../../components/optional";
 import { IfFeatureEnabled } from "@growthbook/growthbook-react";
 
+// todo: on refocus on home refetch matches
+
 export default function Home() {
   const user = useUser();
   const router = useRouter();
