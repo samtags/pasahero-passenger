@@ -2,14 +2,14 @@ import { Platform, TouchableOpacity, View } from "react-native";
 import Text from "../../components/text";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useStringVariation } from "@launchdarkly/react-native-client-sdk";
+import { useFeatureValue } from "@growthbook/growthbook-react";
 import storage from "../../services/storage";
 import * as Updates from "expo-updates";
 import log from "../../services/log";
 
 export default function Update() {
-  const googlePlayUrl = useStringVariation("phd-google-play-url", "");
-  const appStoreUrl = useStringVariation("phd-app-store-url", "");
+  const googlePlayUrl = useFeatureValue("php-google-play-url", "");
+  const appStoreUrl = useFeatureValue("php-app-store-url", "");
 
   let url = googlePlayUrl;
 
@@ -30,6 +30,9 @@ export default function Update() {
         });
       return;
     }
+
+    // todo: redirect to the app store
+    log.debug("Redirecting to the store.", { url });
 
     storage.set("app.updateAvailable", false);
   };

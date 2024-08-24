@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   View,
   StyleSheet,
@@ -20,7 +20,7 @@ import Preview from "./components/Preview";
 import useOnUpdate from "../../services/hooks/useOnUpdate";
 import BackButton from "../../components/back";
 import { useMMKVString } from "react-native-mmkv";
-import { useBoolVariation } from "@launchdarkly/react-native-client-sdk";
+import { useFeatureIsOn } from "@growthbook/growthbook-react";
 import cancelMatchRequest from "../../services/api/cancelMatchRequest";
 import { useMutation } from "@tanstack/react-query";
 import useGetDriverProfile from "../../services/queries/useGetDriverProfile";
@@ -1250,7 +1250,7 @@ export function TransitPoints({
   showShareRide,
   onShareRide,
 }) {
-  const isEnableRideShare = useBoolVariation("php-enable-share-ride", false);
+  const isEnableRideShare = useFeatureIsOn("php-enable-share-ride", false);
 
   return (
     <View style={styles.transitContainer}>
@@ -1314,7 +1314,7 @@ function FareDetails({
   showCancelOption,
   serviceCharge,
 }) {
-  const isEnableServiceCharge = useBoolVariation("php-enable-service-charge", false); // prettier-ignore
+  const isEnableServiceCharge = useFeatureIsOn("php-enable-service-charge", false); // prettier-ignore
 
   return (
     <View style={styles.fareDetailsContainer}>

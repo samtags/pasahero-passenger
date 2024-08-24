@@ -5,7 +5,6 @@ import { ClerkProvider } from "@clerk/clerk-expo";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useReactQueryDevTools } from "@dev-plugins/react-query";
 import tokenCache from "../src/services/auth/tokenCache";
-import LaunchdarklyProvider from "../src/services/launchdarkly/Provider";
 import Mapbox from "@rnmapbox/maps";
 import { useFonts } from "expo-font";
 import { useWarmUpBrowser } from "../src/services/hooks/useWarmUpBrowser";
@@ -36,7 +35,7 @@ const queryClient = new QueryClient({});
 UNSAFE_registerProperty("__queryClient__", queryClient);
 
 export default function Layout() {
-  const [fontsLoaded] = useFonts({
+  useFonts({
     "Lato-Thin": require("../assets/fonts/Lato/Lato-Thin.ttf"),
     "Lato-Light": require("../assets/fonts/Lato/Lato-Light.ttf"),
     "Lato-Regular": require("../assets/fonts/Lato/Lato-Regular.ttf"),
@@ -51,9 +50,6 @@ export default function Layout() {
   useReactQueryDevTools(queryClient);
   useWarmUpBrowser();
 
-  // todo: splash screen
-  if (!fontsLoaded) return null;
-
   return (
     <ClerkProvider
       tokenCache={tokenCache}
@@ -61,15 +57,13 @@ export default function Layout() {
     >
       <QueryClientProvider client={queryClient}>
         <GrowthBook>
-          <LaunchdarklyProvider>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <ImagePreRenderer />
-              <Stack />
-              <MessageProvider />
-              <Cancelation />
-              <RequestTimeout />
-            </GestureHandlerRootView>
-          </LaunchdarklyProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <ImagePreRenderer />
+            <Stack />
+            <MessageProvider />
+            <Cancelation />
+            <RequestTimeout />
+          </GestureHandlerRootView>
         </GrowthBook>
       </QueryClientProvider>
     </ClerkProvider>
