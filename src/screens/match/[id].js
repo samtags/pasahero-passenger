@@ -242,6 +242,7 @@ export default function Match() {
 
   function handleCancelFromRequestTimeoutPrompt() {
     router.replace("/");
+    // todo: refetch get matches query
   }
 
   useEffect(() => {
