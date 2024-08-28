@@ -2,14 +2,17 @@ import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { Image } from "expo-image";
 import { to, closeGray } from "../../../services/images/remote";
 
-export default function Input() {
+export default function Input({ onChangeText, onFocus, onBlur }) {
   return (
     <View style={styles.container}>
       <View style={styles.row}>
         <Image style={styles.indicator} cachePolicy="memory-disk" source={to} />
         <TextInput
+          onFocus={() => onFocus?.()}
+          onBlur={() => onBlur?.()}
           placeholder="Search drop-off location"
           style={styles.textInput}
+          onChangeText={(e) => onChangeText?.(e)}
         />
       </View>
       <TouchableOpacity>

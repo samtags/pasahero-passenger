@@ -2,7 +2,7 @@ import { View, StyleSheet } from "react-native";
 import Text from "../../../components/text";
 import Cta from "../../../components/cta";
 
-export default function BottomSheet({ title, subTitle }) {
+export default function BottomSheet({ title, subTitle, onConfirm }) {
   return (
     <View style={styles.container}>
       <View style={{ gap: 8 }}>
@@ -13,11 +13,7 @@ export default function BottomSheet({ title, subTitle }) {
           {subTitle}
         </Text>
       </View>
-      <Cta
-      // onPress={handleConfirm}
-      // disabled={isDisabled}
-      // color={isDisabled ? "#B9BAF9" : "#6366F1"}
-      >
+      <Cta onPress={() => onConfirm?.()} color="#6366F1">
         Confirm
       </Cta>
     </View>
@@ -36,5 +32,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 34,
     borderTopRightRadius: 34,
     gap: 24,
+    zIndex: 2,
   },
 });

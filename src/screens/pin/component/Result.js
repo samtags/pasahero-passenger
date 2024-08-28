@@ -1,31 +1,31 @@
 import { StyleSheet, View, ScrollView, TouchableOpacity } from "react-native";
 import Text from "../../../components/text";
 
-export default function Result() {
+export default function Result({ data = [] }) {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <SearchResult />
-        <SearchResult />
-        <SearchResult />
-        <SearchResult />
-        <SearchResult />
+        {data?.map((item) => (
+          <SearchResult
+            key={item.id}
+            title={item.shortAddress}
+            subTitle={item.longAddress}
+          />
+        ))}
       </ScrollView>
     </View>
   );
 }
 
-export function SearchResult() {
+export function SearchResult({ title, subTitle, onPress }) {
   return (
     <TouchableOpacity>
       <View style={styles.result}>
         <Text color="#707070" size={15} weight="500">
-          Salon for Herr and Frau
+          {title}
         </Text>
         <Text size={15} color="#707070" numberOfLines={2}>
-          Unit 205, CIRQ Building, 1,1 L Sumulong Memorial Circle, Bgry San
-          Roque, San Roque Antip Unit 205, CIRQ Building, 1,1 L Sumulong
-          Memorial Circle, Bgry San Roque, San Roque Antip
+          {subTitle}
         </Text>
       </View>
     </TouchableOpacity>
