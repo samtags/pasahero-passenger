@@ -7,10 +7,8 @@ import {
   StyleSheet,
 } from "react-native";
 import { useState, useRef } from "react";
-// import MapView from "react-native-maps";
 import reverseGeocode from "../../services/api/reverseGeocoding";
 import { Image } from "expo-image";
-import Const from "expo-constants";
 import Mapbox from "@rnmapbox/maps";
 import { pinWhite } from "../../services/images/remote";
 

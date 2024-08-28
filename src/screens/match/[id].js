@@ -1116,7 +1116,6 @@ function StartedPreview({ onHandlerStateChange, profile_id, eta, match_id }) {
           disabled={isPending}
           style={{ opacity: isPending ? 0.25 : 1 }}
           onPress={() => {
-            // todo: add location validation. check if the location is near to the destination
             Alert.alert(
               "Confirm trip arrival",
               "Doing this will complete your the trip. Do you want to continue this action?",
