@@ -1,27 +1,40 @@
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { Image } from "expo-image";
 import { to, closeGray } from "../../../services/images/remote";
+import Optional from "../../../components/optional";
 
-export default function Input({ onChangeText, onFocus, onBlur }) {
+export default function Input({
+  onChangeText,
+  onFocus,
+  onBlur,
+  value,
+  selection,
+  onClear,
+  showClearOption,
+}) {
   return (
     <View style={styles.container}>
       <View style={styles.row}>
         <Image style={styles.indicator} cachePolicy="memory-disk" source={to} />
         <TextInput
+          selection={selection}
           onFocus={() => onFocus?.()}
           onBlur={() => onBlur?.()}
           placeholder="Search drop-off location"
           style={styles.textInput}
           onChangeText={(e) => onChangeText?.(e)}
+          value={value}
         />
       </View>
-      <TouchableOpacity>
-        <Image
-          style={{ width: 20, height: 20 }}
-          cachePolicy="memory-disk"
-          source={closeGray}
-        />
-      </TouchableOpacity>
+      <Optional condition={showClearOption}>
+        <TouchableOpacity onPress={() => onClear?.()}>
+          <Image
+            style={{ width: 20, height: 20 }}
+            cachePolicy="memory-disk"
+            source={closeGray}
+          />
+        </TouchableOpacity>
+      </Optional>
     </View>
   );
 }

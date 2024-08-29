@@ -1,31 +1,50 @@
+import { View } from "react-native";
+import { useContext } from "react";
 import Map from "./component/Map";
 import Info from "./component/Info";
 import Control from "./component/Control";
 import { handleSetTransitLast } from "../transit/search/last";
-import useKeyboard from "../../services/hooks/useKeyboard";
 import Optional from "../../components/optional";
-import { View } from "react-native";
+import { Context } from "./component/Provider";
 
 export default function PinLastLocation() {
-  const { isKeyboardVisible } = useKeyboard();
+  // const router = useRouter();
+  const { selected, setSelected, isKeyboardVisible, coordinates } =
+    useContext(Context);
 
-  const handleConfirm = () => {
-    handleSetTransitLast({
-      latitude: 121.1728652,
-      longitude: 14.5813157,
-      shortAddress: "Pinned Location",
-      longAddress: "Near Salon for Herr and Frau.",
-    });
+  const { isPending, data } = coordinates;
+
+  const handleConfirm = async () => {
+    if (selected) {
+      const { data } = coordinates;
+
+      handleSetTransitLast({
+        latitude: data.latitude,
+        longitude: data.longitude,
+        shortAddress: selected.shortAddress,
+        longAddress: selected.longAddress,
+      });
+
+      // router.replace("/match/request");
+      return;
+    }
   };
 
   return (
     <View style={{ flex: 1 }}>
-      <Map coordinates={[121.1728652, 14.5813157]} />
-      <Control />
+      <View style={{ opacity: isPending ? 0 : 1 }}>
+        <Map
+          coordinates={[
+            data?.longitude || 121.1728652,
+            data?.latitude || 14.5813157,
+          ]}
+        />
+      </View>
+      <Control onSelect={setSelected} />
       <Optional condition={isKeyboardVisible === false}>
         <Info
-          title="Pinned Location"
-          subTitle="Custom pinned location. Near Salon for Herr and Frau."
+          title={selected?.shortAddress || "Pinned Location"}
+          subTitle={selected?.longAddress || "Custom pinned location."}
           onConfirm={handleConfirm}
         />
       </Optional>

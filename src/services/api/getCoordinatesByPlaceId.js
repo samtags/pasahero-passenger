@@ -18,3 +18,11 @@ export default async function getCoordinatesByPlaceId(place_id) {
     }
   );
 }
+
+export function extractCoordinates(data) {
+  return data?.map((item) => ({
+    placeId: item.place_id,
+    shortAddress: item.structured_formatting?.main_text,
+    longAddress: item.description,
+  }));
+}

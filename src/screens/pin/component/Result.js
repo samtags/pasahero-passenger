@@ -1,12 +1,13 @@
 import { StyleSheet, View, ScrollView, TouchableOpacity } from "react-native";
 import Text from "../../../components/text";
 
-export default function Result({ data = [] }) {
+export default function Result({ data = [], onSelect }) {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         {data?.map((item) => (
           <SearchResult
+            onPress={() => onSelect?.(item)}
             key={item.id}
             title={item.shortAddress}
             subTitle={item.longAddress}
@@ -19,7 +20,7 @@ export default function Result({ data = [] }) {
 
 export function SearchResult({ title, subTitle, onPress }) {
   return (
-    <TouchableOpacity>
+    <TouchableOpacity onPress={() => onPress?.()}>
       <View style={styles.result}>
         <Text color="#707070" size={15} weight="500">
           {title}

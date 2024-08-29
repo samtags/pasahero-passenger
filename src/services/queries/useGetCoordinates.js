@@ -9,6 +9,12 @@ export default function useGetCoordinates(id, lat = 0, lng = 0) {
   return useQuery({
     queryKey: ["getCoordinatesByPlaceId", id],
     queryFn: async () => {
+      if (!id)
+        return {
+          latitude: 0,
+          longitude: 0,
+        };
+
       if (lat && lng) {
         return {
           latitude: Number(lat),

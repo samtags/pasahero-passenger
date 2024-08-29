@@ -13,6 +13,7 @@ import { handleSetTransitLast } from "../../../src/screens/transit/search/last";
 import { pin } from "../../../src/services/images/remote";
 import PinLastLocation from "../../../src/screens/pin/last";
 import { useFeatureIsOn } from "@growthbook/growthbook-react";
+import PinProvider from "../../../src/screens/pin/component/Provider";
 
 export default function Entry() {
   const isEnabled = useFeatureIsOn("enable-map-pin-enhancement", false);
@@ -31,7 +32,9 @@ export function Next() {
         }}
       />
       <StatusBar backgroundColor="white" />
-      <PinLastLocation />
+      <PinProvider>
+        <PinLastLocation />
+      </PinProvider>
     </>
   );
 }
