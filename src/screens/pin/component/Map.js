@@ -41,7 +41,7 @@ export default function Map({
       >
         <Mapbox.Camera
           animationMode="none"
-          zoomLevel={16.75}
+          zoomLevel={18}
           centerCoordinate={coordinates}
         />
       </Mapbox.MapView>
