@@ -7,7 +7,7 @@ import Optional from "../../../components/optional";
 import { Context } from "./Provider";
 import log from "../../../services/log";
 
-export default function Control({ placeholder }) {
+export default function Control({ placeholder, indicatorType }) {
   const {
     selected,
     setSelected,
@@ -52,6 +52,7 @@ export default function Control({ placeholder }) {
       <View style={styles.row}>
         <Back />
         <Input
+          indicatorType={indicatorType}
           placeholder={placeholder}
           onClear={handleOnClear}
           selection={selectionSetting}

@@ -1,6 +1,6 @@
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { Image } from "expo-image";
-import { to, closeGray } from "../../../services/images/remote";
+import { to, closeGray, from } from "../../../services/images/remote";
 import Optional from "../../../components/optional";
 import log from "../../../services/log";
 
@@ -13,6 +13,7 @@ export default function Input({
   onClear,
   showClearOption,
   placeholder,
+  indicatorType,
 }) {
   const handleOnFocus = () => {
     log.debug("User tapped the search input.", { actionType: "tap" });
@@ -29,10 +30,17 @@ export default function Input({
     onChangeText?.(text);
   };
 
+  let indicator = from;
+  if (indicatorType === "to") indicator = to;
+
   return (
     <View style={styles.container}>
       <View style={styles.row}>
-        <Image style={styles.indicator} cachePolicy="memory-disk" source={to} />
+        <Image
+          style={styles.indicator}
+          cachePolicy="memory-disk"
+          source={indicator}
+        />
         <TextInput
           selection={selection}
           onFocus={handleOnFocus}
