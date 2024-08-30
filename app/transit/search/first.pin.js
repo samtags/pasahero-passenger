@@ -12,8 +12,35 @@ import useDelayedValue from "../../../src/services/hooks/useDelayedValue";
 import log from "../../../src/services/log";
 import storage from "../../../src/services/storage";
 import { pin } from "../../../src/services/images/remote";
+import FirstLastLocation from "../../../src/screens/pin/first";
+import PinProvider from "../../../src/screens/pin/component/Provider";
+import { useFeatureIsOn } from "@growthbook/growthbook-react";
 
-export default function Pin() {
+export default function Entry() {
+  const isEnabled = useFeatureIsOn("enable-map-pin-enhancement", false);
+
+  if (isEnabled) return <Next />;
+  return <Pin />;
+}
+
+export function Next() {
+  return (
+    <>
+      <Stack.Screen
+        options={{
+          headerShown: false,
+          animation: "ios",
+        }}
+      />
+      <StatusBar backgroundColor="white" />
+      <PinProvider>
+        <FirstLastLocation />
+      </PinProvider>
+    </>
+  );
+}
+
+export function Pin() {
   const params = useLocalSearchParams();
   const router = useRouter();
 
