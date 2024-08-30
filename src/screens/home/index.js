@@ -19,10 +19,11 @@ import { ongoing } from "../../services/images/remote";
 import useMatches from "../../services/queries/useMatches";
 import Optional from "../../components/optional";
 import { IfFeatureEnabled } from "@growthbook/growthbook-react";
-
-// todo: on refocus on home refetch matches
+import useOnFocus from "../../services/hooks/useOnFocus";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Home() {
+  const qClient = useQueryClient();
   const cameraRef = useRef(null);
   const user = useUser();
   const router = useRouter();
@@ -54,6 +55,11 @@ export default function Home() {
       handleInitializeUser(userInfo);
     }
   }, [user?.user]);
+
+  useOnFocus(() => {
+    log.debug("User is in the home screen.");
+    qClient.invalidateQueries(["getMatches", user?.user?.id]);
+  }, []);
 
   let greeting = "Hi,";
 
