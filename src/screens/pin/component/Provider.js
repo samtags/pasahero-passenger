@@ -23,6 +23,8 @@ export const Context = createContext({
 
 export default function PinProvider({ children }) {
   const cameraRef = useRef();
+
+  const [isMapAlreadyChanged, setIsMapAlreadyChanged] = useState(false);
   const [selected, setSelected] = useState();
   const [q, setQ] = useState("");
   const [displayedValue, setDisplayedValue] = useState("");
@@ -45,6 +47,7 @@ export default function PinProvider({ children }) {
 
   function handleSwipeMapStart() {
     setSelected();
+    setIsMapAlreadyChanged(true);
   }
 
   useOnUpdate(() => {
@@ -70,6 +73,19 @@ export default function PinProvider({ children }) {
     }
   }, [data]);
 
+  let displayedTitle = "Exact location";
+  let displayedSubTitle = "Selected a custom location on the map";
+
+  if (selected) {
+    displayedTitle = selected?.shortAddress;
+    displayedSubTitle = selected?.longAddress;
+  } else {
+    if (isMapAlreadyChanged === false) {
+      displayedTitle = currentLocation?.shortAddress;
+      displayedSubTitle = currentLocation?.longAddress;
+    }
+  }
+
   const propsToPass = {
     selected,
     setSelected,
@@ -81,8 +97,8 @@ export default function PinProvider({ children }) {
     setDisplayedValue,
     isMapLoading: isPending,
     setMapCoordinates,
-    title: selected?.shortAddress ?? "Exact location",
-    subTitle: selected?.longAddress ?? "Custom pinned location",
+    title: displayedTitle,
+    subTitle: displayedSubTitle,
     latitude: mapCoordinates.latitude || currentLocation.latitude,
     longitude: mapCoordinates.longitude || currentLocation.longitude,
     defaultLatitude: currentLocation.latitude || 0,
