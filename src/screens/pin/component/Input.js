@@ -2,6 +2,7 @@ import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { Image } from "expo-image";
 import { to, closeGray } from "../../../services/images/remote";
 import Optional from "../../../components/optional";
+import log from "../../../services/log";
 
 export default function Input({
   onChangeText,
@@ -11,18 +12,34 @@ export default function Input({
   selection,
   onClear,
   showClearOption,
+  placeholder,
 }) {
+  const handleOnFocus = () => {
+    log.debug("User tapped the search input.", { actionType: "tap" });
+    onFocus?.();
+  };
+
+  const handleOnBlur = () => {
+    log.debug("User closes the search input.");
+    onBlur?.();
+  };
+
+  const handleChangeText = (text) => {
+    log.debug("User changes the search input text.", { actionType: "change", text }); // prettier-ignore
+    onChangeText?.(text);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.row}>
         <Image style={styles.indicator} cachePolicy="memory-disk" source={to} />
         <TextInput
           selection={selection}
-          onFocus={() => onFocus?.()}
-          onBlur={() => onBlur?.()}
-          placeholder="Search drop-off location"
+          onFocus={handleOnFocus}
+          onBlur={handleOnBlur}
+          placeholder={placeholder}
           style={styles.textInput}
-          onChangeText={(e) => onChangeText?.(e)}
+          onChangeText={handleChangeText}
           value={value}
         />
       </View>

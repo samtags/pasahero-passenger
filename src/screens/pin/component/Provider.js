@@ -6,20 +6,9 @@ import useAutoComplete from "../../../services/queries/useAutoComplete";
 import { extractCoordinates } from "../../../services/api/getCoordinatesByPlaceId";
 import { useMMKVString } from "react-native-mmkv";
 import useOnUpdate from "../../../services/hooks/useOnUpdate";
+import log from "../../../services/log";
 
-export const Context = createContext({
-  selected: undefined,
-  setSelected: () => {},
-  isKeyboardVisible: false,
-  coordinates: {
-    isPending: false,
-    data: undefined,
-  },
-  q: "",
-  setQ: () => {},
-  displayedValue: "",
-  setDisplayedValue: () => {},
-});
+export const Context = createContext({});
 
 export default function PinProvider({ children }) {
   const cameraRef = useRef();
@@ -48,24 +37,35 @@ export default function PinProvider({ children }) {
   function handleSwipeMapStart() {
     setSelected();
     setIsMapAlreadyChanged(true);
+
+    log.debug("User changed the pinned location.", { actionType: "swipe", selected }); // prettier-ignore
   }
 
   useOnUpdate(() => {
-    if (q) setSelected();
+    if (q) {
+      log.debug("New search query detected. Clearing the selected location.", { query: q }); // prettier-ignore
+      setSelected();
+    }
   }, [q]);
 
   useOnUpdate(() => {
-    if (selected) setQ("");
+    if (selected) {
+      log.debug("New selected location detected. Clearing the search query.", { location: selected }); // prettier-ignore
+      setQ("");
+    }
   }, [selected]);
 
   // center map to the selected location
   useOnUpdate(() => {
     if (data?.longitude && data?.latitude) {
+      log.debug("Changing the map center to the selected location.", data);
+
       cameraRef?.current?.setCamera({
         centerCoordinate: [data?.longitude, data?.latitude],
         animationMode: "none",
       });
 
+      log.debug("Changing map coordinates details", data);
       setMapCoordinates({
         latitude: data?.latitude,
         longitude: data?.longitude,

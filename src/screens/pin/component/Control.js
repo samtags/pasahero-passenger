@@ -5,8 +5,9 @@ import Input from "./Input";
 import Result from "./Result";
 import Optional from "../../../components/optional";
 import { Context } from "./Provider";
+import log from "../../../services/log";
 
-export default function Control({ onSelect }) {
+export default function Control({ placeholder }) {
   const {
     selected,
     setSelected,
@@ -19,8 +20,9 @@ export default function Control({ onSelect }) {
 
   const handleOnSelect = (data) => {
     setSelected(data);
-    onSelect?.(data);
     setDisplayedValue(data.shortAddress);
+
+    log.debug("User selected a search result.", { actionType: "tap", data }); // prettier-ignore
   };
 
   const handleChangeText = (value) => {
@@ -31,6 +33,8 @@ export default function Control({ onSelect }) {
   const handleOnClear = () => {
     setQ("");
     setDisplayedValue("");
+
+    log.debug("User cleared the search input.", { actionType: "tap" });
   };
 
   let selectionSetting = undefined;
@@ -48,6 +52,7 @@ export default function Control({ onSelect }) {
       <View style={styles.row}>
         <Back />
         <Input
+          placeholder={placeholder}
           onClear={handleOnClear}
           selection={selectionSetting}
           onChangeText={handleChangeText}

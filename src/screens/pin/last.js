@@ -9,36 +9,43 @@ import { Context } from "./component/Provider";
 import { useRouter } from "expo-router";
 import storage from "../../services/storage";
 import JSON from "../../services/json";
+import log from "../../services/log";
+import useOnFocus from "../../services/hooks/useOnFocus";
 
 export default function PinLastLocation() {
   const router = useRouter();
-  const {
-    setSelected,
-    isKeyboardVisible,
-    latitude,
-    longitude,
-    title,
-    subTitle,
-  } = useContext(Context);
+  const { isKeyboardVisible, latitude, longitude, title, subTitle } =
+    useContext(Context);
 
   const handleConfirm = async () => {
-    handleSetTransitLast({
+    const payload = {
       latitude: latitude,
       longitude: longitude,
       shortAddress: title,
       longAddress: subTitle,
-    });
+    };
+
+    handleSetTransitLast(payload);
 
     router.navigate({
       pathname: "/transit/search/first",
       params: JSON.parse(storage.getString("location.current"), {}),
     });
+
+    log.info("User confirmed the drop-off location.", {
+      actionType: "tap",
+      payload,
+    });
   };
+
+  useOnFocus(() => {
+    log.debug("User is in the drop-off pin location screen.");
+  });
 
   return (
     <View style={{ flex: 1 }}>
       <Map />
-      <Control onSelect={setSelected} />
+      <Control placeholder="Search drop-off location" />
       <Optional condition={isKeyboardVisible === false}>
         <Info title={title} subTitle={subTitle} onConfirm={handleConfirm} />
       </Optional>

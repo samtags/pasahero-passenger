@@ -4,7 +4,8 @@ import Mapbox from "@rnmapbox/maps";
 import { pin } from "../../../services/images/remote";
 import { Context } from "./Provider";
 import Optional from "../../../components/optional";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
+import log from "../../../services/log";
 
 export default function Map() {
   const {
@@ -30,6 +31,10 @@ export default function Map() {
     });
   };
 
+  useEffect(() => {
+    log.debug("Map component rendered.");
+  }, []);
+
   return (
     <View style={[styles.container, containerOptionalStyles]}>
       <Optional condition={isKeyboardVisible === false}>
@@ -44,7 +49,6 @@ export default function Map() {
         attributionEnabled={false}
         onTouchStart={(e) => handleSwipeMapStart?.(e)}
         onCameraChanged={(e) => handleOnChangeRegion?.(e)}
-        // onRegionDidChange={(e) => onRegionDidChange?.(e)}
         styleURL="mapbox://styles/mapbox/streets-v12"
       >
         <Mapbox.Camera

@@ -1,7 +1,13 @@
+import { useEffect } from "react";
 import { StyleSheet, View, ScrollView, TouchableOpacity } from "react-native";
 import Text from "../../../components/text";
+import log from "../../../services/log";
 
 export default function Result({ data = [], onSelect }) {
+  useEffect(() => {
+    log.debug("Showing search results", data);
+  }, []);
+
   return (
     <ScrollView contentContainerStyle={styles.content}>
       {data?.map((item) => (
