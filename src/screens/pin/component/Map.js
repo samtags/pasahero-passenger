@@ -13,8 +13,8 @@ export default function Map() {
     isMapLoading,
     handleSwipeMapStart,
     setMapCoordinates,
-    latitude,
-    longitude,
+    defaultLatitude,
+    defaultLongitude,
   } = useContext(Context);
 
   const containerOptionalStyles = {};
@@ -51,7 +51,7 @@ export default function Map() {
           ref={cameraRef}
           animationMode="none"
           zoomLevel={18}
-          centerCoordinate={[longitude, latitude]}
+          centerCoordinate={[defaultLongitude, defaultLatitude]}
         />
       </Mapbox.MapView>
     </View>

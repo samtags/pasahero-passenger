@@ -62,6 +62,11 @@ export default function PinProvider({ children }) {
         centerCoordinate: [data?.longitude, data?.latitude],
         animationMode: "none",
       });
+
+      setMapCoordinates({
+        latitude: data?.latitude,
+        longitude: data?.longitude,
+      });
     }
   }, [data]);
 
@@ -69,10 +74,6 @@ export default function PinProvider({ children }) {
     selected,
     setSelected,
     isKeyboardVisible,
-    coordinates: {
-      isPending,
-      data,
-    },
     suggestion,
     q,
     setQ,
@@ -81,9 +82,11 @@ export default function PinProvider({ children }) {
     isMapLoading: isPending,
     setMapCoordinates,
     title: selected?.shortAddress ?? "Exact location",
-    subTitle: selected?.longAddress ?? "Pinned Location",
-    latitude: currentLocation.latitude || 0,
-    longitude: currentLocation.longitude || 0,
+    subTitle: selected?.longAddress ?? "Custom pinned location",
+    latitude: mapCoordinates.latitude || currentLocation.latitude,
+    longitude: mapCoordinates.longitude || currentLocation.longitude,
+    defaultLatitude: currentLocation.latitude || 0,
+    defaultLongitude: currentLocation.longitude || 0,
     handleSwipeMapStart,
     cameraRef,
   };

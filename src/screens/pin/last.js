@@ -13,7 +13,6 @@ import JSON from "../../services/json";
 export default function PinLastLocation() {
   const router = useRouter();
   const {
-    selected,
     setSelected,
     isKeyboardVisible,
     latitude,
@@ -23,20 +22,17 @@ export default function PinLastLocation() {
   } = useContext(Context);
 
   const handleConfirm = async () => {
-    if (selected) {
-      handleSetTransitLast({
-        latitude: latitude,
-        longitude: longitude,
-        shortAddress: title,
-        longAddress: subTitle,
-      });
+    handleSetTransitLast({
+      latitude: latitude,
+      longitude: longitude,
+      shortAddress: title,
+      longAddress: subTitle,
+    });
 
-      router.navigate({
-        pathname: "/transit/search/first",
-        params: JSON.parse(storage.getString("location.current"), {}),
-      });
-      return;
-    }
+    router.navigate({
+      pathname: "/transit/search/first",
+      params: JSON.parse(storage.getString("location.current"), {}),
+    });
   };
 
   return (
