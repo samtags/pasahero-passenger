@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { useMMKVString } from "react-native-mmkv";
 import { Stack, useRouter } from "expo-router";
 import { View, SafeAreaView, StyleSheet, TouchableOpacity } from "react-native";
@@ -13,7 +14,7 @@ import useOnUpdate from "../../services/hooks/useOnUpdate";
 import initializeUser from "../../services/api/initializeUser";
 import initializeWallet from "../../services/api/initializeWallet";
 import usePushNotification from "../../services/notification/usePushNotification";
-import { account } from "../../services/images/remote";
+import { account, center } from "../../services/images/remote";
 import { ongoing } from "../../services/images/remote";
 import useMatches from "../../services/queries/useMatches";
 import Optional from "../../components/optional";
@@ -22,6 +23,7 @@ import { IfFeatureEnabled } from "@growthbook/growthbook-react";
 // todo: on refocus on home refetch matches
 
 export default function Home() {
+  const cameraRef = useRef(null);
   const user = useUser();
   const router = useRouter();
   const [loc] = useMMKVString("location.current");
@@ -31,6 +33,15 @@ export default function Home() {
   const handleOnPressWhereTo = () => {
     handleInitializeDraft();
     router.navigate("/transit/search/last");
+  };
+
+  const handleRecenterMap = () => {
+    if (cameraRef?.current) {
+      cameraRef.current.setCamera({
+        centerCoordinate: [location.longitude, location.latitude],
+        animationMode: "flyTo",
+      });
+    }
   };
 
   usePushNotification(user?.user?.id);
@@ -92,7 +103,7 @@ export default function Home() {
                 </View>
               </View>
               <Image
-                style={{ width: 65, height: 65 }}
+                style={{ width: 58, height: 58 }}
                 cachePolicy="memory-disk"
                 contentFit="contain"
                 source={ongoing}
@@ -101,15 +112,23 @@ export default function Home() {
           </Optional>
         </IfFeatureEnabled>
 
+        <TouchableOpacity onPress={handleRecenterMap} style={styles.centerIcon}>
+          <Image
+            style={{ width: 56, height: 56 }}
+            cachePolicy="memory-disk"
+            source={center}
+          />
+        </TouchableOpacity>
+
         <Mapbox.MapView
           scaleBarEnabled={false}
           style={styles.map}
           styleURL="mapbox://styles/mapbox/streets-v12"
-          // styleURL="mapbox://styles/mapbox/navigation-day-v1"
           logoPosition={{ top: -100, left: 0 }}
           attributionEnabled={false}
         >
           <Mapbox.Camera
+            ref={cameraRef}
             animationMode="none"
             zoomLevel={15}
             centerCoordinate={[location.longitude, location.latitude]}
@@ -218,7 +237,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     zIndex: 1,
     padding: 16,
-    bottom: 158,
+    bottom: 160,
   },
   badge: {
     position: "absolute",
@@ -231,5 +250,13 @@ const styles = StyleSheet.create({
     width: 20,
     borderRadius: 20,
     height: 20,
+  },
+  centerIcon: {
+    position: "absolute",
+    zIndex: 1,
+    paddingRight: 14,
+    paddingBottom: 16,
+    right: 0,
+    bottom: 160,
   },
 });

@@ -8,6 +8,7 @@ export const pin = require("../../assets/png/pin.png");
 export const backCircle = require("../../assets/png/back-circle.png");
 export const back = require("../../assets/png/back-circle-centered.png");
 export const closeGray = require("../../assets/png/close-circle-gray.png");
+export const center = require("../../assets/png/center.png");
 export const checkBoxChecked = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FChecked.png?alt=media&token=37eb6137-cea4-4e8d-bfbf-47c72141c546"; // prettier-ignore
 export const checkBoxUnchecked = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FUnchecked.png?alt=media&token=0d879712-7900-4de4-9ec8-02720b88cf71"; // prettier-ignore
 export const origin = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FPrediction.png?alt=media&token=21bbdf2d-1513-4245-ba1f-b6083baf5d5c"; // prettier-ignore
@@ -32,8 +33,6 @@ export const pinOutlined = "https://firebasestorage.googleapis.com/v0/b/pasahero
 export const call = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FPhone.png?alt=media&token=f27c1ca8-c601-4f37-905c-61ac9ab0c9e5"; // prettier-ignore
 export const ongoing =
   "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.driver%2FOngoing.png?alt=media&token=d9b9dfa7-2d9d-4bcb-be2c-4a3b4d250b4a"; // prettier-ignore
-
-export const center = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.driver%2FCenter.png?alt=media&token=3bd8ec3f-f3b3-4eab-9919-8cc8b2acacd6"; // prettier-ignore
 
 /** * @deprecated - use pin instead */
 export const oldPin = "https://firebasestorage.googleapis.com/v0/b/pasahero-5c989.appspot.com/o/com.pasahero.passenger%2FLocation.png?alt=media&token=c6c91f9e-1ea6-4205-9292-506bfdc25a05"; // prettier-ignore
