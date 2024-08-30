@@ -8,31 +8,32 @@ import Optional from "../../components/optional";
 import { Context } from "./component/Provider";
 import { useRouter } from "expo-router";
 import storage from "../../services/storage";
+import JSON from "../../services/json";
 
 export default function PinLastLocation() {
   const router = useRouter();
-  const { selected, setSelected, isKeyboardVisible, coordinates } =
-    useContext(Context);
-
-  const { isPending, data } = coordinates;
+  const {
+    selected,
+    setSelected,
+    isKeyboardVisible,
+    latitude,
+    longitude,
+    title,
+    subTitle,
+  } = useContext(Context);
 
   const handleConfirm = async () => {
     if (selected) {
-      const { data } = coordinates;
-
       handleSetTransitLast({
-        latitude: data.latitude,
-        longitude: data.longitude,
-        shortAddress: selected.shortAddress,
-        longAddress: selected.longAddress,
+        latitude: latitude,
+        longitude: longitude,
+        shortAddress: title,
+        longAddress: subTitle,
       });
-
-      const currentLocationString = storage.getString("location.current");
-      const location = JSON.parse(currentLocationString || "{}");
 
       router.navigate({
         pathname: "/transit/search/first",
-        params: location,
+        params: JSON.parse(storage.getString("location.current"), {}),
       });
       return;
     }
@@ -40,19 +41,10 @@ export default function PinLastLocation() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Map
-        coordinates={[
-          data?.longitude || 121.1728652,
-          data?.latitude || 14.5813157,
-        ]}
-      />
+      <Map />
       <Control onSelect={setSelected} />
       <Optional condition={isKeyboardVisible === false}>
-        <Info
-          title={selected?.shortAddress || "Pinned Location"}
-          subTitle={selected?.longAddress || "Custom pinned location."}
-          onConfirm={handleConfirm}
-        />
+        <Info title={title} subTitle={subTitle} onConfirm={handleConfirm} />
       </Optional>
     </View>
   );

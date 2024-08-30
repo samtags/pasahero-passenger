@@ -6,21 +6,29 @@ import { Context } from "./Provider";
 import Optional from "../../../components/optional";
 import { useContext } from "react";
 
-export default function Map({
-  onCameraChanged,
-  onTouchStart,
-  onRegionDidChange,
-  coordinates,
-}) {
-  const { isKeyboardVisible } = useContext(Context);
-
-  const { isPending } = coordinates;
+export default function Map() {
+  const {
+    isKeyboardVisible,
+    cameraRef,
+    isMapLoading,
+    handleSwipeMapStart,
+    setMapCoordinates,
+    latitude,
+    longitude,
+  } = useContext(Context);
 
   const containerOptionalStyles = {};
 
-  if (isPending) {
+  if (isMapLoading) {
     containerOptionalStyles.opacity = 0;
   }
+
+  const handleOnChangeRegion = (e) => {
+    setMapCoordinates({
+      latitude: e.properties.center[1],
+      longitude: e.properties.center[0],
+    });
+  };
 
   return (
     <View style={[styles.container, containerOptionalStyles]}>
@@ -34,15 +42,16 @@ export default function Map({
         scaleBarEnabled={false}
         logoPosition={{ top: -100, left: 0 }}
         attributionEnabled={false}
-        onTouchStart={(e) => onTouchStart?.(e)}
-        onCameraChanged={(e) => onCameraChanged?.(e)}
-        onRegionDidChange={(e) => onRegionDidChange?.(e)}
+        onTouchStart={(e) => handleSwipeMapStart?.(e)}
+        onCameraChanged={(e) => handleOnChangeRegion?.(e)}
+        // onRegionDidChange={(e) => onRegionDidChange?.(e)}
         styleURL="mapbox://styles/mapbox/streets-v12"
       >
         <Mapbox.Camera
+          ref={cameraRef}
           animationMode="none"
           zoomLevel={18}
-          centerCoordinate={coordinates}
+          centerCoordinate={[longitude, latitude]}
         />
       </Mapbox.MapView>
     </View>

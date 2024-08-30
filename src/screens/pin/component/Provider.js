@@ -4,6 +4,8 @@ import useKeyboard from "../../../services/hooks/useKeyboard";
 import useDelayedValue from "../../../services/hooks/useDelayedValue";
 import useAutoComplete from "../../../services/queries/useAutoComplete";
 import { extractCoordinates } from "../../../services/api/getCoordinatesByPlaceId";
+import { useMMKVString } from "react-native-mmkv";
+import useOnUpdate from "../../../services/hooks/useOnUpdate";
 
 export const Context = createContext({
   selected: undefined,
@@ -20,6 +22,7 @@ export const Context = createContext({
 });
 
 export default function PinProvider({ children }) {
+  const cameraRef = useRef();
   const [selected, setSelected] = useState();
   const [q, setQ] = useState("");
   const [displayedValue, setDisplayedValue] = useState("");
@@ -32,9 +35,35 @@ export default function PinProvider({ children }) {
 
   const suggestion = extractCoordinates(result);
 
-  useEffect(() => {
+  const [currentLocationString] = useMMKVString("location.current");
+  const currentLocation = JSON.parse(currentLocationString || "{}");
+
+  const [mapCoordinates, setMapCoordinates] = useState({
+    latitude: 0,
+    longitude: 0,
+  });
+
+  function handleSwipeMapStart() {
+    setSelected();
+  }
+
+  useOnUpdate(() => {
     if (q) setSelected();
   }, [q]);
+
+  useOnUpdate(() => {
+    if (selected) setQ("");
+  }, [selected]);
+
+  // center map to the selected location
+  useOnUpdate(() => {
+    if (data?.longitude && data?.latitude) {
+      cameraRef?.current?.setCamera({
+        centerCoordinate: [data?.longitude, data?.latitude],
+        animationMode: "none",
+      });
+    }
+  }, [data]);
 
   const propsToPass = {
     selected,
@@ -49,6 +78,14 @@ export default function PinProvider({ children }) {
     setQ,
     displayedValue,
     setDisplayedValue,
+    isMapLoading: isPending,
+    setMapCoordinates,
+    title: selected?.shortAddress ?? "Exact location",
+    subTitle: selected?.longAddress ?? "Pinned Location",
+    latitude: currentLocation.latitude || 0,
+    longitude: currentLocation.longitude || 0,
+    handleSwipeMapStart,
+    cameraRef,
   };
 
   return <Context.Provider value={propsToPass}>{children}</Context.Provider>;
