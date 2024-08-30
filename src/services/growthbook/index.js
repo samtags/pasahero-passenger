@@ -12,7 +12,7 @@ const gb = new GrowthBook({
   streaming: true,
   attributes: {
     service: "com.pasahero",
-    version: "1.0.5",
+    version: "1.0.6",
   },
   // Only required for A/B testing
   // Called every time a user is put into an experiment
