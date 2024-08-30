@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { StyleSheet, View } from "react-native";
+import { Dimensions, StyleSheet, View } from "react-native";
 import Back from "./Back";
 import Input from "./Input";
 import Result from "./Result";
@@ -44,7 +44,7 @@ export default function Control({ onSelect }) {
   }
 
   return (
-    <View style={containerStyles}>
+    <View pointerEvents="box-none" style={containerStyles}>
       <View style={styles.row}>
         <Back />
         <Input
@@ -55,19 +55,14 @@ export default function Control({ onSelect }) {
           showClearOption={isKeyboardVisible && displayedValue}
         />
       </View>
+
       <Optional condition={Boolean(selected) === false}>
-        <Result onSelect={handleOnSelect} data={suggestion} />
+        <Optional condition={suggestion?.length > 0}>
+          <Result onSelect={handleOnSelect} data={suggestion} />
+        </Optional>
       </Optional>
     </View>
   );
-}
-
-function handleTransformAutoCompleteResult(data) {
-  return data?.map((item) => ({
-    placeId: item.place_id,
-    shortAddress: item.structured_formatting?.main_text,
-    longAddress: item.description,
-  }));
 }
 
 const styles = StyleSheet.create({
@@ -76,12 +71,13 @@ const styles = StyleSheet.create({
     top: 0,
     padding: 16,
     paddingTop: 40,
-    width: "100%",
-    // height: "100%",
-    zIndex: 1,
+    width: Dimensions.get("window").width,
+    height: "100%",
+    zIndex: 2,
   },
   row: {
     flexDirection: "row",
+    zIndex: 1,
   },
   short: {
     height: "75%",

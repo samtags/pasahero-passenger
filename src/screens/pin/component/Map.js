@@ -2,8 +2,9 @@ import { View, StyleSheet, Dimensions } from "react-native";
 import { Image } from "expo-image";
 import Mapbox from "@rnmapbox/maps";
 import { pin } from "../../../services/images/remote";
-import useKeyboard from "../../../services/hooks/useKeyboard";
+import { Context } from "./Provider";
 import Optional from "../../../components/optional";
+import { useContext } from "react";
 
 export default function Map({
   onCameraChanged,
@@ -11,12 +12,20 @@ export default function Map({
   onRegionDidChange,
   coordinates,
 }) {
-  const { isKeyboardVisible } = useKeyboard();
+  const { isKeyboardVisible } = useContext(Context);
+
+  const { isPending } = coordinates;
+
+  const containerOptionalStyles = {};
+
+  if (isPending) {
+    containerOptionalStyles.opacity = 0;
+  }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, containerOptionalStyles]}>
       <Optional condition={isKeyboardVisible === false}>
-        <View style={styles.marker}>
+        <View pointerEvents="none" style={styles.marker}>
           <Image style={styles.pin} source={pin} contentFit="contain" />
         </View>
       </Optional>
@@ -60,6 +69,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: Dimensions.get("window").width,
     height: Dimensions.get("window").height,
+    zIndex: 0,
   },
   pin: { height: 98, width: 98 },
 });

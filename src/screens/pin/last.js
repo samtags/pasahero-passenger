@@ -6,9 +6,11 @@ import Control from "./component/Control";
 import { handleSetTransitLast } from "../transit/search/last";
 import Optional from "../../components/optional";
 import { Context } from "./component/Provider";
+import { useRouter } from "expo-router";
+import storage from "../../services/storage";
 
 export default function PinLastLocation() {
-  // const router = useRouter();
+  const router = useRouter();
   const { selected, setSelected, isKeyboardVisible, coordinates } =
     useContext(Context);
 
@@ -25,21 +27,25 @@ export default function PinLastLocation() {
         longAddress: selected.longAddress,
       });
 
-      // router.replace("/match/request");
+      const currentLocationString = storage.getString("location.current");
+      const location = JSON.parse(currentLocationString || "{}");
+
+      router.navigate({
+        pathname: "/transit/search/first",
+        params: location,
+      });
       return;
     }
   };
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={{ opacity: isPending ? 0 : 1 }}>
-        <Map
-          coordinates={[
-            data?.longitude || 121.1728652,
-            data?.latitude || 14.5813157,
-          ]}
-        />
-      </View>
+      <Map
+        coordinates={[
+          data?.longitude || 121.1728652,
+          data?.latitude || 14.5813157,
+        ]}
+      />
       <Control onSelect={setSelected} />
       <Optional condition={isKeyboardVisible === false}>
         <Info

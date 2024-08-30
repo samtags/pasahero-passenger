@@ -3,18 +3,16 @@ import Text from "../../../components/text";
 
 export default function Result({ data = [], onSelect }) {
   return (
-    <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        {data?.map((item) => (
-          <SearchResult
-            onPress={() => onSelect?.(item)}
-            key={item.id}
-            title={item.shortAddress}
-            subTitle={item.longAddress}
-          />
-        ))}
-      </ScrollView>
-    </View>
+    <ScrollView contentContainerStyle={styles.content}>
+      {data?.map((item) => (
+        <SearchResult
+          onPress={() => onSelect?.(item)}
+          key={item.id}
+          title={item.shortAddress}
+          subTitle={item.longAddress}
+        />
+      ))}
+    </ScrollView>
   );
 }
 
@@ -34,9 +32,6 @@ export function SearchResult({ title, subTitle, onPress }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   content: {
     borderRadius: 12,
     backgroundColor: "white",

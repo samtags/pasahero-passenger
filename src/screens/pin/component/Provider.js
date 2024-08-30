@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useRef } from "react";
 import useGetCoordinates from "../../../services/queries/useGetCoordinates";
 import useKeyboard from "../../../services/hooks/useKeyboard";
 import useDelayedValue from "../../../services/hooks/useDelayedValue";
@@ -13,6 +13,10 @@ export const Context = createContext({
     isPending: false,
     data: undefined,
   },
+  q: "",
+  setQ: () => {},
+  displayedValue: "",
+  setDisplayedValue: () => {},
 });
 
 export default function PinProvider({ children }) {
