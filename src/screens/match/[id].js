@@ -54,6 +54,7 @@ import {
   share,
   to,
 } from "../../services/images/remote";
+import { invalidateUseMatches } from "../../services/queries/useMatches";
 
 const defaultLocation = {
   latitude: 14.5535991,
@@ -1467,6 +1468,15 @@ function GrayBar() {
 }
 
 function CancelationPrompt({ match, onProceed, onCancel }) {
+  useEffect(() => {
+    log.debug("Cancelation Prompt displayed");
+
+    return () => {
+      log.debug("Cancelation Prompt closed.");
+      invalidateUseMatches();
+    };
+  }, []);
+
   return (
     <View style={styles.promptContainer}>
       <View style={styles.cancelationContent}>

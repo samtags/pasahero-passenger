@@ -16,7 +16,9 @@ import initializeWallet from "../../services/api/initializeWallet";
 import usePushNotification from "../../services/notification/usePushNotification";
 import { account, center } from "../../services/images/remote";
 import { ongoing } from "../../services/images/remote";
-import useMatches from "../../services/queries/useMatches";
+import useMatches, {
+  invalidateUseMatches,
+} from "../../services/queries/useMatches";
 import Optional from "../../components/optional";
 import { IfFeatureEnabled } from "@growthbook/growthbook-react";
 import useOnFocus from "../../services/hooks/useOnFocus";
@@ -58,7 +60,7 @@ export default function Home() {
 
   useOnFocus(() => {
     log.debug("User is in the home screen.");
-    qClient.invalidateQueries(["getMatches", user?.user?.id]);
+    invalidateUseMatches();
   }, []);
 
   let greeting = "Hi,";

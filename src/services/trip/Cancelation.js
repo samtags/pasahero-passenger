@@ -10,6 +10,7 @@ import { TransitPoints } from "../../screens/match/[id]";
 import findNearby from "../api/findNearby";
 import { useMutation } from "@tanstack/react-query";
 import { useMMKVString } from "react-native-mmkv";
+import { invalidateUseMatches } from "../queries/useMatches";
 
 export default function Cancelation() {
   const router = useRouter();
@@ -22,6 +23,7 @@ export default function Cancelation() {
   function handleClosePrompt() {
     setIncoming();
     log.debug("Trip cancelation prompt closed.");
+    invalidateUseMatches();
   }
 
   const { isPending, mutateAsync: handleRequestTrip } = useMutation({
