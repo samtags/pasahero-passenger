@@ -260,7 +260,7 @@ export default function List() {
   };
 
   const handleOnConfirm = () => {
-    // todo: check wallet balance here.
+    log.info('User tap "Request a Ride" button.', { actionType: "tap" });
 
     mutateAsync()
       .then((res) => {
