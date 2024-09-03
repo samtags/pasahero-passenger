@@ -125,7 +125,7 @@ export default function Setup() {
       })
     );
 
-    log.info("Initial location set to current location.", { latitude, longitude, heading, longAddress, shortAddress }); // prettier-ignore
+    log.debug("Initial location set to current location.", { latitude, longitude, heading, longAddress, shortAddress }); // prettier-ignore
     setTimeout(() => {
       router.navigate("/");
     }, 750);
