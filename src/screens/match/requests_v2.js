@@ -25,6 +25,7 @@ import useGetEstimate from "../../services/queries/useGetEstimate";
 
 export default function Find() {
   const [addTip, setAddTip] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("CASH");
   const [matchDraft] = useMMKVString("match.draft");
 
   const match = JSON.parse(matchDraft || "{}");
@@ -72,8 +73,9 @@ export default function Find() {
       >
         <View style={{ flexDirection: "row", paddingVertical: 16, gap: 16 }}>
           <Image
-            style={{ width: 30, height: 30 }}
+            style={{ width: 34, height: 34 }}
             cachePolicy="memory-disk"
+            resizeMode="contain"
             source={firstIcon}
           />
           <View style={{ gap: 8, flex: 1 }}>
@@ -88,8 +90,9 @@ export default function Find() {
 
         <View style={{ flexDirection: "row", paddingVertical: 16, gap: 16 }}>
           <Image
-            style={{ width: 30, height: 30 }}
+            style={{ width: 34, height: 34 }}
             cachePolicy="memory-disk"
+            resizeMode="contain"
             source={lastIcon}
           />
           <View style={{ gap: 8, flex: 1 }}>
@@ -121,9 +124,24 @@ export default function Find() {
             Preferred Mode of Payment
           </Text>
           <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
-            <Chip active>Cash</Chip>
-            <Chip>E-Wallet</Chip>
-            <Chip>Platform Wallet</Chip>
+            <Chip
+              active={paymentMethod === "CASH"}
+              onPress={() => setPaymentMethod("CASH")}
+            >
+              Cash
+            </Chip>
+            <Chip
+              active={paymentMethod === "E_WALLET"}
+              onPress={() => setPaymentMethod("E_WALLET")}
+            >
+              E-Wallet
+            </Chip>
+            <Chip
+              active={paymentMethod === "PLATFORM_WALLET"}
+              onPress={() => setPaymentMethod("PLATFORM_WALLET")}
+            >
+              Platform Wallet
+            </Chip>
           </View>
         </View>
 
@@ -262,12 +280,12 @@ export default function Find() {
   );
 }
 
-function Chip({ children, active }) {
+function Chip({ children, active, onPress }) {
   let activeStyle = styles.chipInactive;
   if (active) activeStyle = styles.chipActive;
 
   return (
-    <TouchableOpacity>
+    <TouchableOpacity onPress={onPress}>
       <View style={[styles.chip, activeStyle]}>
         <Text weight="bold" color="white">
           {children}
