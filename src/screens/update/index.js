@@ -1,4 +1,4 @@
-import { Platform, TouchableOpacity, View } from "react-native";
+import { Linking, Platform, TouchableOpacity, View } from "react-native";
 import Text from "../../components/text";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -31,8 +31,15 @@ export default function Update() {
       return;
     }
 
-    // todo: redirect to the app store
     log.debug("Redirecting to the store.", { url });
+
+    Linking.canOpenURL(url).then((supported) => {
+      if (supported) {
+        Linking.openURL(url);
+      } else {
+        log.debug("Unable to open the store link", { url });
+      }
+    });
 
     storage.set("app.updateAvailable", false);
   };
