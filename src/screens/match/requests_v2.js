@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
   ScrollView,
@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   View,
   StyleSheet,
+  ToastAndroid,
+  ActivityIndicator,
 } from "react-native";
 import Text from "../../components/text";
 import { Image } from "expo-image";
@@ -22,11 +24,23 @@ import {
 import Cta from "../../components/cta";
 import { useMMKVString } from "react-native-mmkv";
 import useGetEstimate from "../../services/queries/useGetEstimate";
+import Optional from "../../components/optional";
+import { useRouter } from "expo-router";
+import { decimal } from "../../services/util/amount";
 
 export default function Find() {
+  const router = useRouter();
+  const noteRef = useRef("");
+
   const [addTip, setAddTip] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("CASH");
   const [matchDraft] = useMMKVString("match.draft");
+
+  const [selectedPlatforms, setSelectedPlatforms] = useState([
+    "AngkasPassenger",
+    "JoyRideMcTaxi",
+    "MoveItMotoTaxi",
+  ]);
 
   const match = JSON.parse(matchDraft || "{}");
   const first = match?.first;
@@ -42,14 +56,22 @@ export default function Find() {
   let minFare = undefined;
   let maxFare = undefined;
 
-  const fares = [
-    angkasPassenger?.fare?.minFare,
-    angkasPassenger?.fare?.maxFare,
-    joyRideMcTaxi?.fare?.minFare,
-    joyRideMcTaxi?.fare?.maxFare,
-    moveItMotoTaxi?.fare?.minFare,
-    moveItMotoTaxi?.fare?.maxFare,
-  ];
+  const fares = [];
+
+  if (selectedPlatforms.includes("AngkasPassenger")) {
+    fares.push(angkasPassenger?.fare?.minFare);
+    fares.push(angkasPassenger?.fare?.maxFare);
+  }
+
+  if (selectedPlatforms.includes("JoyRideMcTaxi")) {
+    fares.push(joyRideMcTaxi?.fare?.minFare);
+    fares.push(joyRideMcTaxi?.fare?.maxFare);
+  }
+
+  if (selectedPlatforms.includes("MoveItMotoTaxi")) {
+    fares.push(moveItMotoTaxi?.fare?.minFare);
+    fares.push(moveItMotoTaxi?.fare?.maxFare);
+  }
 
   fares.forEach((num, index) => {
     // loop
@@ -64,6 +86,52 @@ export default function Find() {
     if (num > maxFare) maxFare = num;
   });
 
+  function handleSelectPlatform(platform) {
+    if (selectedPlatforms.includes(platform)) {
+      if (selectedPlatforms.length === 1) {
+        ToastAndroid.show("You must select at least one platform.", 100);
+        return;
+      }
+
+      setSelectedPlatforms((prev) => prev.filter((p) => p !== platform));
+    } else {
+      setSelectedPlatforms((prev) => [...prev, platform]);
+    }
+  }
+
+  function handleOnPressFirstLocation() {
+    router.navigate({
+      pathname: "/transit/search/first",
+      params: {
+        shortAddress: match?.first?.shortAddress,
+        latitude: match?.first?.latitude,
+        longitude: match?.first?.longitude,
+        isFromMatchRequest: 1,
+      },
+    });
+  }
+
+  function handleOnPressLastLocation() {
+    router.push({
+      pathname: "/transit/search/last",
+      params: {
+        shortAddress: match?.last?.shortAddress,
+        latitude: match?.last?.latitude,
+        longitude: match?.last?.longitude,
+        isFromMatchRequest: 1,
+      },
+    });
+  }
+
+  const isAngkasSelected =
+    selectedPlatforms.includes("AngkasPassenger") || isLoadingAngkas;
+
+  const isJoyRideSelected =
+    selectedPlatforms.includes("JoyRideMcTaxi") || isLoadingJoyRide;
+
+  const isMoveItSelected =
+    selectedPlatforms.includes("MoveItMotoTaxi") || isLoadingMoveIt;
+
   return (
     <>
       <StatusBar style="light" />
@@ -71,39 +139,43 @@ export default function Find() {
         contentContainerStyle={styles.scrollViewContainer}
         style={styles.scrollView}
       >
-        <View style={{ flexDirection: "row", paddingVertical: 16, gap: 16 }}>
-          <Image
-            style={{ width: 34, height: 34 }}
-            cachePolicy="memory-disk"
-            resizeMode="contain"
-            source={firstIcon}
-          />
-          <View style={{ gap: 8, flex: 1 }}>
-            <Text size={18} weight="bold" color="#1B1B1B">
-              {first?.shortAddress}
-            </Text>
-            <Text size={14} color="#707070">
-              {first?.longAddress}
-            </Text>
+        <TouchableOpacity onPress={handleOnPressFirstLocation}>
+          <View style={{ flexDirection: "row", paddingVertical: 16, gap: 16 }}>
+            <Image
+              style={{ width: 34, height: 34 }}
+              cachePolicy="memory-disk"
+              resizeMode="contain"
+              source={firstIcon}
+            />
+            <View style={{ gap: 8, flex: 1 }}>
+              <Text size={18} weight="bold" color="#1B1B1B">
+                {first?.shortAddress}
+              </Text>
+              <Text size={14} color="#707070">
+                {first?.longAddress}
+              </Text>
+            </View>
           </View>
-        </View>
+        </TouchableOpacity>
 
-        <View style={{ flexDirection: "row", paddingVertical: 16, gap: 16 }}>
-          <Image
-            style={{ width: 34, height: 34 }}
-            cachePolicy="memory-disk"
-            resizeMode="contain"
-            source={lastIcon}
-          />
-          <View style={{ gap: 8, flex: 1 }}>
-            <Text size={18} weight="bold" color="#1B1B1B">
-              {last?.shortAddress}
-            </Text>
-            <Text size={14} color="#707070">
-              {last?.longAddress}
-            </Text>
+        <TouchableOpacity onPress={handleOnPressLastLocation}>
+          <View style={{ flexDirection: "row", paddingVertical: 16, gap: 16 }}>
+            <Image
+              style={{ width: 34, height: 34 }}
+              cachePolicy="memory-disk"
+              resizeMode="contain"
+              source={lastIcon}
+            />
+            <View style={{ gap: 8, flex: 1 }}>
+              <Text size={18} weight="bold" color="#1B1B1B">
+                {last?.shortAddress}
+              </Text>
+              <Text size={14} color="#707070">
+                {last?.longAddress}
+              </Text>
+            </View>
           </View>
-        </View>
+        </TouchableOpacity>
 
         <View style={{ gap: 16, marginTop: 16 }}>
           <Text size={18} weight="bold" color="#1B1B1B">
@@ -111,6 +183,7 @@ export default function Find() {
           </Text>
 
           <TextInput
+            onChangeText={(text) => (noteRef.current = text)}
             multiline
             maxLength={1000}
             autoFocus={false}
@@ -179,15 +252,22 @@ export default function Find() {
           </Text>
 
           <View style={{ gap: 16 }}>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => handleSelectPlatform("JoyRideMcTaxi")}
+              style={{
+                opacity: isJoyRideSelected ? 1 : 0.7,
+              }}
+            >
               <View style={[styles.platformOption, styles.joyRidePlatform]}>
                 <View style={styles.platformContent}>
                   <View style={styles.checkbox}>
-                    <Image
-                      source={checkboxJoyRide}
-                      cachePolicy="memory-disk"
-                      style={{ width: 18, height: 18 }}
-                    />
+                    <Optional condition={isJoyRideSelected}>
+                      <Image
+                        source={checkboxJoyRide}
+                        cachePolicy="memory-disk"
+                        style={{ width: 18, height: 18 }}
+                      />
+                    </Optional>
                   </View>
                   <View style={{ gap: 4 }}>
                     <Text size={18} weight="bold" color="white">
@@ -198,22 +278,34 @@ export default function Find() {
                     </Text>
                   </View>
                 </View>
-                <Text size={22} color="white">
-                  P {joyRideMcTaxi?.fare?.minFare} -{" "}
-                  {joyRideMcTaxi?.fare?.maxFare}
-                </Text>
+                <Optional
+                  fallback={<ActivityIndicator color="white" size="large" />}
+                  condition={isLoadingJoyRide === false}
+                >
+                  <Text size={22} color="white">
+                    P {decimal.format(joyRideMcTaxi?.fare?.minFare || 0)} -{" "}
+                    {decimal.format(joyRideMcTaxi?.fare?.maxFare || 0)}
+                  </Text>
+                </Optional>
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => handleSelectPlatform("AngkasPassenger")}
+              style={{
+                opacity: isAngkasSelected ? 1 : 0.7,
+              }}
+            >
               <View style={[styles.platformOption, styles.angkasPlatform]}>
                 <View style={styles.platformContent}>
                   <View style={styles.checkbox}>
-                    <Image
-                      style={{ width: 18, height: 18 }}
-                      cachePolicy="memory-disk"
-                      source={checkboxAngkas}
-                    />
+                    <Optional condition={isAngkasSelected}>
+                      <Image
+                        style={{ width: 18, height: 18 }}
+                        cachePolicy="memory-disk"
+                        source={checkboxAngkas}
+                      />
+                    </Optional>
                   </View>
                   <View style={{ gap: 4 }}>
                     <Text size={18} weight="bold" color="white">
@@ -224,22 +316,34 @@ export default function Find() {
                     </Text>
                   </View>
                 </View>
-                <Text size={22} color="white">
-                  P {angkasPassenger?.fare?.minFare} -{" "}
-                  {angkasPassenger?.fare?.maxFare}
-                </Text>
+                <Optional
+                  fallback={<ActivityIndicator color="white" size="large" />}
+                  condition={isLoadingAngkas === false}
+                >
+                  <Text size={22} color="white">
+                    P {decimal.format(angkasPassenger?.fare?.minFare || 0)} -{" "}
+                    {decimal.format(angkasPassenger?.fare?.maxFare || 0)}
+                  </Text>
+                </Optional>
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => handleSelectPlatform("MoveItMotoTaxi")}
+              style={{
+                opacity: isMoveItSelected ? 1 : 0.7,
+              }}
+            >
               <View style={[styles.platformOption, styles.moveItPlatform]}>
                 <View style={styles.platformContent}>
                   <View style={styles.checkbox}>
-                    <Image
-                      style={{ width: 18, height: 18 }}
-                      cachePolicy="memory-disk"
-                      source={checkboxMoveIt}
-                    />
+                    <Optional condition={isMoveItSelected}>
+                      <Image
+                        style={{ width: 18, height: 18 }}
+                        cachePolicy="memory-disk"
+                        source={checkboxMoveIt}
+                      />
+                    </Optional>
                   </View>
                   <View style={{ gap: 4 }}>
                     <Text size={18} weight="bold" color="white">
@@ -250,19 +354,27 @@ export default function Find() {
                     </Text>
                   </View>
                 </View>
-                <Text size={22} color="white">
-                  P {moveItMotoTaxi?.fare?.minFare} -{" "}
-                  {moveItMotoTaxi?.fare?.maxFare}
-                </Text>
+
+                <Optional
+                  fallback={<ActivityIndicator color="white" size="large" />}
+                  condition={isLoadingMoveIt === false}
+                >
+                  <Text size={22} color="white">
+                    P {decimal.format(moveItMotoTaxi?.fare?.minFare || 0)} -{" "}
+                    {decimal.format(moveItMotoTaxi?.fare?.maxFare || 0)}
+                  </Text>
+                </Optional>
               </View>
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={{ marginTop: 120, gap: 16 }}>
-          <Text textAlign="center" size={34} weight="bold" color="#353579">
-            P {minFare} - {maxFare}
-          </Text>
+          <Optional condition={fares.length > 0}>
+            <Text textAlign="center" size={34} weight="bold" color="#353579">
+              P {decimal.format(minFare || 0)} - {decimal.format(maxFare || 0)}
+            </Text>
+          </Optional>
 
           <View style={{ paddingHorizontal: 24 }}>
             <Text textAlign="center" size={11} color="#707070">

@@ -136,6 +136,7 @@ export default function TransitSearchLastScreen() {
               params: {
                 latitude: latitude || location.latitude,
                 longitude: longitude || location.longitude,
+                isFromMatchRequest,
               },
             });
           }}

@@ -33,7 +33,7 @@ export default function cta({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 11,
+    borderRadius: 16,
     padding: 17.5,
   },
 });

@@ -6,7 +6,7 @@ import Control from "./component/Control";
 import { handleSetTransitLast } from "../transit/search/last";
 import Optional from "../../components/optional";
 import { Context } from "./component/Provider";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import storage from "../../services/storage";
 import JSON from "../../services/json";
 import log from "../../services/log";
@@ -14,6 +14,9 @@ import useOnFocus from "../../services/hooks/useOnFocus";
 
 export default function PinLastLocation() {
   const router = useRouter();
+  const payload = useLocalSearchParams();
+  const isFromMatchRequest = Boolean(payload?.isFromMatchRequest);
+
   const { isKeyboardVisible, latitude, longitude, title, subTitle } =
     useContext(Context);
 
@@ -27,10 +30,16 @@ export default function PinLastLocation() {
 
     handleSetTransitLast(payload);
 
-    router.navigate({
-      pathname: "/transit/search/first",
-      params: JSON.parse(storage.getString("location.current"), {}),
-    });
+    if (isFromMatchRequest) {
+      router.navigate({
+        pathname: "/match/request",
+      });
+    } else {
+      router.navigate({
+        pathname: "/transit/search/first",
+        params: JSON.parse(storage.getString("location.current"), {}),
+      });
+    }
 
     log.info("User confirmed the drop-off location.", {
       actionType: "tap",
