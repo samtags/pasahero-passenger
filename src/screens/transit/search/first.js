@@ -85,16 +85,23 @@ export default function TransitSearchFirstScreen() {
   }
 
   function handlePressPin() {
-    const locationString = storage.getString("location.current");
-    const location = JSON.parse(locationString);
+    if (isFromMatchRequest) {
+      router.replace({
+        pathname: "/transit/search/first.pin",
+        params,
+      });
+    } else {
+      const locationString = storage.getString("location.current");
+      const location = JSON.parse(locationString);
 
-    router.replace({
-      pathname: "/transit/search/first.pin",
-      params: {
-        latitude: location.latitude,
-        longitude: location.longitude,
-      },
-    });
+      router.replace({
+        pathname: "/transit/search/first.pin",
+        params: {
+          latitude: location.latitude,
+          longitude: location.longitude,
+        },
+      });
+    }
   }
 
   return (

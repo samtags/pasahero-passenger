@@ -25,7 +25,7 @@ export default function TransitSearchLastScreen() {
   const textInputRef = useRef(null);
 
   const params = useLocalSearchParams();
-  const isFromMatchRequest = Boolean(params?.shortAddress);
+  const isFromMatchRequest = Boolean(params?.isFromMatchRequest);
 
   const latitude = params?.latitude;
   const longitude = params?.longitude;
@@ -101,6 +101,27 @@ export default function TransitSearchLastScreen() {
     }
   }, []);
 
+  function handlePressPin() {
+    if (isFromMatchRequest) {
+      router.replace({
+        pathname: "/transit/search/last.pin",
+        params,
+      });
+    } else {
+      const locationString = storage.getString("location.current");
+      const location = JSON.parse(locationString);
+
+      router.replace({
+        pathname: "/transit/search/last.pin",
+        params: {
+          latitude: latitude || location.latitude,
+          longitude: longitude || location.longitude,
+          isFromMatchRequest,
+        },
+      });
+    }
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.heading}>
@@ -127,19 +148,7 @@ export default function TransitSearchLastScreen() {
           />
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => {
-            const locationString = storage.getString("location.current");
-            const location = JSON.parse(locationString);
-
-            router.replace({
-              pathname: "/transit/search/last.pin",
-              params: {
-                latitude: latitude || location.latitude,
-                longitude: longitude || location.longitude,
-                isFromMatchRequest,
-              },
-            });
-          }}
+          onPress={handlePressPin}
           style={{
             alignItems: "center",
             justifyContent: "center",

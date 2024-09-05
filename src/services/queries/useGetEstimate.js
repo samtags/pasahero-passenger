@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import getEstimate from "../api/getEstimate";
+import { decimal } from "../util/amount";
 
 export default function useGetEstimate(service, origin, destination) {
   return useQuery({
@@ -11,6 +12,19 @@ export default function useGetEstimate(service, origin, destination) {
         return null;
 
       const estimate = await getEstimate({ service, origin, destination });
+
+      if (estimate?.fare?.minFare && estimate?.fare?.maxFare) {
+        let estimatedPreview;
+        let formattedMinFare = decimal.format(estimate?.fare?.minFare);
+        let formattedMaxFare = decimal.format(estimate?.fare?.maxFare);
+
+        estimatedPreview = `${formattedMinFare} - ${formattedMaxFare}`;
+
+        if (estimate?.fare) {
+          estimate.fare.estimatedPreview = estimatedPreview;
+        }
+      }
+
       return estimate;
     },
     enabled: !!service && !!origin && !!destination,

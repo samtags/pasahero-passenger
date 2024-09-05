@@ -1,4 +1,5 @@
-import { useState, useRef } from "react";
+import { StackActions, CommonActions } from "@react-navigation/native";
+import { useState, useRef, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
   ScrollView,
@@ -25,22 +26,26 @@ import Cta from "../../components/cta";
 import { useMMKVString } from "react-native-mmkv";
 import useGetEstimate from "../../services/queries/useGetEstimate";
 import Optional from "../../components/optional";
-import { useRouter } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import { decimal } from "../../services/util/amount";
+import { SignedOut, SignedIn, useOAuth, useUser } from "@clerk/clerk-expo";
+import log from "../../services/log";
+import { useMutation } from "@tanstack/react-query";
+import findNearby from "../../services/api/findNearby";
 
 export default function Find() {
+  const isFromAuth = useRef(false);
   const router = useRouter();
+  const navigation = useNavigation();
   const noteRef = useRef("");
+  const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
 
+  const [services, setServices] = useState(preSelectedServices);
   const [addTip, setAddTip] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("CASH");
-  const [matchDraft] = useMMKVString("match.draft");
 
-  const [selectedPlatforms, setSelectedPlatforms] = useState([
-    "AngkasPassenger",
-    "JoyRideMcTaxi",
-    "MoveItMotoTaxi",
-  ]);
+  const [matchDraft] = useMMKVString("match.draft");
+  const [user_id] = useMMKVString("user.id");
 
   const match = JSON.parse(matchDraft || "{}");
   const first = match?.first;
@@ -58,17 +63,17 @@ export default function Find() {
 
   const fares = [];
 
-  if (selectedPlatforms.includes("AngkasPassenger")) {
+  if (services.includes("AngkasPassenger")) {
     fares.push(angkasPassenger?.fare?.minFare);
     fares.push(angkasPassenger?.fare?.maxFare);
   }
 
-  if (selectedPlatforms.includes("JoyRideMcTaxi")) {
+  if (services.includes("JoyRideMcTaxi")) {
     fares.push(joyRideMcTaxi?.fare?.minFare);
     fares.push(joyRideMcTaxi?.fare?.maxFare);
   }
 
-  if (selectedPlatforms.includes("MoveItMotoTaxi")) {
+  if (services.includes("MoveItMotoTaxi")) {
     fares.push(moveItMotoTaxi?.fare?.minFare);
     fares.push(moveItMotoTaxi?.fare?.maxFare);
   }
@@ -86,16 +91,63 @@ export default function Find() {
     if (num > maxFare) maxFare = num;
   });
 
+  const minFareDisplay = decimal.format(minFare || 0);
+  const maxFareDisplay = decimal.format(maxFare || 0);
+  const estimatedPreview = `${minFareDisplay} - ${maxFareDisplay}`;
+
+  /**
+   * prevent stacking of same screen in the navigation stack
+   * resulting in a back button loop to the same screen
+   * this usually happens when the user came from pin location screen
+   */
+  useEffect(() => {
+    const routes = navigation.getState().routes;
+
+    let hasDuplicate = false;
+    let tmp = new Set();
+    const newRoutes = [];
+
+    routes.forEach((route) => {
+      if (tmp.has(route.name)) {
+        hasDuplicate = true;
+        return;
+      }
+
+      tmp.add(route.name);
+      newRoutes.push(route);
+    });
+
+    if (hasDuplicate) {
+      navigation.dispatch(
+        CommonActions.reset({
+          index: newRoutes.length - 1,
+          routes: newRoutes,
+        })
+      );
+    }
+  }, []);
+
+  const { isPending, mutateAsync: handleRequestRide } = useMutation({
+    mutationFn: () =>
+      findNearby({
+        user_id,
+        services,
+        estimatedPreview,
+        first_point: transformToApiField(match?.first),
+        last_point: transformToApiField(match?.last),
+      }),
+  });
+
   function handleSelectPlatform(platform) {
-    if (selectedPlatforms.includes(platform)) {
-      if (selectedPlatforms.length === 1) {
+    if (services.includes(platform)) {
+      if (services.length === 1) {
         ToastAndroid.show("You must select at least one platform.", 100);
         return;
       }
 
-      setSelectedPlatforms((prev) => prev.filter((p) => p !== platform));
+      setServices((prev) => prev.filter((p) => p !== platform));
     } else {
-      setSelectedPlatforms((prev) => [...prev, platform]);
+      setServices((prev) => [...prev, platform]);
     }
   }
 
@@ -136,7 +188,7 @@ export default function Find() {
       return;
     }
 
-    router.push({
+    router.navigate({
       pathname: "/transit/search/last",
       params: {
         shortAddress: match?.last?.shortAddress,
@@ -147,14 +199,51 @@ export default function Find() {
     });
   }
 
+  async function handleSignIn() {
+    try {
+      isFromAuth.current = true;
+      const flow = await startOAuthFlow();
+
+      const { createdSessionId, signUp, setActive } = flow;
+
+      if (createdSessionId) {
+        setActive({ session: createdSessionId });
+      } else {
+        setActive({ session: signUp.createdSessionId });
+      }
+    } catch (err) {
+      log.error("OAuth error", { error: err });
+      isFromAuth.current = false;
+    }
+  }
+
+  function handleOnConfirm() {
+    log.info('User tap "Request a Ride" button.', { actionType: "tap" });
+
+    handleRequestRide()
+      .then((res) => {
+        navigation.dispatch(StackActions.popToTop());
+        router.navigate({
+          pathname: `match/${res?.id}`,
+        });
+      })
+      .catch((err) => {
+        log.warn("Unable to proceed with request Ride", {
+          error: err,
+        });
+      });
+  }
+
   const isAngkasSelected =
-    selectedPlatforms.includes("AngkasPassenger") || isLoadingAngkas;
+    services.includes("AngkasPassenger") || isLoadingAngkas;
 
   const isJoyRideSelected =
-    selectedPlatforms.includes("JoyRideMcTaxi") || isLoadingJoyRide;
+    services.includes("JoyRideMcTaxi") || isLoadingJoyRide;
 
   const isMoveItSelected =
-    selectedPlatforms.includes("MoveItMotoTaxi") || isLoadingMoveIt;
+    services.includes("MoveItMotoTaxi") || isLoadingMoveIt;
+
+  const disableSubmit = isPending || fares.length === 0;
 
   return (
     <>
@@ -307,8 +396,7 @@ export default function Find() {
                   condition={isLoadingJoyRide === false}
                 >
                   <Text size={22} color="white">
-                    P {decimal.format(joyRideMcTaxi?.fare?.minFare || 0)} -{" "}
-                    {decimal.format(joyRideMcTaxi?.fare?.maxFare || 0)}
+                    P {joyRideMcTaxi?.fare?.estimatedPreview}
                   </Text>
                 </Optional>
               </View>
@@ -345,8 +433,7 @@ export default function Find() {
                   condition={isLoadingAngkas === false}
                 >
                   <Text size={22} color="white">
-                    P {decimal.format(angkasPassenger?.fare?.minFare || 0)} -{" "}
-                    {decimal.format(angkasPassenger?.fare?.maxFare || 0)}
+                    P {angkasPassenger?.fare?.estimatedPreview}
                   </Text>
                 </Optional>
               </View>
@@ -384,8 +471,7 @@ export default function Find() {
                   condition={isLoadingMoveIt === false}
                 >
                   <Text size={22} color="white">
-                    P {decimal.format(moveItMotoTaxi?.fare?.minFare || 0)} -{" "}
-                    {decimal.format(moveItMotoTaxi?.fare?.maxFare || 0)}
+                    P {moveItMotoTaxi?.fare?.estimatedPreview}
                   </Text>
                 </Optional>
               </View>
@@ -396,7 +482,7 @@ export default function Find() {
         <View style={{ marginTop: 120, gap: 16 }}>
           <Optional condition={fares.length > 0}>
             <Text textAlign="center" size={34} weight="bold" color="#353579">
-              P {decimal.format(minFare || 0)} - {decimal.format(maxFare || 0)}
+              P {estimatedPreview}
             </Text>
           </Optional>
 
@@ -407,9 +493,24 @@ export default function Find() {
             </Text>
           </View>
 
-          <Cta onPress={() => {}} color="#6366F1">
-            Request a Ride
-          </Cta>
+          <SignedOut>
+            <Cta
+              disabled={disableSubmit}
+              color={disableSubmit ? "#B9BAF9" : "#6366F1"}
+              onPress={handleSignIn}
+            >
+              Sign in to Continue
+            </Cta>
+          </SignedOut>
+          <SignedIn>
+            <Cta
+              onPress={handleOnConfirm}
+              disabled={disableSubmit}
+              color={disableSubmit ? "#B9BAF9" : "#6366F1"}
+            >
+              Request a Ride
+            </Cta>
+          </SignedIn>
         </View>
       </ScrollView>
     </>
@@ -497,3 +598,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#CFD0FF",
   },
 });
+
+const preSelectedServices = [
+  "AngkasPassenger",
+  "JoyRideMcTaxi",
+  "MoveItMotoTaxi",
+];
+
+function transformToApiField(obj) {
+  const data = { ...obj };
+
+  data.short_address = obj.shortAddress;
+  data.long_address = obj.longAddress;
+
+  return data;
+}
