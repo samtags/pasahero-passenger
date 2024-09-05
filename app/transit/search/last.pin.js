@@ -23,6 +23,12 @@ export default function Entry() {
 }
 
 export function Next() {
+  const params = useLocalSearchParams();
+
+  const coordinates = {};
+  if (params.latitude) coordinates.latitude = params.latitude;
+  if (params.longitude) coordinates.longitude = params.longitude;
+
   return (
     <>
       <Stack.Screen
@@ -32,7 +38,7 @@ export function Next() {
         }}
       />
       <StatusBar backgroundColor="white" />
-      <PinProvider>
+      <PinProvider {...coordinates}>
         <PinLastLocation />
       </PinProvider>
     </>

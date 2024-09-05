@@ -100,7 +100,19 @@ export default function Find() {
   }
 
   function handleOnPressFirstLocation() {
-    router.navigate({
+    if (match?.first?.shortAddress?.toLowerCase?.() === "exact location") {
+      router.navigate({
+        pathname: "/transit/search/first.pin",
+        params: {
+          latitude: match?.first.latitude,
+          longitude: match?.first.longitude,
+          isFromMatchRequest: 1,
+        },
+      });
+      return;
+    }
+
+    router.replace({
       pathname: "/transit/search/first",
       params: {
         shortAddress: match?.first?.shortAddress,
@@ -112,6 +124,18 @@ export default function Find() {
   }
 
   function handleOnPressLastLocation() {
+    if (match?.last?.shortAddress?.toLowerCase?.() === "exact location") {
+      router.navigate({
+        pathname: "/transit/search/last.pin",
+        params: {
+          latitude: match?.last.latitude,
+          longitude: match?.last.longitude,
+          isFromMatchRequest: 1,
+        },
+      });
+      return;
+    }
+
     router.push({
       pathname: "/transit/search/last",
       params: {

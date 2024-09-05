@@ -10,7 +10,7 @@ import log from "../../../services/log";
 
 export const Context = createContext({});
 
-export default function PinProvider({ children }) {
+export default function PinProvider({ children, latitude, longitude }) {
   const cameraRef = useRef();
 
   const [isMapAlreadyChanged, setIsMapAlreadyChanged] = useState(false);
@@ -27,7 +27,14 @@ export default function PinProvider({ children }) {
   const suggestion = extractCoordinates(result);
 
   const [currentLocationString] = useMMKVString("location.current");
-  const currentLocation = JSON.parse(currentLocationString || "{}");
+  let currentLocation = JSON.parse(currentLocationString || "{}"); // fall back pin location is the user's current location
+
+  if (latitude && longitude) {
+    currentLocation = {
+      latitude,
+      longitude,
+    };
+  }
 
   const [mapCoordinates, setMapCoordinates] = useState({
     latitude: 0,
@@ -73,8 +80,8 @@ export default function PinProvider({ children }) {
     }
   }, [data]);
 
-  let displayedTitle = "Exact location";
-  let displayedSubTitle = "Selected a custom location on the map";
+  let displayedTitle;
+  let displayedSubTitle;
 
   if (selected) {
     displayedTitle = selected?.shortAddress;
@@ -85,6 +92,10 @@ export default function PinProvider({ children }) {
       displayedSubTitle = currentLocation?.longAddress;
     }
   }
+
+  if (!displayedTitle) displayedTitle = "Exact location";
+  if (!displayedSubTitle)
+    displayedSubTitle = "Selected a custom location on the map";
 
   const propsToPass = {
     selected,
