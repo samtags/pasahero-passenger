@@ -1,6 +1,5 @@
 import { StackActions, CommonActions } from "@react-navigation/native";
 import { useState, useRef, useEffect } from "react";
-import { StatusBar } from "expo-status-bar";
 import {
   ScrollView,
   TextInput,
@@ -9,6 +8,7 @@ import {
   StyleSheet,
   ToastAndroid,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import Text from "../../components/text";
 import { Image } from "expo-image";
@@ -41,7 +41,7 @@ export default function Find() {
   const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
 
   const [services, setServices] = useState(preSelectedServices);
-  const [addTip, setAddTip] = useState(false);
+  const [willAddTip, setWillAddTip] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("CASH");
 
   const [matchDraft] = useMMKVString("match.draft");
@@ -93,7 +93,7 @@ export default function Find() {
 
   const minFareDisplay = decimal.format(minFare || 0);
   const maxFareDisplay = decimal.format(maxFare || 0);
-  const estimatedPreview = `${minFareDisplay} - ${maxFareDisplay}`;
+  const estimatePreview = `${minFareDisplay} - ${maxFareDisplay}`;
 
   /**
    * prevent stacking of same screen in the navigation stack
@@ -127,14 +127,37 @@ export default function Find() {
     }
   }, []);
 
+  // prevent back button
+  useEffect(() => {
+    function handleBackButton() {
+      return true;
+    }
+
+    BackHandler.addEventListener("hardwareBackPress", handleBackButton);
+
+    return () => {
+      BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
+    };
+  }, []);
+
   const { isPending, mutateAsync: handleRequestRide } = useMutation({
     mutationFn: () =>
       findNearby({
         user_id,
         services,
-        estimatedPreview,
+        estimatePreview,
         first_point: transformToApiField(match?.first),
         last_point: transformToApiField(match?.last),
+        notes: noteRef.current,
+        paymentMethod,
+        willAddTip,
+        fare: {
+          minFare,
+          maxFare,
+          angkasPassenger,
+          joyRideMcTaxi,
+          moveItMotoTaxi,
+        },
       }),
   });
 
@@ -164,7 +187,7 @@ export default function Find() {
       return;
     }
 
-    router.replace({
+    router.navigate({
       pathname: "/transit/search/first",
       params: {
         shortAddress: match?.first?.shortAddress,
@@ -247,7 +270,6 @@ export default function Find() {
 
   return (
     <>
-      <StatusBar style="light" />
       <ScrollView
         contentContainerStyle={styles.scrollViewContainer}
         style={styles.scrollView}
@@ -346,14 +368,14 @@ export default function Find() {
             </TouchableOpacity>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-            <Text weight="bold" color={addTip ? "#6366F1" : "#1B1B1B"}>
-              {addTip ? "Yes" : "No"}
+            <Text weight="bold" color={willAddTip ? "#6366F1" : "#1B1B1B"}>
+              {willAddTip ? "Yes" : "No"}
             </Text>
-            <TouchableOpacity onPress={() => setAddTip((prev) => !prev)}>
+            <TouchableOpacity onPress={() => setWillAddTip((prev) => !prev)}>
               <Image
                 style={{ width: 40, height: 40 }}
                 cachePolicy="memory-disk"
-                source={addTip ? radioOn : radioOff}
+                source={willAddTip ? radioOn : radioOff}
               />
             </TouchableOpacity>
           </View>
@@ -482,7 +504,7 @@ export default function Find() {
         <View style={{ marginTop: 120, gap: 16 }}>
           <Optional condition={fares.length > 0}>
             <Text textAlign="center" size={34} weight="bold" color="#353579">
-              P {estimatedPreview}
+              P {estimatePreview}
             </Text>
           </Optional>
 

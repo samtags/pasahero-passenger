@@ -6,14 +6,22 @@ import log from "../log";
  * @param {Payload} param0
  * @returns
  */
-export default async function findNearby({
-  user_id,
-  first_point,
-  last_point,
-  services,
-  estimatePreview,
-}) {
+export default async function findNearby(payload) {
+  const {
+    user_id,
+    first_point,
+    last_point,
+    services,
+    estimatePreview,
+    fare,
+    notes,
+    paymentMethod,
+    willAddTip,
+  } = payload;
+
   try {
+    log.debug("Initiating find nearby drivers.", payload);
+
     const res = await axios.post("https://demand-2h6pkmfalq-et.a.run.app", {
       user_id,
       latitude: first_point.latitude,
@@ -22,6 +30,10 @@ export default async function findNearby({
       last_point,
       services,
       estimatePreview,
+      fare,
+      notes,
+      paymentMethod,
+      willAddTip,
     });
 
     log.debug("Successfully created trip request.", { res });
