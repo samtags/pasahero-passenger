@@ -13,7 +13,7 @@ export default function Result({ data = [], onSelect }) {
       {data?.map((item) => (
         <SearchResult
           onPress={() => onSelect?.(item)}
-          key={item.id}
+          key={item.placeId}
           title={item.shortAddress}
           subTitle={item.longAddress}
         />

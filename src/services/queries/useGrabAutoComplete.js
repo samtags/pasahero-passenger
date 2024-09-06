@@ -16,7 +16,7 @@ export default function useGrabAutoComplete(input) {
         res?.data || []
       );
     },
-    staleTime: 1000 * 60 * 30,
+    staleTime: 1000 * 60 * 30, // 30 minutes
   });
 }
 
@@ -27,7 +27,7 @@ function handleTransformCompatibilityWithGoogleAutoComplete(data = []) {
     if (item.Text) {
       const parts = item.Text.split(",");
       main_text = parts.shift();
-      description = parts.join(",");
+      description = parts?.join(",")?.trim();
     }
 
     return {

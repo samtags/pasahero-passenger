@@ -17,9 +17,9 @@ export default async function getGrabCoordinatesByPlaceId(place_id) {
   return response.data;
 }
 
-export function extractCoordinates(data) {
+export function extractData(data) {
   return data?.map((item) => ({
-    placeId: item.place_id,
+    placeId: item.PlaceId,
     shortAddress: item.structured_formatting?.main_text,
     longAddress: item.description,
   }));
