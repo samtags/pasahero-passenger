@@ -7,14 +7,19 @@ import { origin } from "../../services/images/remote";
  *
  * @param {PredictionProps} props
  */
-export default function SearchResult({ shortAddress, longAddress, onPress }) {
+export default function SearchResult({
+  shortAddress,
+  longAddress,
+  onPress,
+  indicator,
+}) {
   return (
     <TouchableOpacity onPress={() => onPress?.()}>
       <View style={styles.container}>
         <Image
           style={styles.indicator}
           cachePolicy="memory-disk"
-          source={origin}
+          source={indicator ?? origin}
         />
         <View style={styles.content}>
           <Text numberOfLines={1} color="#1B1B1B" weight="bold" size={18}>
@@ -33,7 +38,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 12,
     paddingVertical: 16,
     paddingLeft: 8,
     borderBottomWidth: 1,

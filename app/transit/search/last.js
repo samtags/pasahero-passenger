@@ -1,11 +1,15 @@
+import { useFeatureIsOn } from "@growthbook/growthbook-react";
 import { Stack, useNavigation } from "expo-router";
 import Text from "../../../src/components/text";
 import TransitSearchLast from "../../../src/screens/transit/search/last";
 import { useEffect } from "react";
+import TransitSearchLastGrab from "../../../src/screens/transit/search/last.grab";
+import Optional from "../../../src/components/optional";
 import log from "../../../src/services/log";
 
 export default function TransitSearchLastRoute() {
   const navigation = useNavigation();
+  const isEnabledGrabAutoComplete = useFeatureIsOn("enable-grab-auto-complete", false); // prettier-ignore
 
   useEffect(() => {
     function handleBeforeRemove(e) {
@@ -35,7 +39,12 @@ export default function TransitSearchLastRoute() {
           headerTintColor: "#757477",
         }}
       />
-      <TransitSearchLast />
+      <Optional
+        fallback={<TransitSearchLast />}
+        condition={isEnabledGrabAutoComplete}
+      >
+        <TransitSearchLastGrab />
+      </Optional>
     </>
   );
 }

@@ -1,8 +1,16 @@
 import { Stack } from "expo-router";
 import Text from "../../../src/components/text";
 import TransitSearchFirst from "../../../src/screens/transit/search/first";
+import TransitSearchFirstGrab from "../../../src/screens/transit/search/first.grab";
+import Optional from "../../../src/components/optional";
+import { useFeatureIsOn } from "@growthbook/growthbook-react";
 
 export default function TransitSearchFirstRoute() {
+  const isEnabledGrabAutoComplete = useFeatureIsOn(
+    "enable-grab-auto-complete",
+    false
+  );
+
   return (
     <>
       <Stack.Screen
@@ -16,7 +24,12 @@ export default function TransitSearchFirstRoute() {
           headerTitleAlign: "center",
         }}
       />
-      <TransitSearchFirst />
+      <Optional
+        fallback={<TransitSearchFirst />}
+        condition={isEnabledGrabAutoComplete}
+      >
+        <TransitSearchFirstGrab />
+      </Optional>
     </>
   );
 }
