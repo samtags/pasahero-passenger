@@ -64,7 +64,7 @@ export default function Account() {
         </View>
       </ScrollView>
       <View style={{ padding: 24 }}>
-        <Text color="#bbbbbb">1.0.7-beta</Text>
+        <Text color="#bbbbbb">1.0.8-beta</Text>
       </View>
     </View>
   );
