@@ -9,7 +9,7 @@ export default async function initializeWallet(id) {
     .upsert({ user_id: id })
     .select();
 
-  if (error.message.includes("duplicate")) {
+  if (error?.message?.includes("duplicate")) {
     log.debug("Wallet already exists.");
   } else {
     log.warn("Upsert wallet error.", { error });

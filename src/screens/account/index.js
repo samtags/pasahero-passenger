@@ -9,6 +9,7 @@ import {
   useAuth,
 } from "@clerk/clerk-expo";
 import { handleResetUser } from "../home";
+import log from "../../services/log";
 
 export default function Account() {
   const { signOut } = useAuth();
