@@ -895,31 +895,46 @@ function RequestedPreview({
       </Text>
       <View style={styles.services}>
         <Optional condition={services?.includes("AngkasPassenger")}>
-          <View style={styles.serviceContainer}>
+          <View style={[styles.serviceChip, styles.angkas]}>
+            <Text weight="bold" size={12} color="white">
+              Passenger
+            </Text>
+          </View>
+          {/* <View style={styles.serviceContainer}>
             <Image
               source={angkasIcon}
               cachePolicy="memory-disk"
               style={styles.image}
             />
-          </View>
+          </View> */}
         </Optional>
         <Optional condition={services?.includes("JoyRideMcTaxi")}>
-          <View style={styles.serviceContainer}>
+          <View style={[styles.serviceChip, styles.joyRide]}>
+            <Text weight="bold" size={12} color="white">
+              MC Taxi
+            </Text>
+          </View>
+          {/* <View style={styles.serviceContainer}>
             <Image
               source={joyrideIcon}
               cachePolicy="memory-disk"
               style={styles.image}
             />
-          </View>
+          </View> */}
         </Optional>
         <Optional condition={services?.includes("MoveItMotoTaxi")}>
-          <View style={styles.serviceContainer}>
+          <View style={[styles.serviceChip, styles.moveIt]}>
+            <Text weight="bold" size={12} color="white">
+              MotoTaxi
+            </Text>
+          </View>
+          {/* <View style={styles.serviceContainer}>
             <Image
               source={moveItIcon}
               cachePolicy="memory-disk"
               style={styles.image}
             />
-          </View>
+          </View> */}
         </Optional>
       </View>
     </Preview>
@@ -1615,8 +1630,8 @@ const styles = StyleSheet.create({
   },
   services: {
     flexDirection: "row",
-    marginTop: 24,
-    gap: 8,
+    marginTop: 16,
+    gap: 5,
   },
   serviceContainer: {
     height: 24,
@@ -1703,6 +1718,14 @@ const styles = StyleSheet.create({
   cancelationContent: {
     backgroundColor: "white",
   },
+  serviceChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 16,
+  },
+  angkas: { backgroundColor: "#0090F9" },
+  joyRide: { backgroundColor: "#181ACA" },
+  moveIt: { backgroundColor: "#EF4444" },
 });
 
 /**
