@@ -9,6 +9,7 @@ import {
   ToastAndroid,
   ActivityIndicator,
   BackHandler,
+  Alert,
 } from "react-native";
 import Text from "../../components/text";
 import { Image } from "expo-image";
@@ -32,8 +33,11 @@ import { SignedOut, SignedIn, useOAuth, useUser } from "@clerk/clerk-expo";
 import log from "../../services/log";
 import { useMutation } from "@tanstack/react-query";
 import findNearby from "../../services/api/findNearby";
+import useOnUpdateSnapshot from "../../services/hooks/useOnUpdateSnapshot";
+import storage from "../../services/storage";
 
 export default function Find() {
+  const user = useUser();
   const isFromAuth = useRef(false);
   const router = useRouter();
   const navigation = useNavigation();
@@ -45,7 +49,6 @@ export default function Find() {
   const [paymentMethod, setPaymentMethod] = useState("CASH");
 
   const [matchDraft] = useMMKVString("match.draft");
-  const [user_id] = useMMKVString("user.id");
 
   const match = JSON.parse(matchDraft || "{}");
   const first = match?.first;
@@ -140,9 +143,22 @@ export default function Find() {
     };
   }, []);
 
+  useOnUpdateSnapshot(
+    (prev, curr) => {
+      if (!prev.user?.user && curr.user?.user) {
+        if (isFromAuth.current === true) {
+          handleOnConfirm();
+        }
+      }
+    },
+    { user }
+  );
+
   const { isPending, mutateAsync: handleRequestRide } = useMutation({
-    mutationFn: () =>
-      findNearby({
+    mutationFn: () => {
+      const user_id = storage.getString("user.id");
+
+      const payload = {
         user_id,
         services,
         estimatePreview,
@@ -158,7 +174,10 @@ export default function Find() {
           joyRideMcTaxi,
           moveItMotoTaxi,
         },
-      }),
+      };
+
+      return findNearby(payload);
+    },
   });
 
   function handleSelectPlatform(platform) {
@@ -251,7 +270,11 @@ export default function Find() {
         });
       })
       .catch((err) => {
-        log.warn("Unable to proceed with request Ride", {
+        Alert.alert(
+          "Unable to proceed",
+          "There was an error while requesting a ride. Please try again later."
+        );
+        log.error("Unable to proceed with request Ride", {
           error: err,
         });
       });
