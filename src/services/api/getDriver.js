@@ -9,7 +9,7 @@ export default async function getDriver(driver_id) {
   const { data, error } = await supabase
     .from("drivers")
     .select("active_services, display_name, plate_number, model, image_url")
-    .eq("ref", driver_id)
+    .eq("user_id", driver_id)
     .single();
 
   if (error) {
