@@ -1,8 +1,4 @@
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
-import { useCallback, useRef, useState } from "react";
-import { useUser } from "@clerk/clerk-expo";
-import moment from "moment";
-import { Image } from "expo-image";
 import {
   View,
   TouchableOpacity,
@@ -10,17 +6,22 @@ import {
   TextInput,
   ScrollView,
 } from "react-native";
-
-import Message from "./util/CommsMessage";
+import supabase from "../../services/supabase";
+import { useCallback, useRef, useState } from "react";
+import Message from "./util/Message";
+import { useUser } from "@clerk/clerk-expo";
+import useIncomingMessage from "./util/useIncomingMessage";
+import OrderedMap from "../../services/ordered-map";
+import useOnUpdate from "../../services/hooks/useOnUpdate";
+import moment from "moment";
 import log from "../../services/log";
+import { Image } from "expo-image";
 import Text from "../../components/text";
 import { send } from "../../services/images/remote";
-import getChats from "../../services/api/getChats";
-import sendChat from "../../services/api/sendChat";
-import useMessages from "./util/useMessages";
-import useMatch from "../../services/supabase/realtime/useMatch";
 
 export default function Messaging() {
+  const messageMap = useRef(new OrderedMap());
+
   const scrollViewRef = useRef();
   const user = useUser();
   const [, toggleState] = useState(false);
@@ -28,29 +29,20 @@ export default function Messaging() {
   const refValue = useRef("");
   const refInput = useRef(null);
   const params = useLocalSearchParams();
-  const { match } = useMatch(params?.transit);
 
-  const { messages, handleAddMessage } = useMessages({
-    onIncomingMessage: handleOnIncomingMessage,
-  });
+  const incomingMessage = useIncomingMessage(params.transit);
+  useOnUpdate(handleAddIncomingMessage, [incomingMessage]);
 
-  const handleOnFocus = useCallback(() => {
-    handleGetMessages().finally(() => {
-      handleManualRerender();
-      setTimeout(handleScrollToBottom);
-    });
-  }, []);
-
-  useFocusEffect(handleOnFocus);
-
-  function handleOnIncomingMessage() {
-    handleManualRerender();
-    setTimeout(handleScrollToBottom, 250);
-  }
-
-  function handleScrollToBottom() {
-    scrollViewRef?.current?.scrollToEnd?.({ animated: false });
-  }
+  useFocusEffect(
+    useCallback(() => {
+      handleGetMessages().finally(() => {
+        handleManualRerender();
+        setTimeout(() =>
+          scrollViewRef?.current?.scrollToEnd?.({ animated: false })
+        );
+      });
+    }, [])
+  );
 
   function handleClearSetInput() {
     refInput.current?.setNativeProps({ text: "" });
@@ -61,7 +53,6 @@ export default function Messaging() {
     msg.setMessage(refValue.current?.trim?.());
     msg.setSenderId(user?.user?.id);
     msg.setTransit(params?.transit ?? "/dev/null");
-    msg.setReceiverId(match?.driver_id);
     return msg;
   }
 
@@ -70,12 +61,10 @@ export default function Messaging() {
       toggleState();
       return;
     }
-
     const message = handleBuildMessage();
 
     // send to server
-    sendChat(message);
-    // todo: handle negative scenario of sending chat. eg. failed to send in server side
+    sendMessage(message);
 
     // send message to client
     handleAddMessage(message);
@@ -94,15 +83,30 @@ export default function Messaging() {
     toggleState((state) => !state);
   }
 
-  async function handleGetMessages() {
-    log.debug("Retrieving messages from server.");
-    const retrieveMessages = await handleRetrieveMessages(params?.transit);
+  function handleAddIncomingMessage() {
+    if (incomingMessage) {
+      handleAddMessage(incomingMessage);
+      handleManualRerender();
+      setTimeout(() => {
+        scrollViewRef?.current?.scrollToEnd?.({ animated: false });
+      }, 250);
+    }
+  }
 
-    log.debug("Syncing retrieved messages with the messages state", {
-      retrieveMessages,
-      messages,
-    });
-    retrieveMessages.forEach(handleAddMessage);
+  async function handleGetMessages() {
+    const messages = await handleRetrieveMessages(params?.transit);
+    console.log("🚀 ~ handleGetMessages ~ messages:", messages);
+    log.debug("Retrieved messages from server.", { messages });
+    messages.forEach((message) => handleAddMessage(message));
+  }
+
+  function handleAddMessage(message) {
+    if (!messageMap.current.get(message.id)) {
+      messageMap.current.addToEnd(message.id, message);
+      log.debug("Added message to map.", { message });
+    } else {
+      log.debug("Message already exists in the map.", { message });
+    }
   }
 
   return (
@@ -111,14 +115,13 @@ export default function Messaging() {
         ref={scrollViewRef}
         style={{ flex: 1 }}
         contentContainerStyle={{ gap: 24, padding: 16 }}
-        onContentSizeChange={handleScrollToBottom}
       >
-        {messages.map((key, value) => {
-          if (value.senderId === user?.user?.id) {
+        {messageMap?.current.map((key, value) => {
+          if (value.sender_id === user?.user?.id) {
             return (
               <SenderChat
                 key={key}
-                createdAt={value.createdAt}
+                created_at={value.created_at}
                 message={value.message}
               />
             );
@@ -127,7 +130,7 @@ export default function Messaging() {
           return (
             <ReceiverChat
               key={key}
-              createdAt={value.createdAt}
+              created_at={value.created_at}
               message={value.message}
             />
           );
@@ -135,7 +138,18 @@ export default function Messaging() {
       </ScrollView>
 
       <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
-        <View style={styles.bottom}>
+        <View
+          style={{
+            backgroundColor: "#F0F0F0",
+            height: 81,
+            borderRadius: 10,
+            padding: 16,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            gap: 16,
+          }}
+        >
           <TextInput
             multiline
             ref={refInput}
@@ -144,14 +158,16 @@ export default function Messaging() {
             style={{ fontFamily: "Lato-Regular", fontSize: 16, flex: 1 }}
           />
           <TouchableOpacity
-            hitSlop={{ top: 24, bottom: 24, left: 24, right: 24 }}
-            style={{ alignSelf: "center", paddingLeft: 24 }}
+            style={{ alignSelf: "center" }}
             onPress={handleSendMessage}
           >
             <Image
               source={send}
               cachePolicy="memory-disk"
-              style={{ width: 28, height: 28 }}
+              style={{
+                width: 28,
+                height: 28,
+              }}
             />
           </TouchableOpacity>
         </View>
@@ -163,13 +179,21 @@ export default function Messaging() {
 function SenderChat(props) {
   return (
     <View style={{ alignItems: "flex-end", gap: 8 }}>
-      <View style={styles.senderChat}>
+      <View
+        style={{
+          maxWidth: "80%",
+          backgroundColor: "#6366F1",
+          padding: 16,
+          borderRadius: 29,
+          borderBottomRightRadius: 0,
+        }}
+      >
         <Text size={17} textAlign="right" color="white">
           {props.message}
         </Text>
       </View>
       <Text size={14} textAlign="right" color="#6B7280">
-        {moment(props.createdAt).fromNow()}
+        {moment(props.created_at).fromNow()}
       </Text>
     </View>
   );
@@ -178,27 +202,58 @@ function SenderChat(props) {
 function ReceiverChat(props) {
   return (
     <View style={{ gap: 8 }}>
-      <View style={styles.receiverChat}>
+      <View
+        style={{
+          maxWidth: "80%",
+          backgroundColor: "#F3F4F4",
+          padding: 16,
+          borderRadius: 29,
+          borderBottomLeftRadius: 0,
+        }}
+      >
         <Text style={styles.message}>{props.message}</Text>
       </View>
       <Text size={14} color="#6B7280">
-        {moment(props.createdAt).fromNow()}
+        {moment(props.created_at).fromNow()}
       </Text>
     </View>
   );
+}
+
+async function sendMessage(message) {
+  const { error, data } = await supabase //
+    .from("msg")
+    .upsert(message)
+    .single();
+
+  if (error) {
+    // todo: send log to newrelic
+    log.error("An error occurred while sending message to server.", { error });
+    return;
+  }
+
+  log.debug("Message sent to server!");
+
+  return data;
 }
 
 /** @param {string} transit  */
 async function handleRetrieveMessages(transit) {
   if (!transit) return [];
 
-  try {
-    const chats = await getChats(transit);
-    return chats;
-  } catch (error) {
-    log.warn("Unable to retrieve chats", { error });
+  log.debug("Retrieving messages");
+
+  const { data, error } = await supabase
+    .from("msg")
+    .select("*")
+    .eq("transit", transit);
+
+  if (error) {
+    log.error("An error occurred while retrieving messages.", { error });
     return [];
   }
+
+  return data || [];
 }
 
 const styles = StyleSheet.create({
@@ -228,28 +283,4 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   textAlignRight: { textAlign: "right" },
-  bottom: {
-    backgroundColor: "#F0F0F0",
-    height: 81,
-    borderRadius: 10,
-    padding: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: 16,
-  },
-  senderChat: {
-    maxWidth: "80%",
-    backgroundColor: "#6366F1",
-    padding: 16,
-    borderRadius: 29,
-    borderBottomRightRadius: 0,
-  },
-  receiverChat: {
-    maxWidth: "80%",
-    backgroundColor: "#F3F4F4",
-    padding: 16,
-    borderRadius: 29,
-    borderBottomLeftRadius: 0,
-  },
 });

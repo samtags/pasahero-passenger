@@ -44,4 +44,8 @@ export default class OrderedMap {
 
     return result;
   }
+
+  size() {
+    return this.#order.size;
+  }
 }

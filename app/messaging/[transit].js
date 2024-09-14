@@ -5,17 +5,20 @@ import {
   useRouter,
 } from "expo-router";
 import Text from "../../src/components/text";
-import Messaging from "../../src/screens/messaging/[transit]";
+import CommsMessaging from "../../src/screens/messaging/[transit]";
+import Messaging from "../../src/screens/messaging/[transit].legacy";
 import { TouchableOpacity, View } from "react-native";
 import { Image } from "expo-image";
 import useGetDriver from "../../src/services/queries/useGetDriver";
 import { useEffect } from "react";
 import { call } from "../../src/services/images/remote";
+import { useFeatureIsOn } from "@growthbook/growthbook-react";
 
 export default function Entry(props) {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { data: driver } = useGetDriver(params?.driver_id);
+  const isCommsMessagingEnabled = useFeatureIsOn("use-comms-messaging", false);
 
   const navigation = useNavigation();
 
@@ -77,7 +80,9 @@ export default function Entry(props) {
           ),
         }}
       />
-      <Messaging />
+      <Optional fallback={<Messaging />} condition={isCommsMessagingEnabled}>
+        <CommsMessaging />
+      </Optional>
     </>
   );
 }
