@@ -63,6 +63,7 @@ const defaultLocation = {
 
 export default function Match() {
   const scrollRef = useRef();
+  const cameraRef = useRef();
 
   const { user } = useUser();
   const router = useRouter();
@@ -226,7 +227,15 @@ export default function Match() {
     handleResetAssignedRoute();
     setScreen("PENDING");
     setShowCancelationPrompt(false);
-    // todo: recenter the map
+    if (cameraRef?.current) {
+      cameraRef.current.setCamera({
+        centerCoordinate: [
+          match?.first_point?.longitude,
+          match?.first_point?.latitude,
+        ],
+        animationMode: "flyTo",
+      });
+    }
   }
 
   function handleConfirmFromRequestTimeoutPrompt() {
@@ -234,7 +243,16 @@ export default function Match() {
     handleResetAssignedRoute();
     setScreen("PENDING");
     setShowRequestTimeoutPrompt(false);
-    // todo: recenter the map
+
+    if (cameraRef?.current) {
+      cameraRef.current.setCamera({
+        centerCoordinate: [
+          match?.first_point?.longitude,
+          match?.first_point?.latitude,
+        ],
+        animationMode: "flyTo",
+      });
+    }
   }
 
   function handleCancelFromCancelationPrompt() {
@@ -494,6 +512,7 @@ export default function Match() {
             condition={isCoordinatesReady}
           >
             <Mapbox.Camera
+              ref={cameraRef}
               animationMode="none"
               zoomLevel={16.75}
               centerCoordinate={initialCoordinates}
