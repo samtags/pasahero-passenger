@@ -13,6 +13,7 @@ import useGetDriver from "../../src/services/queries/useGetDriver";
 import { useEffect } from "react";
 import { call } from "../../src/services/images/remote";
 import { useFeatureIsOn } from "@growthbook/growthbook-react";
+import Optional from "../../src/components/optional";
 
 export default function Entry(props) {
   const router = useRouter();
