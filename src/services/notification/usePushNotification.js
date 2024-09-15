@@ -21,7 +21,7 @@ export default function usePushNotification(userId) {
           const params =
             response.notification.request.content.data.params || {};
 
-          router.replace({
+          router.navigate({
             pathname: notificationRoute,
             params,
           });
