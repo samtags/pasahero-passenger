@@ -7,6 +7,7 @@ import {
   RTCSessionDescription,
 } from "react-native-webrtc";
 import db from "../firebase/db";
+import InCallManager from "react-native-incall-manager";
 import uuidv4 from "../util/uuidv4";
 import moment from "moment";
 
@@ -17,6 +18,7 @@ export default function useDial(roomId) {
   const [streams, setStreams] = useState([]);
   const [isMuted, setIsMuted] = useState(false);
   const [status, setStatus] = useState("CONNECTING");
+  const [isSpeakerOn, setIsSpeakerOn] = useState(false);
 
   useEffect(() => {
     const subscriptions = [];
@@ -193,6 +195,17 @@ export default function useDial(roomId) {
     setStatus("REJECTED");
   }
 
+  function handleToggleSpeaker() {
+    if (isSpeakerOn) {
+      // Turn off loudspeaker
+      InCallManager.setSpeakerphoneOn(false);
+    } else {
+      // Turn on loudspeaker
+      InCallManager.setSpeakerphoneOn(true);
+    }
+    setIsSpeakerOn(!isSpeakerOn);
+  }
+
   return {
     userStream,
     streams,
@@ -201,6 +214,8 @@ export default function useDial(roomId) {
     status,
     handleToggleMute,
     handleHangup,
+    isSpeakerOn,
+    handleToggleSpeaker,
   };
 }
 

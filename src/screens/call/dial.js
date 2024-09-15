@@ -12,12 +12,18 @@ import Optional from "../../components/optional";
 import { StatusBar } from "expo-status-bar";
 import useTimer from "../../services/hooks/useTimer";
 import { hangUp, mute, unmute } from "../../services/images/remote";
+import { IfFeatureEnabled, useFeatureIsOn } from "@growthbook/growthbook-react";
+import Drop from "./components/drop";
+import Speaker from "./components/speaker";
+import Mute from "./components/mute";
 
 export default function Dial() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
   const roomId = params?.roomId;
+
+  const isEnhancementEnabled = useFeatureIsOn("messaging-enhancements");
 
   const {
     isMuted,
@@ -26,6 +32,8 @@ export default function Dial() {
     handleToggleMute,
     streams,
     handleHangup,
+    isSpeakerOn,
+    handleToggleSpeaker,
   } = useDial(roomId);
 
   const timer = useTimer();
@@ -54,12 +62,8 @@ export default function Dial() {
       <StatusBar style="light" />
 
       <LinearGradient
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-        colors={["#242565", "#111023"]}
+        style={styles.container}
+        colors={["#65666A", "#292D33"]}
         end={{ x: 1, y: 1 }}
       >
         <View
@@ -86,27 +90,33 @@ export default function Dial() {
           </Optional>
         </View>
         <View style={{ paddingVertical: 56 }}>
-          <View
-            style={{ gap: 108, flexDirection: "row", justifyContent: "center" }}
-          >
-            {userStream && (
-              <TouchableOpacity onPress={handleToggleMute}>
+          <Optional condition={isEnhancementEnabled === false}>
+            <View
+              style={{
+                gap: 108,
+                flexDirection: "row",
+                justifyContent: "center",
+              }}
+            >
+              {userStream && (
+                <TouchableOpacity onPress={handleToggleMute}>
+                  <Image
+                    source={isMuted ? mute : unmute}
+                    style={{ width: 50, height: 50 }}
+                    cachePolicy="memory-disk"
+                  />
+                </TouchableOpacity>
+              )}
+
+              <TouchableOpacity onPress={handleEndCall}>
                 <Image
-                  source={isMuted ? mute : unmute}
+                  source={hangUp}
                   style={{ width: 50, height: 50 }}
                   cachePolicy="memory-disk"
                 />
               </TouchableOpacity>
-            )}
-
-            <TouchableOpacity onPress={handleEndCall}>
-              <Image
-                source={hangUp}
-                style={{ width: 50, height: 50 }}
-                cachePolicy="memory-disk"
-              />
-            </TouchableOpacity>
-          </View>
+            </View>
+          </Optional>
 
           {streams?.map((stream) => (
             <RTCView
@@ -116,9 +126,55 @@ export default function Dial() {
             />
           ))}
         </View>
+
+        <IfFeatureEnabled feature="messaging-enhancements">
+          <Optional condition={status === "RINGING"}>
+            <View style={styles.ringingAction}>
+              <Drop onPress={handleEndCall} />
+            </View>
+          </Optional>
+          <Optional condition={status === "CONNECTED"}>
+            <View style={styles.actionContainer}>
+              <Speaker
+                label="Speaker"
+                isActive={isSpeakerOn}
+                onPress={handleToggleSpeaker}
+              />
+
+              <Optional condition={Boolean(userStream)}>
+                <Mute
+                  label="Mute"
+                  isActive={isMuted}
+                  onPress={handleToggleMute}
+                />
+              </Optional>
+
+              <Drop onPress={handleEndCall} label="End" />
+            </View>
+          </Optional>
+        </IfFeatureEnabled>
       </LinearGradient>
     </View>
   );
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingBottom: 32,
+  },
+  ringingAction: {
+    flexDirection: "row",
+    justifyContent: "center",
+    width: "100%",
+    paddingHorizontal: 36,
+  },
+  actionContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    paddingHorizontal: 36,
+  },
+});

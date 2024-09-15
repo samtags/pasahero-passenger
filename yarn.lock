@@ -7342,6 +7342,11 @@ react-native-helmet-async@2.0.4:
     react-fast-compare "^3.2.2"
     shallowequal "^1.1.0"
 
+react-native-incall-manager@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/react-native-incall-manager/-/react-native-incall-manager-4.2.0.tgz#1cc781591007c4c9fc21deea82a308d46dc4db6c"
+  integrity sha512-DC5XRQVAwNgNA6YZ3ILF6ttWXv/MUQ4omzmVDh/uHc0TW0v4f8QIdt6D9GHZhGKb3+qB7XKUxpXVBrLH+9zqfQ==
+
 react-native-maps-directions@^1.9.0:
   version "1.9.0"
   resolved "https://registry.yarnpkg.com/react-native-maps-directions/-/react-native-maps-directions-1.9.0.tgz#63ae8e8b36499042a658e43cd4836ac89aab8b7d"

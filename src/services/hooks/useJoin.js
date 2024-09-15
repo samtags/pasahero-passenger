@@ -5,6 +5,7 @@ import {
   RTCIceCandidate,
   RTCSessionDescription,
 } from "react-native-webrtc";
+import InCallManager from "react-native-incall-manager";
 import db from "../firebase/db";
 import { handleClearRoom, handleGetRoomData } from "./useDial";
 
@@ -15,6 +16,7 @@ export default function useJoin(roomId) {
   const [streams, setStreams] = useState([]);
   const [isMuted, setIsMuted] = useState(false);
   const [status, setStatus] = useState("CONNECTING");
+  const [isSpeakerOn, setIsSpeakerOn] = useState(false);
 
   useEffect(() => {
     const subscriptions = [];
@@ -127,6 +129,17 @@ export default function useJoin(roomId) {
     setStatus("DROPPED");
   }
 
+  function handleToggleSpeaker() {
+    if (isSpeakerOn) {
+      // Turn off loudspeaker
+      InCallManager.setSpeakerphoneOn(false);
+    } else {
+      // Turn on loudspeaker
+      InCallManager.setSpeakerphoneOn(true);
+    }
+    setIsSpeakerOn(!isSpeakerOn);
+  }
+
   return {
     peerConnectionRef,
     userStream,
@@ -135,6 +148,8 @@ export default function useJoin(roomId) {
     handleToggleMute,
     handleHangUp,
     status,
+    isSpeakerOn,
+    handleToggleSpeaker,
   };
 }
 
