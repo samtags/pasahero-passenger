@@ -69,6 +69,12 @@ export default function Dial() {
         <View
           style={{ alignItems: "center", justifyContent: "center", flex: 1 }}
         >
+          <Optional condition={status === "CONNECTING"}>
+            <Text size={21} color="white">
+              Connecting
+            </Text>
+          </Optional>
+
           <Optional condition={status === "RINGING"}>
             <Text size={21} color="white">
               Ringing
@@ -128,7 +134,7 @@ export default function Dial() {
         </View>
 
         <IfFeatureEnabled feature="messaging-enhancements">
-          <Optional condition={status === "RINGING"}>
+          <Optional condition={status === "RINGING" || status === "CONNECTING"}>
             <View style={styles.ringingAction}>
               <Drop onPress={handleEndCall} />
             </View>

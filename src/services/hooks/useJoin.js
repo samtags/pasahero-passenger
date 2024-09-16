@@ -8,6 +8,9 @@ import {
 import InCallManager from "react-native-incall-manager";
 import db from "../firebase/db";
 import { handleClearRoom, handleGetRoomData } from "./useDial";
+import RNCallKeep from "react-native-callkeep";
+import { Alert, Linking } from "react-native";
+import { router } from "expo-router";
 
 export default function useJoin(roomId) {
   const peerConnectionRef = useRef(null);
@@ -22,9 +25,34 @@ export default function useJoin(roomId) {
     const subscriptions = [];
 
     (async () => {
-      const userStream = await mediaDevices.getUserMedia({
-        audio: true,
+      await RNCallKeep.setup({
+        android: {
+          selfManaged: false,
+          alertTitle: "Allow incoming calls?",
+          alertDescription:
+            "This permission is require to receive incoming call from the passengers.",
+          okButton: "Allow",
+        },
       });
+
+      const userStream = await mediaDevices
+        .getUserMedia({
+          audio: true,
+        })
+        .catch(() => {
+          handleHangup();
+          Alert.alert("Permission required", "Please allow microphone access", [
+            {
+              text: "OK",
+              onPress: () => {
+                // redirect to the settings page
+                Linking.openSettings();
+                router.back();
+              },
+            },
+          ]);
+        });
+
       setUserStream(userStream);
 
       const roomRef = await db.collection("rooms").doc(roomId);

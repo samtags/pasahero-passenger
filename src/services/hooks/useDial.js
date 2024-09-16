@@ -10,6 +10,9 @@ import db from "../firebase/db";
 import InCallManager from "react-native-incall-manager";
 import uuidv4 from "../util/uuidv4";
 import moment from "moment";
+import RNCallKeep from "react-native-callkeep";
+import { Alert, Linking } from "react-native";
+import { router } from "expo-router";
 
 export default function useDial(roomId) {
   const peerConnectionRef = useRef(null);
@@ -33,18 +36,42 @@ export default function useDial(roomId) {
         return;
       }
 
-      setStatus("RINGING");
-
       const { sessionId } = await handleCreateRoom(roomId);
       sessionIdRef.current = sessionId;
 
       const roomRef = await db.collection("rooms").doc(roomId);
       const callerCandidatesCollection = roomRef.collection("callerCandidates");
 
-      // create stream
-      const userStream = await mediaDevices.getUserMedia({
-        audio: true,
+      await RNCallKeep.setup({
+        android: {
+          selfManaged: false,
+          alertTitle: "Allow incoming calls?",
+          alertDescription:
+            "This permission is require to receive incoming call from the passengers.",
+          okButton: "Allow",
+        },
       });
+
+      // create stream
+      const userStream = await mediaDevices
+        .getUserMedia({
+          audio: true,
+        })
+        .catch(() => {
+          handleHangup();
+          Alert.alert("Permission required", "Please allow microphone access", [
+            {
+              text: "OK",
+              onPress: () => {
+                // redirect to the settings page
+                Linking.openSettings();
+                router.back();
+              },
+            },
+          ]);
+        });
+
+      setStatus("RINGING");
 
       const peerConnection = new RTCPeerConnection(configuration);
 
