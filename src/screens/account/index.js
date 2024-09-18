@@ -8,7 +8,7 @@ import {
   useUser,
   useAuth,
 } from "@clerk/clerk-expo";
-import { handleResetUser } from "../home";
+import { handleResetApp, handleResetUser } from "../home";
 import log from "../../services/log";
 
 export default function Account() {
@@ -34,6 +34,7 @@ export default function Account() {
   const handleSignOut = () => {
     signOut();
     handleResetUser();
+    handleResetApp();
   };
 
   return (

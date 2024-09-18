@@ -22,10 +22,8 @@ import useMatches, {
 import Optional from "../../components/optional";
 import { IfFeatureEnabled } from "@growthbook/growthbook-react";
 import useOnFocus from "../../services/hooks/useOnFocus";
-import { useQueryClient } from "@tanstack/react-query";
 
 export default function Home() {
-  const qClient = useQueryClient();
   const cameraRef = useRef(null);
   const user = useUser();
   const router = useRouter();
@@ -202,6 +200,10 @@ export function handleResetUser() {
   storage.delete("user.lastName");
   storage.delete("user.imageUrl");
   storage.delete("user.email");
+}
+
+export function handleResetApp() {
+  storage.delete("app.handledCallSessionIds");
 }
 
 const styles = StyleSheet.create({
