@@ -1,5 +1,6 @@
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { RTCView } from "react-native-webrtc";
+import { useEffect } from "react";
 
 import { useLocalSearchParams, useRouter } from "expo-router";
 import useDial from "../../services/hooks/useDial";
@@ -16,6 +17,8 @@ import { IfFeatureEnabled, useFeatureIsOn } from "@growthbook/growthbook-react";
 import Drop from "./components/drop";
 import Speaker from "./components/speaker";
 import Mute from "./components/mute";
+import storage from "../../services/storage";
+import sendIncomingCallSignal from "../../services/api/sendIncomingCallSignal";
 
 export default function Dial() {
   const router = useRouter();
@@ -34,6 +37,7 @@ export default function Dial() {
     handleHangup,
     isSpeakerOn,
     handleToggleSpeaker,
+    sessionId,
   } = useDial(roomId);
 
   const timer = useTimer();
@@ -56,6 +60,22 @@ export default function Dial() {
       timer.handleStart();
     }
   }, [status]);
+
+  useEffect(() => {
+    if (sessionId) {
+      // send push notification that trigger the incoming call
+      const firstName = storage.getString("user.firstName") ?? "";
+      const lastName = storage.getString("user.lastName") ?? "";
+      const displayName = `${firstName} ${lastName}`.trim();
+
+      sendIncomingCallSignal({
+        displayName,
+        displayNumber: "PasaHero Passenger",
+        sessionId,
+        roomId,
+      });
+    }
+  }, [sessionId]);
 
   return (
     <View style={{ flex: 1 }}>

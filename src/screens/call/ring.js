@@ -79,7 +79,7 @@ export default function Ring() {
         >
           <Optional condition={isRejected === false}>
             <Text size={21} color="white">
-              Your passenger is calling
+              Your driver is calling
             </Text>
           </Optional>
           <Optional condition={isRejected === true}>

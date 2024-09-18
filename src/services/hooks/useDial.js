@@ -13,10 +13,12 @@ import moment from "moment";
 import RNCallKeep from "react-native-callkeep";
 import { Alert, Linking } from "react-native";
 import { router } from "expo-router";
+import log from "../log";
 
 export default function useDial(roomId) {
   const peerConnectionRef = useRef(null);
   const sessionIdRef = useRef(null);
+  const [sessionId, setSessionId] = useState("");
   const [userStream, setUserStream] = useState();
   const [streams, setStreams] = useState([]);
   const [isMuted, setIsMuted] = useState(false);
@@ -38,6 +40,7 @@ export default function useDial(roomId) {
 
       const { sessionId } = await handleCreateRoom(roomId);
       sessionIdRef.current = sessionId;
+      setSessionId(sessionId);
 
       const roomRef = await db.collection("rooms").doc(roomId);
       const callerCandidatesCollection = roomRef.collection("callerCandidates");
@@ -203,10 +206,11 @@ export default function useDial(roomId) {
   }
 
   async function handleHangup() {
+    log.debug("Hanging up the call", { roomId, sessionId });
     const room = await handleGetRoomData(roomId);
 
     if (room) {
-      if (room.sessionId === sessionIdRef.current) {
+      if (room.sessionId === sessionId) {
         handleClearRoom(roomId);
       }
     }
@@ -243,6 +247,7 @@ export default function useDial(roomId) {
     handleHangup,
     isSpeakerOn,
     handleToggleSpeaker,
+    sessionId,
   };
 }
 

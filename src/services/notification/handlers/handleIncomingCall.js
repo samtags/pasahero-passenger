@@ -48,16 +48,12 @@ export async function handleIncomingCall(payload, ctx) {
     });
   }
 
+  log.debug("Adding answer call event listener.");
   RNCallKeep.addEventListener("answerCall", (callId) => {
     log.debug("Answer call event fired.", { callId });
     removePushNotification();
     RNCallKeep.backToForeground();
     RNCallKeep.endCall(callId.callUUID);
-
-    const handledCallSessionIds = storage.getString("app.handledCallSessionIds"); // prettier-ignore
-    let sessionIds = handledCallSessionIds?.split(",") || [];
-    sessionIds.push(payload.sessionId);
-    storage.set("app.handledCallSessionIds", sessionIds.join(","));
 
     setTimeout(() => {
       const sessionIds = storage.getString("app.handledCallSessionIds"); // prettier-ignore
@@ -74,6 +70,13 @@ export async function handleIncomingCall(payload, ctx) {
           alreadyAccepted: true,
         },
       });
+
+      const handledCallSessionIds = storage.getString("app.handledCallSessionIds"); // prettier-ignore
+      const ids = handledCallSessionIds?.split(",") ?? [];
+      ids.push(payload.sessionId);
+      storage.set("app.handledCallSessionIds", ids.join(","));
+
+      log.debug("Removing answer call event listener.");
     });
   });
 
