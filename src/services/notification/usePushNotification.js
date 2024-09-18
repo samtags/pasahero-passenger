@@ -5,6 +5,8 @@ import * as Device from "expo-device";
 import messaging from "@react-native-firebase/messaging";
 import useOnUpdate from "../hooks/useOnUpdate";
 import { useRouter } from "expo-router";
+import JSON from "../json";
+import * as handler from "./handlers";
 
 export default function usePushNotification(userId) {
   const router = useRouter();
@@ -12,7 +14,7 @@ export default function usePushNotification(userId) {
   useEffect(() => {
     const subscription = Notifications.addNotificationResponseReceivedListener(
       (response) => {
-        log.debug("Received notification response.", response);
+        log.debug("User tap on push notification.", response);
 
         const notificationRoute =
           response.notification.request.content?.data?.route;
@@ -34,7 +36,7 @@ export default function usePushNotification(userId) {
     };
   }, []);
 
-  useOnUpdate(() => {
+  useEffect(() => {
     if (userId) {
       messaging()
         .subscribeToTopic(userId)
@@ -67,9 +69,38 @@ export default function usePushNotification(userId) {
       }
     );
 
+    const onBackgroundMessageSubscription =
+      messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+        log.debug("Incoming push notification from background", remoteMessage);
+
+        if (!remoteMessage) return;
+
+        const payload = JSON.parse(remoteMessage?.data?.body, {});
+        log.debug("Push notification payload", payload);
+
+        if (payload?.evaluation === "onReceive") {
+          const interaction = payload?.interaction;
+
+          if (interaction === "handler") {
+            const method = payload?.extras?.handler;
+            const notification = {
+              body: remoteMessage.notification.body,
+              title: remoteMessage.notification.title,
+              messageId: remoteMessage.messageId,
+              topic: remoteMessage.from,
+              sentTime: remoteMessage.sentTime,
+              ttl: remoteMessage.ttl,
+            };
+
+            handler?.[method]?.(payload?.extras, notification);
+          }
+        }
+      });
+
     return () => {
       log.debug("Unsubscribing to foreground message subscription.");
       onForegroundMessageSubscription?.();
+      onBackgroundMessageSubscription?.();
     };
   }, []);
 }
