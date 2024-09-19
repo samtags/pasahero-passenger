@@ -307,6 +307,7 @@ async function handleCreateRoom(roomId) {
     sessionId,
     validTill,
     showed: false,
+    status: "CONNECTING",
   });
 
   return {

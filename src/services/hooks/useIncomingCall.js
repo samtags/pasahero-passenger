@@ -14,7 +14,7 @@ export default function useIncomingCall(userId) {
       if (!e.metadata?.fromCache) {
         if (e.exists) {
           const doc = e.data();
-          if (doc.showed === false && doc.offer) {
+          if (doc.status === "CONNECTING" && doc.offer) {
             const sessionId = doc.sessionId;
 
             setTimeout(async () => {
@@ -26,7 +26,7 @@ export default function useIncomingCall(userId) {
                 return;
               }
 
-              await ref.update({ showed: true });
+              await ref.update({ status: "RINGING" });
               router.navigate({
                 pathname: "/call/ring",
                 params: {
