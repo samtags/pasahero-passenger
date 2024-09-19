@@ -14,8 +14,10 @@ import RNCallKeep from "react-native-callkeep";
 import { Alert, Linking } from "react-native";
 import { router } from "expo-router";
 import log from "../log";
+import { useFeatureValue } from "@growthbook/growthbook-react";
 
 export default function useDial(roomId) {
+  const timeoutRef = useRef();
   const peerConnectionRef = useRef(null);
   const sessionIdRef = useRef(null);
   const [sessionId, setSessionId] = useState("");
@@ -25,7 +27,17 @@ export default function useDial(roomId) {
   const [status, setStatus] = useState("CONNECTING");
   const [isSpeakerOn, setIsSpeakerOn] = useState(false);
 
+  const callAcknowledgmentTimeoutInSeconds = useFeatureValue("call-acknowledgment-timeout-in-seconds", 60); // prettier-ignore
+
   useEffect(() => {
+    log.debug("Setting call acknowledgment timeout.", { roomId, callAcknowledgmentTimeoutInSeconds }); // prettier-ignore
+    timeoutRef.current = setTimeout(async () => {
+      const roomRef = await db.collection("rooms").doc(roomId);
+      await roomRef.update({ status: "TIMEOUT" });
+
+      log.debug("Call acknowledgment timeout reached. Status updated to TIMEOUT", { roomId }); // prettier-ignore
+    }, 1000 * callAcknowledgmentTimeoutInSeconds);
+
     const subscriptions = [];
     const pendingPeerCandidates = [];
     let remoteDescriptionReady = false;
@@ -98,6 +110,7 @@ export default function useDial(roomId) {
           // other party is connected
           // Alert.alert("Answered", "Call receiver answered your call!");
           setStatus("CONNECTED");
+          clearTimeout(timeoutRef.current);
         }
       };
 
