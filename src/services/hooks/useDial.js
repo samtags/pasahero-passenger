@@ -103,14 +103,14 @@ export default function useDial(roomId) {
         if (peerConnection?.iceConnectionState == "disconnected") {
           // Alert.alert("Call ended", "Call receiver ended the call.");
           setStatus("TERMINATED");
-          handleCloseMedia();
+          handleDisconnection();
         }
 
         if (peerConnection?.iceConnectionState == "connected") {
           // other party is connected
           // Alert.alert("Answered", "Call receiver answered your call!");
           setStatus("CONNECTED");
-          clearTimeout(timeoutRef.current);
+          handleConnected();
         }
       };
 
@@ -250,6 +250,32 @@ export default function useDial(roomId) {
     setIsSpeakerOn(!isSpeakerOn);
   }
 
+  async function handleConnected() {
+    clearTimeout(timeoutRef.current);
+
+    log.debug("Call connected", { roomId, sessionId });
+
+    const roomRef = await db.collection("rooms").doc(roomId);
+    await roomRef.update({ status: "CONNECTED" });
+  }
+
+  async function handleTerminate() {
+    clearTimeout(timeoutRef.current);
+
+    log.debug("Call terminated", { roomId, sessionId });
+
+    const roomRef = await db.collection("rooms").doc(roomId);
+    await roomRef.update({ status: "TERMINATED" }).finally(handleCloseMedia);
+  }
+
+  async function handleDisconnection() {
+    clearTimeout(timeoutRef.current);
+
+    log.debug("Call disconnected", { roomId, sessionId });
+    const roomRef = await db.collection("rooms").doc(roomId);
+    await roomRef.update({ status: "DISCONNECTED" }).finally(handleCloseMedia);
+  }
+
   return {
     userStream,
     streams,
@@ -261,6 +287,7 @@ export default function useDial(roomId) {
     isSpeakerOn,
     handleToggleSpeaker,
     sessionId,
+    handleTerminate,
   };
 }
 

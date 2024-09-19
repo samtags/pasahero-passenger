@@ -30,16 +30,16 @@ export default function JoinScreen() {
     userStream,
     status,
     streams,
-    handleHangUp,
     isSpeakerOn,
     handleToggleSpeaker,
+    handleTerminate,
   } = useJoin(roomId);
 
   const timer = useTimer();
 
   useOnUpdate(() => {
     if (status === "TERMINATED") {
-      setTimeout(() => router.back(), 1500);
+      setTimeout(router.back, 1500);
     }
 
     if (status === "CONNECTED") {
@@ -55,7 +55,7 @@ export default function JoinScreen() {
   }, []);
 
   function handleEndCall() {
-    handleHangUp();
+    handleTerminate();
     setTimeout(() => router.back(), 1500);
   }
 
@@ -139,7 +139,7 @@ export default function JoinScreen() {
               />
             </Optional>
 
-            <Drop label="Decline" onPress={handleEndCall} />
+            <Drop label="End" onPress={handleEndCall} />
           </View>
         </IfFeatureEnabled>
       </LinearGradient>

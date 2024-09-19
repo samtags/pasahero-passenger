@@ -11,6 +11,7 @@ import { handleClearRoom, handleGetRoomData } from "./useDial";
 import RNCallKeep from "react-native-callkeep";
 import { Alert, Linking } from "react-native";
 import { router } from "expo-router";
+import log from "../log";
 
 export default function useJoin(roomId) {
   const peerConnectionRef = useRef(null);
@@ -76,8 +77,7 @@ export default function useJoin(roomId) {
 
       peerConnection.oniceconnectionstatechange = (e) => {
         if (peerConnection.iceConnectionState == "disconnected") {
-          setStatus("TERMINATED");
-          handleCloseMedia();
+          handleDisconnection();
         }
 
         if (peerConnection?.iceConnectionState == "connected") {
@@ -168,6 +168,18 @@ export default function useJoin(roomId) {
     setIsSpeakerOn(!isSpeakerOn);
   }
 
+  async function handleTerminate() {
+    log.debug("Call terminated", { roomId });
+    const roomRef = await db.collection("rooms").doc(roomId);
+    await roomRef.update({ status: "TERMINATED" }).finally(handleCloseMedia);
+  }
+
+  async function handleDisconnection() {
+    log.debug("Call disconnected", { roomId });
+    const roomRef = await db.collection("rooms").doc(roomId);
+    await roomRef.update({ status: "DISCONNECTED" }).finally(handleCloseMedia);
+  }
+
   return {
     peerConnectionRef,
     userStream,
@@ -178,6 +190,7 @@ export default function useJoin(roomId) {
     status,
     isSpeakerOn,
     handleToggleSpeaker,
+    handleTerminate,
   };
 }
 

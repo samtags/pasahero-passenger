@@ -34,17 +34,17 @@ export default function Dial() {
     userStream,
     handleToggleMute,
     streams,
-    handleHangup,
     isSpeakerOn,
     handleToggleSpeaker,
     sessionId,
+    handleTerminate,
   } = useDial(roomId);
 
   const timer = useTimer();
 
   function handleEndCall() {
-    handleHangup();
-    setTimeout(() => router.back(), 1500);
+    handleTerminate();
+    setTimeout(router.back, 1500);
   }
 
   useOnUpdate(() => {

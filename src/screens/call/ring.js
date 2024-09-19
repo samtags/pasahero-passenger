@@ -65,9 +65,7 @@ export default function Ring() {
     const room = await handleGetRoomData(roomId);
 
     if (room.sessionId === sessionId) {
-      db.collection("rooms").doc(roomId).update({
-        rejected: true,
-      });
+      await db.collection("rooms").doc(roomId).update({ status: "DECLINED" });
     }
 
     setIsRejected(true);
