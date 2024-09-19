@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { StyleSheet, View, TouchableOpacity } from "react-native";
+import React, { useEffect } from "react";
+import { StyleSheet, View, TouchableOpacity, BackHandler } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { RTCView } from "react-native-webrtc";
 
@@ -46,6 +46,13 @@ export default function JoinScreen() {
       timer.handleStart();
     }
   }, [status]);
+
+  useEffect(() => {
+    const handleBackPress = () => true;
+    BackHandler.addEventListener("hardwareBackPress", handleBackPress);
+    return () =>
+      BackHandler.removeEventListener("hardwareBackPress", handleBackPress);
+  }, []);
 
   function handleEndCall() {
     handleHangUp();

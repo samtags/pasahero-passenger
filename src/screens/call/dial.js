@@ -1,4 +1,4 @@
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity, BackHandler } from "react-native";
 import { RTCView } from "react-native-webrtc";
 import { useEffect } from "react";
 
@@ -76,6 +76,13 @@ export default function Dial() {
       });
     }
   }, [sessionId]);
+
+  useEffect(() => {
+    const handleBackPress = () => true;
+    BackHandler.addEventListener("hardwareBackPress", handleBackPress);
+    return () =>
+      BackHandler.removeEventListener("hardwareBackPress", handleBackPress);
+  }, []);
 
   return (
     <View style={{ flex: 1 }}>

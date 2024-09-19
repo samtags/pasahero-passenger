@@ -1,5 +1,5 @@
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { View, TouchableOpacity, StyleSheet } from "react-native";
+import { View, TouchableOpacity, StyleSheet, BackHandler } from "react-native";
 import db from "../../services/firebase/db";
 import { handleGetRoomData } from "../../services/hooks/useDial";
 import { useEffect, useState } from "react";
@@ -44,6 +44,13 @@ export default function Ring() {
       return () => clearTimeout(timer);
     }
   }, [isRejected]);
+
+  useEffect(() => {
+    const handleBackPress = () => true;
+    BackHandler.addEventListener("hardwareBackPress", handleBackPress);
+    return () =>
+      BackHandler.removeEventListener("hardwareBackPress", handleBackPress);
+  }, []);
 
   const handleAccept = () => {
     router.replace({
