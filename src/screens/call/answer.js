@@ -28,24 +28,36 @@ export default function JoinScreen() {
     isMuted,
     handleToggleMute,
     userStream,
-    status,
     streams,
     isSpeakerOn,
     handleToggleSpeaker,
     handleTerminate,
+    state,
+    handleCleanup,
   } = useJoin(roomId);
+
+  console.log("🚀 ~ JoinScreen ~ state:", state);
 
   const timer = useTimer();
 
   useOnUpdate(() => {
-    if (status === "TERMINATED") {
-      setTimeout(router.back, 1500);
-    }
+    switch (state) {
+      case "CONNECTED":
+        timer.handleStart();
+        break;
 
-    if (status === "CONNECTED") {
-      timer.handleStart();
+      case "DISCONNECTED":
+      case "TERMINATED":
+      case "TIMEOUT":
+      case "DECLINED":
+        handleCleanup();
+        setTimeout(router.back, 1500);
+        break;
+
+      default:
+        break;
     }
-  }, [status]);
+  }, [state]);
 
   useEffect(() => {
     const handleBackPress = () => true;
@@ -70,19 +82,26 @@ export default function JoinScreen() {
         <View
           style={{ alignItems: "center", justifyContent: "center", flex: 1 }}
         >
-          <Optional condition={status === "CONNECTING"}>
+          <Optional condition={state === "CONNECTING"}>
             <Text size={21} color="white">
               Connecting
             </Text>
           </Optional>
 
-          <Optional condition={status === "CONNECTED"}>
+          <Optional condition={state === "CONNECTED"}>
             <Text size={21} color="white">
               {timer.text}
             </Text>
           </Optional>
 
-          <Optional condition={status === "DROPPED" || status === "TERMINATED"}>
+          <Optional
+            condition={[
+              "TIMEOUT",
+              "TERMINATED",
+              "DISCONNECTED",
+              "DECLINED",
+            ].includes(state)}
+          >
             <Text size={21} color="white">
               Call Ended
             </Text>

@@ -30,7 +30,6 @@ export default function Dial() {
 
   const {
     isMuted,
-    status,
     userStream,
     handleToggleMute,
     streams,
@@ -38,6 +37,8 @@ export default function Dial() {
     handleToggleSpeaker,
     sessionId,
     handleTerminate,
+    state,
+    handleCleanup,
   } = useDial(roomId);
 
   const timer = useTimer();
@@ -48,18 +49,23 @@ export default function Dial() {
   }
 
   useOnUpdate(() => {
-    if (status === "TERMINATED") {
-      handleEndCall();
-    }
+    switch (state) {
+      case "CONNECTED":
+        timer.handleStart();
+        break;
 
-    if (status === "REJECTED") {
-      setTimeout(() => router.back(), 1500);
-    }
+      case "DISCONNECTED":
+      case "TERMINATED":
+      case "TIMEOUT":
+      case "DECLINED":
+        handleCleanup();
+        setTimeout(router.back, 1500);
+        break;
 
-    if (status === "CONNECTED") {
-      timer.handleStart();
+      default:
+        break;
     }
-  }, [status]);
+  }, [state]);
 
   useEffect(() => {
     if (sessionId) {
@@ -96,26 +102,31 @@ export default function Dial() {
         <View
           style={{ alignItems: "center", justifyContent: "center", flex: 1 }}
         >
-          <Optional condition={status === "CONNECTING"}>
+          <Optional condition={state === "CONNECTING"}>
             <Text size={21} color="white">
               Connecting
             </Text>
           </Optional>
 
-          <Optional condition={status === "RINGING"}>
+          <Optional condition={state === "RINGING"}>
             <Text size={21} color="white">
               Ringing
             </Text>
           </Optional>
 
-          <Optional condition={status === "CONNECTED"}>
+          <Optional condition={state === "CONNECTED"}>
             <Text size={21} color="white">
               {timer.text}
             </Text>
           </Optional>
 
           <Optional
-            condition={["DROPPED", "REJECTED", "TERMINATED"].includes(status)}
+            condition={[
+              "TIMEOUT",
+              "TERMINATED",
+              "DISCONNECTED",
+              "DECLINED",
+            ].includes(state)}
           >
             <Text size={21} color="white">
               Call Ended
@@ -161,12 +172,12 @@ export default function Dial() {
         </View>
 
         <IfFeatureEnabled feature="messaging-enhancements">
-          <Optional condition={status === "RINGING" || status === "CONNECTING"}>
+          <Optional condition={state === "RINGING" || state === "CONNECTING"}>
             <View style={styles.ringingAction}>
               <Drop onPress={handleEndCall} />
             </View>
           </Optional>
-          <Optional condition={status === "CONNECTED"}>
+          <Optional condition={state === "CONNECTED"}>
             <View style={styles.actionContainer}>
               <Speaker
                 label="Speaker"

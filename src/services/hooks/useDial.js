@@ -24,10 +24,35 @@ export default function useDial(roomId) {
   const [userStream, setUserStream] = useState();
   const [streams, setStreams] = useState([]);
   const [isMuted, setIsMuted] = useState(false);
-  const [status, setStatus] = useState("CONNECTING");
+  const statusState = useState("CONNECTING");
   const [isSpeakerOn, setIsSpeakerOn] = useState(false);
+  /*** @type {["CONNECTING" | "RINGING" | "TIMEOUT" | "CONNECTED" | "TERMINATED" | "DECLINED" | "DISCONNECTED"]} */
+  const [state, setState] = useState("CONNECTING");
+
+  /** @deprecated use state instead */
+  const status = statusState[0];
+  const setStatus = statusState[1];
 
   const callAcknowledgmentTimeoutInSeconds = useFeatureValue("call-acknowledgment-timeout-in-seconds", 60); // prettier-ignore
+
+  useEffect(() => {
+    log.debug(`Subscribing to the room updates of room: ${roomId}`, roomId);
+    const subscription = db
+      .collection("rooms")
+      .doc(roomId)
+      .onSnapshot((doc) => {
+        if (doc.exists) {
+          const data = doc.data();
+          if (sessionIdRef.current === data?.sessionId) {
+            setState(data.status);
+          }
+        }
+      });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     log.debug("Setting call acknowledgment timeout.", { roomId, callAcknowledgmentTimeoutInSeconds }); // prettier-ignore
@@ -276,11 +301,16 @@ export default function useDial(roomId) {
     await roomRef.update({ status: "DISCONNECTED" }).finally(handleCloseMedia);
   }
 
+  function handleCleanup() {
+    handleCloseMedia();
+  }
+
   return {
     userStream,
     streams,
     isMuted,
     peerConnectionRef,
+    /** @deprecated use state instead */
     status,
     handleToggleMute,
     handleHangup,
@@ -288,6 +318,8 @@ export default function useDial(roomId) {
     handleToggleSpeaker,
     sessionId,
     handleTerminate,
+    state,
+    handleCleanup,
   };
 }
 
