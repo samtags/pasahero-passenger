@@ -72,6 +72,45 @@ export default function Home() {
       <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.full}>
         <View pointerEvents="box-none" style={styles.absolute}>
+          <View style={styles.widgetContainer}>
+            <View>
+              <IfFeatureEnabled feature="passenger-ongoing-trip-indicator">
+                <Optional condition={matches?.length > 0}>
+                  <TouchableOpacity
+                    onPress={router.navigate.bind(null, "/match/list")}
+                  >
+                    <View style={styles.ongoingTripIcon}>
+                      <View style={{ width: 63, height: 63 }}>
+                        <Image
+                          style={{ width: "100%", height: "100%" }}
+                          cachePolicy="memory-disk"
+                          contentFit="contain"
+                          source={ongoing}
+                        />
+                        <View style={styles.badge}>
+                          <Text size={12} color="white">
+                            {matches.length}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                </Optional>
+              </IfFeatureEnabled>
+            </View>
+            <TouchableOpacity onPress={handleRecenterMap}>
+              <Image
+                style={{ width: 60, height: 60 }}
+                cachePolicy="memory-disk"
+                source={center}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <IfFeatureEnabled feature="home-driver-count-promotion">
+            <MatchPromo onPress={() => {}} count={0} />
+          </IfFeatureEnabled>
+
           <View style={styles.content}>
             <Text size={18} weight="bold" color="#757477">
               {greeting}
@@ -89,40 +128,9 @@ export default function Home() {
           style={styles.accountIcon}
         >
           <Image
-            style={{ width: 56, height: 56 }}
+            style={{ width: 60, height: 60 }}
             cachePolicy="memory-disk"
             source={account}
-          />
-        </TouchableOpacity>
-
-        <IfFeatureEnabled feature="passenger-ongoing-trip-indicator">
-          <Optional condition={matches?.length > 0}>
-            <TouchableOpacity
-              onPress={router.navigate.bind(null, "/match/list")}
-              style={styles.ongoingTripIcon}
-            >
-              <View style={{ position: "relative" }}>
-                <View style={styles.badge}>
-                  <Text size={12} color="white">
-                    {matches.length}
-                  </Text>
-                </View>
-              </View>
-              <Image
-                style={{ width: 58, height: 58 }}
-                cachePolicy="memory-disk"
-                contentFit="contain"
-                source={ongoing}
-              />
-            </TouchableOpacity>
-          </Optional>
-        </IfFeatureEnabled>
-
-        <TouchableOpacity onPress={handleRecenterMap} style={styles.centerIcon}>
-          <Image
-            style={{ width: 56, height: 56 }}
-            cachePolicy="memory-disk"
-            source={center}
           />
         </TouchableOpacity>
 
@@ -141,6 +149,20 @@ export default function Home() {
           />
         </Mapbox.MapView>
       </SafeAreaView>
+    </View>
+  );
+}
+
+function MatchPromo({ onPress, count = 0 }) {
+  return (
+    <View style={styles.matchPromoContainer}>
+      <TouchableOpacity onPress={onPress} style={{ width: "100%" }}>
+        <View style={styles.promoButton}>
+          <Text size={18} color="#fff" weight="medium">
+            {count} drivers nearby! Book Now
+          </Text>
+        </View>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -244,29 +266,37 @@ const styles = StyleSheet.create({
     paddingTop: 40,
   },
   ongoingTripIcon: {
-    position: "absolute",
+    position: "relative",
     zIndex: 1,
-    padding: 16,
-    bottom: 168,
+    // bottom: 227.5,
   },
   badge: {
-    position: "absolute",
-    top: -4,
-    right: 0,
     backgroundColor: "#EF4444",
-    zIndex: 2,
     justifyContent: "center",
     alignItems: "center",
     width: 20,
     borderRadius: 20,
     height: 20,
-  },
-  centerIcon: {
     position: "absolute",
-    zIndex: 1,
-    paddingRight: 14,
-    paddingBottom: 24,
+    top: 0,
     right: 0,
-    bottom: 160,
+  },
+  widgetContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+  },
+  matchPromoContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 16,
+    paddingHorizontal: 24,
+  },
+  promoButton: {
+    backgroundColor: "#363F59",
+    borderRadius: 40,
+    paddingVertical: 16,
+    width: "100%",
+    alignItems: "center",
   },
 });
