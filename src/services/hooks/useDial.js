@@ -37,7 +37,7 @@ export default function useDial(roomId) {
 
   useEffect(() => {
     log.debug(`Subscribing to the room updates of room: ${roomId}`, roomId);
-    const subscription = db
+    const unsubscribe = db
       .collection("rooms")
       .doc(roomId)
       .onSnapshot((doc) => {
@@ -50,15 +50,14 @@ export default function useDial(roomId) {
       });
 
     return () => {
-      subscription.unsubscribe();
+      unsubscribe?.();
     };
   }, []);
 
   useEffect(() => {
     log.debug("Setting call acknowledgment timeout.", { roomId, callAcknowledgmentTimeoutInSeconds }); // prettier-ignore
     timeoutRef.current = setTimeout(async () => {
-      const roomRef = await db.collection("rooms").doc(roomId);
-      await roomRef.update({ status: "TIMEOUT" });
+      await handleUpdateRoomStatus(roomId, "TIMEOUT");
 
       log.debug("Call acknowledgment timeout reached. Status updated to TIMEOUT", { roomId }); // prettier-ignore
     }, 1000 * callAcknowledgmentTimeoutInSeconds);
@@ -127,7 +126,6 @@ export default function useDial(roomId) {
       peerConnection.oniceconnectionstatechange = (e) => {
         if (peerConnection?.iceConnectionState == "disconnected") {
           // Alert.alert("Call ended", "Call receiver ended the call.");
-          setStatus("TERMINATED");
           handleDisconnection();
         }
 
@@ -235,11 +233,11 @@ export default function useDial(roomId) {
   }
 
   function handleCloseMedia() {
-    if (peerConnectionRef.current) {
-      peerConnectionRef.current.getTransceivers().forEach((transceiver) => {
-        transceiver.stop();
-      });
-      peerConnectionRef.current.close();
+    if (peerConnectionRef?.current) {
+      peerConnectionRef?.current?.getTransceivers?.()?.forEach?.((transceiver) => { 
+        transceiver?.stop?.();
+      }); // prettier-ignore
+      peerConnectionRef?.current?.close?.();
     }
   }
 
@@ -253,14 +251,14 @@ export default function useDial(roomId) {
       }
     }
 
-    handleCloseMedia();
+    // handleCloseMedia();
     setStatus("DROPPED");
   }
 
   function handleCallRejected() {
     handleClearRoom(roomId);
 
-    handleCloseMedia();
+    // handleCloseMedia();
     setStatus("REJECTED");
   }
 
@@ -276,11 +274,11 @@ export default function useDial(roomId) {
   }
 
   async function handleConnected() {
-    clearTimeout(timeoutRef.current);
+    clearTimeout(timeoutRef?.current);
 
     log.debug("Call connected", { roomId, sessionId });
 
-    const roomRef = await db.collection("rooms").doc(roomId);
+    const roomRef = db.collection("rooms").doc(roomId);
     await roomRef.update({ status: "CONNECTED" });
   }
 
@@ -289,16 +287,14 @@ export default function useDial(roomId) {
 
     log.debug("Call terminated", { roomId, sessionId });
 
-    const roomRef = await db.collection("rooms").doc(roomId);
-    await roomRef.update({ status: "TERMINATED" }).finally(handleCloseMedia);
+    await handleUpdateRoomStatus(roomId, "TERMINATED");
+    handleCloseMedia();
   }
 
   async function handleDisconnection() {
-    clearTimeout(timeoutRef.current);
-
-    log.debug("Call disconnected", { roomId, sessionId });
-    const roomRef = await db.collection("rooms").doc(roomId);
-    await roomRef.update({ status: "DISCONNECTED" }).finally(handleCloseMedia);
+    await new Promise((resolve) => setTimeout(resolve, 3000)); // prevent conflicting statuses sometimes disconnection fire before the terminal statuses
+    await handleUpdateRoomStatus(roomId, "DISCONNECTED");
+    handleCloseMedia();
   }
 
   function handleCleanup() {
@@ -382,3 +378,14 @@ const configuration = {
   ],
   iceCandidatePoolSize: 10,
 };
+
+export async function handleUpdateRoomStatus(roomId, status) {
+  const roomRef = db.collection("rooms").doc(roomId);
+  const room = await handleGetRoomData(roomId);
+
+  const terminalStatuses = ["TIMEOUT", "TERMINATED", "DISCONNECTED", "DECLINED"]; // prettier-ignore
+
+  if (!terminalStatuses.includes(room.status)) {
+    await roomRef.update({ status });
+  }
+}

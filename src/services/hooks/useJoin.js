@@ -7,7 +7,11 @@ import {
 } from "react-native-webrtc";
 import InCallManager from "react-native-incall-manager";
 import db from "../firebase/db";
-import { handleClearRoom, handleGetRoomData } from "./useDial";
+import {
+  handleClearRoom,
+  handleGetRoomData,
+  handleUpdateRoomStatus,
+} from "./useDial";
 import RNCallKeep from "react-native-callkeep";
 import { Alert, Linking } from "react-native";
 import { router } from "expo-router";
@@ -30,7 +34,7 @@ export default function useJoin(roomId) {
 
   useEffect(() => {
     log.debug(`Subscribing to the room updates of room: ${roomId}`, roomId);
-    const subscription = db
+    const unsubscribe = db
       .collection("rooms")
       .doc(roomId)
       .onSnapshot((doc) => {
@@ -43,7 +47,7 @@ export default function useJoin(roomId) {
       });
 
     return () => {
-      subscription.unsubscribe();
+      unsubscribe?.();
     };
   }, []);
   useEffect(() => {
@@ -194,14 +198,15 @@ export default function useJoin(roomId) {
 
   async function handleTerminate() {
     log.debug("Call terminated", { roomId });
-    const roomRef = await db.collection("rooms").doc(roomId);
-    await roomRef.update({ status: "TERMINATED" }).finally(handleCloseMedia);
+    handleUpdateRoomStatus(roomId, "TERMINATED");
+    handleCloseMedia();
   }
 
   async function handleDisconnection() {
-    log.debug("Call disconnected", { roomId });
-    const roomRef = await db.collection("rooms").doc(roomId);
-    await roomRef.update({ status: "DISCONNECTED" }).finally(handleCloseMedia);
+    await new Promise((resolve) => setTimeout(resolve, 3000)); // prevent conflicting statuses sometimes disconnection fire before the terminal statuses
+
+    handleUpdateRoomStatus(roomId, "DISCONNECTED");
+    handleCloseMedia();
   }
 
   function handleCleanup() {

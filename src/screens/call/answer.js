@@ -82,7 +82,7 @@ export default function JoinScreen() {
         <View
           style={{ alignItems: "center", justifyContent: "center", flex: 1 }}
         >
-          <Optional condition={state === "CONNECTING"}>
+          <Optional condition={state === "CONNECTING" || state === "RINGING"}>
             <Text size={21} color="white">
               Connecting
             </Text>

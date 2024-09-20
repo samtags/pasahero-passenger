@@ -1,4 +1,4 @@
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import { View, TouchableOpacity, StyleSheet, BackHandler } from "react-native";
 import db from "../../services/firebase/db";
 import { handleGetRoomData } from "../../services/hooks/useDial";
@@ -14,14 +14,15 @@ import Drop from "./components/drop";
 import Pickup from "./components/pickup";
 
 export default function Ring() {
-  const router = useRouter();
   const params = useLocalSearchParams();
 
   const roomId = params?.roomId;
   const sessionId = params?.sessionId;
 
-  const [isRejected, setIsRejected] = useState(false);
   const isEnhancementEnabled = useFeatureIsOn("messaging-enhancements");
+
+  /*** @type {["CONNECTING" | "RINGING" | "TIMEOUT" | "CONNECTED" | "TERMINATED" | "DECLINED" | "DISCONNECTED"]} */
+  const [state, setState] = useState("RINGING");
 
   useEffect(() => {
     if (roomId) {
@@ -29,21 +30,31 @@ export default function Ring() {
         .collection("rooms")
         .doc(roomId)
         .onSnapshot((doc) => {
-          if (doc.exists === false) {
-            setIsRejected(true);
+          if (doc.exists) {
+            const data = doc.data();
+            if (sessionId === data?.sessionId) {
+              setState(data.status);
+            }
           }
         });
 
-      return () => unsubscribe();
+      return () => unsubscribe?.();
     }
   }, []);
 
   useEffect(() => {
-    if (isRejected) {
-      const timer = setTimeout(router.back, 1500);
-      return () => clearTimeout(timer);
+    switch (state) {
+      case "DISCONNECTED":
+      case "TERMINATED":
+      case "TIMEOUT":
+      case "DECLINED":
+        setTimeout(router.back, 1500);
+        break;
+
+      default:
+        break;
     }
-  }, [isRejected]);
+  }, [state]);
 
   useEffect(() => {
     const handleBackPress = () => true;
@@ -68,8 +79,10 @@ export default function Ring() {
       await db.collection("rooms").doc(roomId).update({ status: "DECLINED" });
     }
 
-    setIsRejected(true);
+    setTimeout(router.back, 1500);
   };
+
+  const isRejected = ["DECLINED", "TIMEOUT", "TERMINATED", "DISCONNECTED"].includes(state); // prettier-ignore
 
   return (
     <View style={{ flex: 1 }}>
