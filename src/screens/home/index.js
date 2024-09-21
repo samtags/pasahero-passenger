@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { useMMKVString } from "react-native-mmkv";
 import { Stack, useRouter } from "expo-router";
 import { View, SafeAreaView, StyleSheet, TouchableOpacity } from "react-native";
@@ -22,6 +22,8 @@ import useMatches, {
 import Optional from "../../components/optional";
 import { IfFeatureEnabled } from "@growthbook/growthbook-react";
 import useOnFocus from "../../services/hooks/useOnFocus";
+import useNearbyDrivers from "../../services/hooks/useNearbyDrivers";
+import supabase from "../../services/supabase";
 
 export default function Home() {
   const cameraRef = useRef(null);
@@ -30,6 +32,11 @@ export default function Home() {
   const [loc] = useMMKVString("location.current");
   const location = JSON.parse(loc || "{}");
   const { data: matches = [] } = useMatches();
+
+  const { nearbyDriverIds } = useNearbyDrivers({
+    startOnMount: true,
+    payload: location,
+  });
 
   const handleOnPressWhereTo = () => {
     handleInitializeDraft();
@@ -108,7 +115,9 @@ export default function Home() {
           </View>
 
           <IfFeatureEnabled feature="home-driver-count-promotion">
-            <MatchPromo onPress={() => {}} count={0} />
+            <Optional condition={nearbyDriverIds?.length > 0}>
+              <MatchPromo onPress={() => {}} count={nearbyDriverIds?.length} />
+            </Optional>
           </IfFeatureEnabled>
 
           <View style={styles.content}>
@@ -147,6 +156,7 @@ export default function Home() {
             zoomLevel={15}
             centerCoordinate={[location.longitude, location.latitude]}
           />
+          <DriverDisplay ids={nearbyDriverIds} />
         </Mapbox.MapView>
       </SafeAreaView>
     </View>
@@ -154,12 +164,15 @@ export default function Home() {
 }
 
 function MatchPromo({ onPress, count = 0 }) {
+  let label = "driver";
+  if (count > 1) label = "drivers";
+
   return (
     <View style={styles.matchPromoContainer}>
       <TouchableOpacity onPress={onPress} style={{ width: "100%" }}>
         <View style={styles.promoButton}>
           <Text size={18} color="#fff" weight="medium">
-            {count} drivers nearby! Book Now
+            {count} {label} nearby! Book Now
           </Text>
         </View>
       </TouchableOpacity>
@@ -226,6 +239,79 @@ export function handleResetUser() {
 
 export function handleResetApp() {
   storage.delete("app.handledCallSessionIds");
+}
+
+function DriverDisplay({ ids }) {
+  const idsRef = useRef(new Set());
+  const subscriptionMapRef = useRef(new Map());
+
+  useEffect(() => {
+    const subscriptionMap = subscriptionMapRef.current;
+    const oldIds = idsRef?.current;
+    const newIds = new Set();
+
+    const addedIds = new Set();
+    const removedIds = new Set();
+
+    // check added ids
+    log.debug("Checking for added ids.", { ids, oldIds: Array.from(oldIds) }); // prettier-ignore
+    ids?.forEach((id) => {
+      if (!oldIds.has(id)) {
+        addedIds.add(id);
+      }
+
+      newIds.add(id);
+    });
+
+    log.debug("Checking added ids completed.", { addedIds: Array.from(addedIds), ids }); // prettier-ignore
+
+    log.debug("Checking for removed ids.", { newIds: Array.from(newIds), oldIds: Array.from(oldIds) }); // prettier-ignore
+    oldIds?.forEach((id) => {
+      if (!newIds.has(id)) {
+        removedIds.add(id);
+      }
+    });
+    log.debug("Checking removed ids completed.", { removedIds: Array.from(removedIds), newIds: Array.from(newIds), oldIds: Array.from(oldIds) }); // prettier-ignore
+
+    log.debug("Subscribing to the new ids.", { ids: Array.from(newIds) });
+    let count = 1;
+    addedIds.forEach((id) => {
+      log.debug(`${count}/${addedIds.size} Subscribing. __tmp_location.${id}`, { id }); // prettier-ignore
+
+      const channel = supabase
+        .channel(`location.${id}`)
+        .on("broadcast", { event: "location_update" }, (data) => {
+          log.debug("Received a location update.", { location, id });
+
+          const location = JSON.parse(data.payload);
+          log.debug(`Storing: [__tmp_location.${id}]`, { location });
+          storage.set(`__tmp_location.${id}`, JSON.stringify(location));
+        })
+        .subscribe();
+
+      subscriptionMap.set(id, channel);
+      count++;
+    });
+
+    // reset count
+    count = 1;
+
+    log.debug("Unsubscribing from the removed ids.", { ids: Array.from(removedIds) }); // prettier-ignore
+    removedIds.forEach((id) => {
+      const channel = subscriptionMap.get(id);
+      channel?.unsubscribe?.();
+      subscriptionMap.delete(id);
+
+      log.debug(
+        `[${count}/${removedIds.size}] Unsubscribing. __tmp_location.${id}`,
+        { id }
+      );
+    });
+
+    addedIds.forEach((id) => oldIds.add(id));
+  }, [ids]);
+
+  return null;
 }
 
 const styles = StyleSheet.create({
