@@ -15,8 +15,8 @@ export default async function findNearby(payload) {
     estimatePreview,
     fare,
     notes,
-    paymentMethod,
-    willAddTip,
+    payment_method,
+    will_add_tip,
   } = payload;
 
   try {
@@ -32,8 +32,8 @@ export default async function findNearby(payload) {
       estimatePreview,
       fare,
       notes,
-      paymentMethod,
-      willAddTip,
+      payment_method,
+      will_add_tip,
     });
 
     log.debug("Successfully created trip request.", { res });

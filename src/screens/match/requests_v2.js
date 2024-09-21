@@ -165,8 +165,8 @@ export default function Find() {
         first_point: transformToApiField(match?.first),
         last_point: transformToApiField(match?.last),
         notes: noteRef.current,
-        paymentMethod,
-        willAddTip,
+        payment_method: paymentMethod,
+        will_add_tip: willAddTip,
         fare: {
           minFare,
           maxFare,
@@ -352,7 +352,7 @@ export default function Find() {
 
         <View style={{ gap: 16, marginTop: 16 }}>
           <Text size={18} weight="bold" color="#1B1B1B">
-            Preferred Mode of Payment
+            Preferred Payment Type
           </Text>
           <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
             <Chip

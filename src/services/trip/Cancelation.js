@@ -11,6 +11,7 @@ import findNearby from "../api/findNearby";
 import { useMutation } from "@tanstack/react-query";
 import { useMMKVString } from "react-native-mmkv";
 import { invalidateUseMatches } from "../queries/useMatches";
+import rebook from "../api/rebook";
 
 export default function Cancelation() {
   const router = useRouter();
@@ -43,13 +44,7 @@ export default function Cancelation() {
   }
 
   function mutationFn() {
-    return findNearby({
-      user_id: storage.getString("user.id"),
-      first_point: incoming?.first_point,
-      last_point: incoming?.last_point,
-      services: incoming?.services,
-      estimatePreview: incoming?.estimatePreview,
-    });
+    return rebook(incoming.id);
   }
 
   // if user is not in message screen upon receiving incoming message

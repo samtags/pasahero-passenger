@@ -55,6 +55,7 @@ import {
   to,
 } from "../../services/images/remote";
 import { invalidateUseMatches } from "../../services/queries/useMatches";
+import rebook from "../../services/api/rebook";
 
 const defaultLocation = {
   latitude: 14.5535991,
@@ -183,8 +184,8 @@ export default function Match() {
     setScrollEnabled(false);
   }
 
-  async function handleCreateTrip(attemp = 0) {
-    if (attemp > 2) {
+  async function handleCreateTrip(attempt = 0) {
+    if (attempt > 2) {
       log.warn("Unable to create trip after 3 attempts");
       Alert.alert("Unable to find driver", "Please try again later.", [
         {
@@ -195,22 +196,16 @@ export default function Match() {
       throw new Error(500);
     }
 
-    log.debug(`[${attemp}] Creating trip`, { match });
+    log.debug(`[${attempt}] Creating trip`, { match });
     let error;
 
-    const createTripResponse = await findNearby({
-      user_id: user?.id,
-      first_point: match.first_point,
-      last_point: match.last_point,
-      services: match.services,
-      estimatePreview: match.estimatePreview,
-    }).catch(() => {
+    const createTripResponse = await rebook(match.id).catch(() => {
       error = true;
     });
 
     if (error) {
-      log.warn(`[${attemp}] Failed to create trip`, { match });
-      return await handleCreateTrip(attemp + 1);
+      log.warn(`[${attempt}] Failed to create trip`, { match });
+      return await handleCreateTrip(attempt + 1);
     }
 
     return createTripResponse;
@@ -881,7 +876,7 @@ export default function Match() {
       </Optional>
 
       <Optional condition={showRequestTimeoutPrompt}>
-        <TimeoutRequestPromp
+        <TimeoutRequestPrompt
           match={match}
           onCancel={handleCancelFromRequestTimeoutPrompt}
           onProceed={handleConfirmFromRequestTimeoutPrompt}
@@ -1549,7 +1544,7 @@ function CancelationPrompt({ match, onProceed, onCancel }) {
   );
 }
 
-function TimeoutRequestPromp({ match, onProceed, onCancel }) {
+function TimeoutRequestPrompt({ match, onProceed, onCancel }) {
   return (
     <View style={styles.promptContainer}>
       <View style={styles.cancelationContent}>
