@@ -99,6 +99,11 @@ export default function useDriverToPickUpRouteProcedure({ match_id }) {
   }
 
   async function handleDirections(pickup, dropoff) {
+    if (!pickup.latitude || !pickup.longitude || !dropoff.latitude || !dropoff.longitude) { 
+      log.debug("Unable to calculate directions. Incomplete pickup or dropoff location.", { pickup, dropoff }); // prettier-ignore
+      return undefined;
+    } // prettier-ignore
+
     const origin = `${pickup.latitude},${pickup.longitude}`;
     const destination = `${dropoff.latitude},${dropoff.longitude}`;
 
