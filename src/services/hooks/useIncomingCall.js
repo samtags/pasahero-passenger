@@ -19,7 +19,7 @@ export default function useIncomingCall(userId) {
 
             setTimeout(async () => {
               log.debug("Received incoming call event from snapshot.");
-              const handledCallSessionIds = storage.getString("app.handledCallSessionIds"); // prettier-ignore
+              const handledCallSessionIds = storage.getString("__tmp.handledCallSessionIds"); // prettier-ignore
 
               if (handledCallSessionIds?.includes(sessionId)) {
                 log.debug("Skipping call handling because the call is already handled in the incoming call widget.", { sessionId }); // prettier-ignore
@@ -38,7 +38,7 @@ export default function useIncomingCall(userId) {
               // flag the sessionId as handled
               const sessionIds = handledCallSessionIds?.split(",") || [];
               sessionIds.push(sessionId);
-              storage.set("app.handledCallSessionIds", sessionIds.join(","));
+              storage.set("__tmp.handledCallSessionIds", sessionIds.join(","));
             }, 3000);
           }
         }

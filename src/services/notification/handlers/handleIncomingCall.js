@@ -56,7 +56,7 @@ export async function handleIncomingCall(payload, ctx) {
     RNCallKeep.endCall(callId.callUUID);
 
     setTimeout(() => {
-      const sessionIds = storage.getString("app.handledCallSessionIds"); // prettier-ignore
+      const sessionIds = storage.getString("__tmp.handledCallSessionIds"); // prettier-ignore
 
       if (sessionIds?.includes(payload.sessionId)) {
         log.debug("Skipping call handling from incoming call widget because the call is already handled.", { sessionId: payload.sessionId }); // prettier-ignore
@@ -71,10 +71,10 @@ export async function handleIncomingCall(payload, ctx) {
         },
       });
 
-      const handledCallSessionIds = storage.getString("app.handledCallSessionIds"); // prettier-ignore
+      const handledCallSessionIds = storage.getString("__tmp.handledCallSessionIds"); // prettier-ignore
       const ids = handledCallSessionIds?.split(",") ?? [];
       ids.push(payload.sessionId);
-      storage.set("app.handledCallSessionIds", ids.join(","));
+      storage.set("__tmp.handledCallSessionIds", ids.join(","));
 
       log.debug("Removing answer call event listener.");
     });
