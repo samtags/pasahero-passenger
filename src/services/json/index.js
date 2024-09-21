@@ -6,6 +6,15 @@ export function parse(data, defaultValue) {
   }
 }
 
+export function stringify(data) {
+  try {
+    return JSON.stringify(data);
+  } catch (e) {
+    return "";
+  }
+}
+
 export default {
   parse,
+  stringify,
 };

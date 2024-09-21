@@ -12,6 +12,7 @@ import storage from "../storage";
 export default function useNearbyDrivers({ startOnMount = true, payload }) {
   const idsRef = useRef([]);
   const timerRef = useRef(null);
+  const nearbyDriverLocationMapRef = useRef(new Map());
   const [nearbyDriverIds, setNearbyDriverIds] = useState([]);
 
   async function handleGetNearbyDriversAndSubscribe() {
@@ -19,7 +20,13 @@ export default function useNearbyDrivers({ startOnMount = true, payload }) {
 
     // get nearby drivers
     const nearbyDrivers = await getNearbyDrivers(payload.latitude, payload.longitude); // prettier-ignore
+
     const nearbyDriverIds = nearbyDrivers?.map(driver => driver?.user_id) || []; // prettier-ignore
+    const nearbyDriverLocationMap = nearbyDriverLocationMapRef.current;
+
+    nearbyDrivers?.forEach((driver) => {
+      nearbyDriverLocationMap.set(driver?.user_id, driver);
+    });
 
     log.debug("Nearby drivers found.", { nearbyDrivers, nearbyDriverIds, payload }); // prettier-ignore
 
@@ -80,6 +87,7 @@ export default function useNearbyDrivers({ startOnMount = true, payload }) {
     nearbyDriverIds,
     handleStop,
     handleStart,
+    nearbyDriverLocationMap: nearbyDriverLocationMapRef.current,
   };
 }
 

@@ -14,7 +14,7 @@ import useOnUpdate from "../../services/hooks/useOnUpdate";
 import initializeUser from "../../services/api/initializeUser";
 import initializeWallet from "../../services/api/initializeWallet";
 import usePushNotification from "../../services/notification/usePushNotification";
-import { account, center } from "../../services/images/remote";
+import { account, center, motorAngkasIcon } from "../../services/images/remote";
 import { ongoing } from "../../services/images/remote";
 import useMatches, {
   invalidateUseMatches,
@@ -22,21 +22,22 @@ import useMatches, {
 import Optional from "../../components/optional";
 import { IfFeatureEnabled } from "@growthbook/growthbook-react";
 import useOnFocus from "../../services/hooks/useOnFocus";
-import useNearbyDrivers from "../../services/hooks/useNearbyDrivers";
 import supabase from "../../services/supabase";
+import JSON from "../../services/json";
+import useGetNearbyDrivers from "../../services/hooks/useGetNearbyDrivers";
 
 export default function Home() {
   const cameraRef = useRef(null);
   const user = useUser();
   const router = useRouter();
   const [loc] = useMMKVString("location.current");
-  const location = JSON.parse(loc || "{}");
+  const location = JSON.parse(loc, {});
   const { data: matches = [] } = useMatches();
 
-  const { nearbyDriverIds } = useNearbyDrivers({
-    startOnMount: true,
-    payload: location,
-  });
+  const { nearbyDriverIds, nearbyDriverLocationMap } = useGetNearbyDrivers(
+    location.latitude,
+    location.longitude
+  );
 
   const handleOnPressWhereTo = () => {
     handleInitializeDraft();
@@ -150,13 +151,21 @@ export default function Home() {
           logoPosition={{ top: -100, left: 0 }}
           attributionEnabled={false}
         >
+          <Mapbox.Images
+            images={{
+              Angkas: motorAngkasIcon,
+            }}
+          />
           <Mapbox.Camera
             ref={cameraRef}
             animationMode="none"
             zoomLevel={15}
             centerCoordinate={[location.longitude, location.latitude]}
           />
-          <DriverDisplay ids={nearbyDriverIds} />
+          <DriverDisplay
+            ids={nearbyDriverIds}
+            nearbyDriverLocationMap={nearbyDriverLocationMap}
+          />
         </Mapbox.MapView>
       </SafeAreaView>
     </View>
@@ -177,6 +186,132 @@ function MatchPromo({ onPress, count = 0 }) {
         </View>
       </TouchableOpacity>
     </View>
+  );
+}
+
+function DriverDisplay({ ids, nearbyDriverLocationMap }) {
+  const idsRef = useRef(new Set());
+  const subscriptionMapRef = useRef(new Map());
+
+  useEffect(() => {
+    const subscriptionMap = subscriptionMapRef.current;
+    const oldIds = idsRef?.current;
+    const newIds = new Set();
+
+    const addedIds = new Set();
+    const removedIds = new Set();
+
+    // check added ids
+    log.debug("Checking for added ids.", { ids, oldIds: Array.from(oldIds) }); // prettier-ignore
+    ids?.forEach((id) => {
+      if (!oldIds.has(id)) {
+        addedIds.add(id);
+      }
+
+      newIds.add(id);
+    });
+
+    log.debug("Checking added ids completed.", { addedIds: Array.from(addedIds), ids }); // prettier-ignore
+
+    log.debug("Checking for removed ids.", { newIds: Array.from(newIds), oldIds: Array.from(oldIds) }); // prettier-ignore
+    oldIds?.forEach((id) => {
+      if (!newIds.has(id)) {
+        removedIds.add(id);
+      }
+    });
+    log.debug("Checking removed ids completed.", { removedIds: Array.from(removedIds), newIds: Array.from(newIds), oldIds: Array.from(oldIds) }); // prettier-ignore
+
+    log.debug("Subscribing to the new ids.", { ids: Array.from(newIds) });
+    let count = 1;
+    addedIds.forEach((id) => {
+      log.debug(`${count}/${addedIds.size} Subscribing to location.${id} channel`, { id }); // prettier-ignore
+
+      const channel = supabase
+        .channel(`location.${id}`)
+        .on("broadcast", { event: "location_update" }, (data) => {
+          const location = data.payload;
+          log.debug(`Received a location update from ${id}`, { id, data, location }); // prettier-ignore
+
+          storage.set(`__tmp_location.${id}`, JSON.stringify(location));
+          log.debug(`Storing to __tmp_location.${id}`, { location });
+        })
+        .subscribe();
+
+      subscriptionMap.set(id, channel);
+      count++;
+    });
+
+    // reset count
+    count = 1;
+
+    log.debug("Unsubscribing from the removed ids.", { ids: Array.from(removedIds) }); // prettier-ignore
+    removedIds.forEach((id) => {
+      const channel = subscriptionMap.get(id);
+      channel?.unsubscribe?.();
+      subscriptionMap.delete(id);
+
+      log.debug(
+        `[${count}/${removedIds.size}] Unsubscribing. __tmp_location.${id}`,
+        { id }
+      );
+    });
+
+    addedIds.forEach((id) => oldIds.add(id));
+  }, [ids]);
+
+  return ids?.map((id) => (
+    <DriverMarker
+      key={id}
+      id={id}
+      initialData={nearbyDriverLocationMap.get(id)}
+    />
+  ));
+}
+
+function DriverMarker({ id, initialData }) {
+  const [locationString] = useMMKVString(`__tmp_location.${id}`);
+  const location = JSON.parse(locationString, {});
+
+  let { latitude, longitude, heading = 0, active_profile } = location;
+
+  if (!latitude || !longitude) {
+    if (initialData.latitude && initialData.longitude) {
+      latitude = initialData.latitude;
+      longitude = initialData.longitude;
+    }
+  }
+
+  if (!latitude || !longitude) return null;
+
+  const geojson = {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [longitude, latitude],
+        },
+        properties: {
+          rotation: heading,
+        },
+      },
+    ],
+  };
+
+  return (
+    <Mapbox.ShapeSource id={`source-${id}`} shape={geojson}>
+      <Mapbox.SymbolLayer
+        id={`symbol-${id}`}
+        style={{
+          iconImage: "Angkas",
+          iconAllowOverlap: true,
+          iconRotate: ["get", "rotation"],
+          iconRotationAlignment: "map",
+          iconSize: 0.17,
+        }}
+      />
+    </Mapbox.ShapeSource>
   );
 }
 
@@ -238,80 +373,7 @@ export function handleResetUser() {
 }
 
 export function handleResetApp() {
-  storage.delete("app.handledCallSessionIds");
-}
-
-function DriverDisplay({ ids }) {
-  const idsRef = useRef(new Set());
-  const subscriptionMapRef = useRef(new Map());
-
-  useEffect(() => {
-    const subscriptionMap = subscriptionMapRef.current;
-    const oldIds = idsRef?.current;
-    const newIds = new Set();
-
-    const addedIds = new Set();
-    const removedIds = new Set();
-
-    // check added ids
-    log.debug("Checking for added ids.", { ids, oldIds: Array.from(oldIds) }); // prettier-ignore
-    ids?.forEach((id) => {
-      if (!oldIds.has(id)) {
-        addedIds.add(id);
-      }
-
-      newIds.add(id);
-    });
-
-    log.debug("Checking added ids completed.", { addedIds: Array.from(addedIds), ids }); // prettier-ignore
-
-    log.debug("Checking for removed ids.", { newIds: Array.from(newIds), oldIds: Array.from(oldIds) }); // prettier-ignore
-    oldIds?.forEach((id) => {
-      if (!newIds.has(id)) {
-        removedIds.add(id);
-      }
-    });
-    log.debug("Checking removed ids completed.", { removedIds: Array.from(removedIds), newIds: Array.from(newIds), oldIds: Array.from(oldIds) }); // prettier-ignore
-
-    log.debug("Subscribing to the new ids.", { ids: Array.from(newIds) });
-    let count = 1;
-    addedIds.forEach((id) => {
-      log.debug(`${count}/${addedIds.size} Subscribing. __tmp_location.${id}`, { id }); // prettier-ignore
-
-      const channel = supabase
-        .channel(`location.${id}`)
-        .on("broadcast", { event: "location_update" }, (data) => {
-          log.debug("Received a location update.", { location, id });
-
-          const location = JSON.parse(data.payload);
-          log.debug(`Storing: [__tmp_location.${id}]`, { location });
-          storage.set(`__tmp_location.${id}`, JSON.stringify(location));
-        })
-        .subscribe();
-
-      subscriptionMap.set(id, channel);
-      count++;
-    });
-
-    // reset count
-    count = 1;
-
-    log.debug("Unsubscribing from the removed ids.", { ids: Array.from(removedIds) }); // prettier-ignore
-    removedIds.forEach((id) => {
-      const channel = subscriptionMap.get(id);
-      channel?.unsubscribe?.();
-      subscriptionMap.delete(id);
-
-      log.debug(
-        `[${count}/${removedIds.size}] Unsubscribing. __tmp_location.${id}`,
-        { id }
-      );
-    });
-
-    addedIds.forEach((id) => oldIds.add(id));
-  }, [ids]);
-
-  return null;
+  // storage.delete("app.handledCallSessionIds");
 }
 
 const styles = StyleSheet.create({

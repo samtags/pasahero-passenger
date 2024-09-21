@@ -20,6 +20,7 @@ import onFetchUpdateAsync from "../src/services/updates";
 import ImagePreRenderer from "../src/services/images/PreRenderer";
 import GrowthBook from "../src/services/growthbook";
 import SplashScreen from "../src/components/splash";
+import { useStorageLifecycle } from "../src/services/storage";
 
 Notifications.setNotificationHandler({
   handleNotification: () => ({
@@ -50,6 +51,7 @@ export default function Layout() {
 
   useReactQueryDevTools(queryClient);
   useWarmUpBrowser();
+  useStorageLifecycle();
 
   return (
     <>
@@ -57,9 +59,7 @@ export default function Layout() {
 
       <QueryClientProvider client={queryClient}>
         <GrowthBook>
-          
           <GestureHandlerRootView style={{ flex: 1 }}>
-            
             <ClerkProvider
               tokenCache={tokenCache}
               publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}
@@ -67,7 +67,7 @@ export default function Layout() {
               <ClerkLoading>
                 <SplashScreen />
               </ClerkLoading>
-              
+
               <ClerkLoaded>
                 <Stack />
               </ClerkLoaded>
@@ -76,9 +76,7 @@ export default function Layout() {
             <MessageProvider />
             <Cancelation />
             <RequestTimeout />
-
           </GestureHandlerRootView>
-          
         </GrowthBook>
       </QueryClientProvider>
     </>

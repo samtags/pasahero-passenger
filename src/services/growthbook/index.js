@@ -4,7 +4,7 @@ import log from "../log";
 import { setPolyfills } from "@growthbook/growthbook";
 
 // Create a GrowthBook instance
-const gb = new GrowthBook({
+export const gb = new GrowthBook({
   apiHost: "https://cdn.growthbook.io",
   clientKey: process.env.EXPO_PUBLIC_GB_KEY,
   enableDevMode: true,
