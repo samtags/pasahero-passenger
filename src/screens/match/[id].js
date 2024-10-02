@@ -467,7 +467,11 @@ export default function Match() {
           <Optional condition={Boolean(match)}>
             <TransitPoints
               showShareRide={["FOUND", "ARRIVED", "STARTED"].includes(match?.status)} // prettier-ignore
-              onShareRide={() => router.navigate("/soon")}
+              onShareRide={() => {
+                Linking.openURL(
+                  `https://share.pasahero.app/${match.id}?isFromApp=true`
+                );
+              }}
               first_point={match?.first_point}
               last_point={match?.last_point}
             />
