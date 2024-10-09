@@ -7,12 +7,15 @@ import { useFeatureIsOn } from "@growthbook/growthbook-react";
 import Text from "../../src/components/text";
 import { HeaderBackButton } from "@react-navigation/elements";
 import { Alert, View } from "react-native";
+import { useRouterParams } from "../../src/services/router";
+import route from "../../src/services/router";
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function Request() {
   const isEnabled = useFeatureIsOn("enable-match-request-new-ui", false);
   const router = useRouter();
+  const params = useRouterParams();
 
   useWarmUpBrowser();
 
@@ -23,6 +26,10 @@ export default function Request() {
         text: "OK",
         style: "default",
         onPress: () => {
+          if (params?.from) {
+            return route.navigate(params.from);
+          }
+
           router.navigate("/");
         },
       },

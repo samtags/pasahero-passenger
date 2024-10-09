@@ -46,7 +46,7 @@ export default function Account() {
         <View style={styles.container}>
           <SignedIn>
             {/* <Link href="/wallet">My Wallet</Link> */}
-            <Link href="/match/list">Requested Trips</Link>
+            <Link href="/match/list">Trips</Link>
           </SignedIn>
           {/* <Link href="/account">Saved Locations</Link> */}
           <Link href="/faqs">FAQs</Link>

@@ -1,85 +1,177 @@
+import { useState } from "react";
 import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import useMatches from "../../services/queries/useMatches";
 import { router } from "expo-router";
+import route from "../../services/router";
 import Text from "../../components/text";
 import { Image } from "expo-image";
 import getLabel from "../../services/util/status/getLabel";
 import log from "../../services/log";
 import useGetDriverProfile from "../../services/queries/useGetDriverProfile";
 import { dropoff, pickup, star } from "../../services/images/remote";
+import useCanceledTrips from "../../services/queries/useCanceledTrips";
+import Optional from "../../components/optional";
+import moment from "moment/moment";
+import storage from "../../services/storage";
 
 export default function List() {
-  const { data } = useMatches();
+  const [activeTab, setActiveTab] = useState("ONGOING"); // ONGOING, COMPLETED, CANCELED
 
   return (
     <View style={styles.container}>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          backgroundColor: "white",
-        }}
-      >
-        <View
-          style={{
-            paddingVertical: 16,
-            borderBottomWidth: 3.5,
-            borderColor: "#6366F1",
-            flex: 1,
-            alignItems: "center",
-          }}
-        >
-          <Text color="#353579" weight="700">
-            Ongoing
-          </Text>
-        </View>
-        <View
-          style={{
-            paddingVertical: 16,
-            flex: 1,
-            alignItems: "center",
-            opacity: 0.2,
-          }}
-        >
-          <Text color="#707070">Nearby</Text>
-        </View>
-        <View
-          style={{
-            paddingVertical: 16,
-            flex: 1,
-            alignItems: "center",
-            opacity: 0.2,
-          }}
-        >
-          <Text color="#707070">History</Text>
-        </View>
-      </View>
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{
-          padding: 24,
-          gap: 12,
-          backgroundColor: "#f9fafb",
-        }}
-      >
-        {data?.map((match) => (
-          <TripCard
-            key={match.id}
-            onPress={() => router.navigate(`/match/${match.id}`)}
-            name={match.passenger_id}
-            platform={match.estimatePreview}
-            status={match.status}
-            firstAddress={match.first_point?.short_address}
-            lastAddress={match.last_point?.short_address}
-            profile_id={match.profile_id}
-          />
-        ))}
-      </ScrollView>
+      <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Optional condition={activeTab === "ONGOING"}>
+        <Ongoing />
+      </Optional>
+
+      {/* <Optional condition={activeTab === "COMPLETED"}>
+        <Completed />
+      </Optional> */}
+
+      <Optional condition={activeTab === "CANCELED"}>
+        <Canceled />
+      </Optional>
     </View>
   );
 }
 
-function TripCard({
+function Ongoing() {
+  const { data } = useMatches();
+  return (
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.scrollView}>
+      {data?.map((match) => (
+        <OngoingTripCard
+          key={match.id}
+          onPress={() => router.navigate(`/match/${match.id}`)}
+          name={match.passenger_id}
+          platform={match.estimatePreview}
+          status={match.status}
+          firstAddress={match.first_point?.short_address}
+          lastAddress={match.last_point?.short_address}
+          profile_id={match.profile_id}
+        />
+      ))}
+    </ScrollView>
+  );
+}
+
+function Canceled() {
+  const { data } = useCanceledTrips();
+  return (
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={styles.canceledScrollView}
+    >
+      {data?.map((match) => {
+        let fareEstimate = "-";
+
+        if (match.fare) {
+          fareEstimate = `${match.fare.minFare} - ${match.fare.maxFare}`;
+        }
+
+        function handleRebook() {
+          log.debug("Rebooking trip", { match });
+
+          const draft = {
+            first: {
+              latitude: match.first_point.latitude,
+              longitude: match.first_point.longitude,
+              shortAddress: match.first_point.short_address,
+              longAddress: match.first_point.long_address,
+            },
+            last: {
+              latitude: match.last_point.latitude,
+              longitude: match.last_point.longitude,
+              shortAddress: match.last_point.short_address,
+              longAddress: match.last_point.long_address,
+            },
+          };
+
+          // set match draft
+          storage.set("match.draft", JSON.stringify(draft));
+
+          // then navigate to trip request screen
+          route.navigate({
+            pathname: "/match/request",
+            params: {
+              from: {
+                pathname: "/match/list",
+                params: {
+                  previousTab: "CANCELED",
+                },
+              },
+            },
+          });
+        }
+
+        return (
+          <CanceledTripCard
+            key={match.id}
+            onPress={handleRebook}
+            firstAddress={match.first_point?.long_address}
+            lastAddress={match.last_point?.long_address}
+            create={match.created_at}
+            fareEstimate={fareEstimate}
+          />
+        );
+      })}
+    </ScrollView>
+  );
+}
+
+function Tabs({ activeTab = "ONGOING", setActiveTab }) {
+  return (
+    <View style={styles.tabsContainer}>
+      <TouchableOpacity
+        onPress={() => setActiveTab("ONGOING")}
+        style={{ flex: 1 }}
+      >
+        <View style={[styles.tab, activeTab === "ONGOING" && styles.activeTab]}>
+          <Text
+            color="#353579"
+            weight={activeTab === "ONGOING" ? "700" : undefined}
+          >
+            Ongoing
+          </Text>
+        </View>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => setActiveTab("COMPLETED")}
+        style={{ flex: 1 }}
+      >
+        <View
+          style={[styles.tab, activeTab === "COMPLETED" && styles.activeTab]}
+        >
+          <Text
+            color="#353579"
+            weight={activeTab === "COMPLETED" ? "700" : undefined}
+          >
+            Completed
+          </Text>
+        </View>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => setActiveTab("CANCELED")}
+        style={{ flex: 1 }}
+      >
+        <View
+          style={[styles.tab, activeTab === "CANCELED" && styles.activeTab]}
+        >
+          <Text
+            color="#353579"
+            weight={activeTab === "CANCELED" ? "700" : undefined}
+          >
+            Canceled
+          </Text>
+        </View>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+function OngoingTripCard({
   name = "[name]",
   platform = "[platform]",
   rating = 4.6,
@@ -228,12 +320,117 @@ function TripCard({
   );
 }
 
+function CanceledTripCard({
+  firstAddress = "[address1]",
+  lastAddress = "[address2]",
+  onPress = () => {},
+  created_at,
+  fareEstimate,
+}) {
+  let date = moment(created_at).format("(ddd) MMMM DD HH:mm A");
+
+  return (
+    <View
+      style={{
+        borderBottomColor: "#EAEAEA",
+        borderBottomWidth: 1,
+        paddingBottom: 16,
+      }}
+    >
+      <View style={{ paddingVertical: 16 }}>
+        <View
+          style={{
+            marginBottom: 16,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "flex-end",
+          }}
+        >
+          <View>
+            <Text size={20} color="#363F59" weight="700">
+              Canceled
+            </Text>
+            <Text color="#707070">{date}</Text>
+          </View>
+
+          <TouchableOpacity onPress={onPress}>
+            <Text
+              style={{ textDecorationLine: "underline" }}
+              size={14}
+              color="#637AF1"
+            >
+              Having same trip?
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ gap: 12 }}>
+          <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
+            <Image
+              source={pickup}
+              style={{ width: 20, height: 20 }}
+              cachePolicy="memory-disk"
+            />
+            <Text color="#1b1b1b" style={{ flex: 1 }} numberOfLines={1}>
+              {firstAddress}
+            </Text>
+          </View>
+          <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
+            <Image
+              source={dropoff}
+              style={{ width: 20, height: 20 }}
+              cachePolicy="memory-disk"
+            />
+            <Text color="#1b1b1b" style={{ flex: 1 }} numberOfLines={1}>
+              {lastAddress}
+            </Text>
+          </View>
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "flex-end",
+            marginTop: 16,
+          }}
+        >
+          <View style={{ flexDirection: "row", marginTop: 16, gap: 4 }}>
+            <View style={[styles.serviceChip, styles.angkas]}>
+              <Text weight="bold" size={12} color="white">
+                Passenger
+              </Text>
+            </View>
+
+            <View style={[styles.serviceChip, styles.joyRide]}>
+              <Text weight="bold" size={12} color="white">
+                MC Taxi
+              </Text>
+            </View>
+
+            <View style={[styles.serviceChip, styles.moveIt]}>
+              <Text weight="bold" size={12} color="white">
+                MotoTaxi
+              </Text>
+            </View>
+          </View>
+          <Text size={20} color="#363F59" weight="700">
+            {fareEstimate}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f9fafb",
   },
-
+  tabsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    backgroundColor: "white",
+  },
   button: {
     backgroundColor: "gainsboro",
     padding: 12,
@@ -244,4 +441,31 @@ const styles = StyleSheet.create({
     padding: 4,
     gap: 8,
   },
+  tab: {
+    paddingVertical: 16,
+    alignItems: "center",
+  },
+  activeTab: {
+    borderBottomWidth: 3.5,
+    borderColor: "#6366F1",
+  },
+  scrollView: {
+    padding: 24,
+    gap: 12,
+    backgroundColor: "#f9fafb",
+  },
+  canceledScrollView: {
+    padding: 24,
+    paddingBottom: 0,
+    gap: 12,
+    backgroundColor: "#f9fafb",
+  },
+  serviceChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 16,
+  },
+  angkas: { backgroundColor: "#0090F9" },
+  joyRide: { backgroundColor: "#181ACA" },
+  moveIt: { backgroundColor: "#EF4444" },
 });

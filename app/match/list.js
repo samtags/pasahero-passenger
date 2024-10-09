@@ -10,7 +10,7 @@ export default function Entry(props) {
           animation: "ios",
           headerTitle: () => (
             <Text size={19} weight="bold" color="#353579">
-              Requested Trips
+              Trips
             </Text>
           ),
           headerTitleAlign: "center",
