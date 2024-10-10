@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import getCanceledTrips from "../api/getCanceledTrips";
 import { useMMKVString } from "react-native-mmkv";
 
-export default function useCompletedTrips() {
+export default function useCanceledTrips() {
   const [userId] = useMMKVString("user.id");
   return useQuery({
     queryKey: ["getCanceledTrips", userId],
