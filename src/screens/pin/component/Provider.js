@@ -111,7 +111,7 @@ export function GoogleMapPinProvider({ children, latitude, longitude }) {
 
   if (!displayedTitle) displayedTitle = "Exact location";
   if (!displayedSubTitle)
-    displayedSubTitle = "Selected a custom location on the map";
+    displayedSubTitle = "Custom location selected on the map";
 
   const propsToPass = {
     selected,
@@ -229,7 +229,7 @@ export function GrabPinProvider({ children, latitude, longitude }) {
 
   if (!displayedTitle) displayedTitle = "Exact location";
   if (!displayedSubTitle)
-    displayedSubTitle = "Selected a custom location on the map";
+    displayedSubTitle = "Custom location selected on the map";
 
   const propsToPass = {
     selected,
