@@ -22,7 +22,7 @@ function log(message, payload = {}) {
   payload.created_at = new Date().toISOString();
   payload.context = payload.context || {};
   payload.context["@service_name"] = "pasahero.passenger";
-  payload.context["@version"] = "1.0.10";
+  payload.context["@version"] = "1.0.11";
   payload.context["@environment"] = process.env.NODE_ENV;
   payload.context["@user_id"] = storage.getString("user.id");
 
