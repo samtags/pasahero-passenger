@@ -14,11 +14,16 @@ import useOnUpdate from "../../services/hooks/useOnUpdate";
 import initializeUser from "../../services/api/initializeUser";
 import initializeWallet from "../../services/api/initializeWallet";
 import usePushNotification from "../../services/notification/usePushNotification";
-import { account, center, motorAngkasIcon } from "../../services/images/remote";
 import { ongoing } from "../../services/images/remote";
 import useMatches, {
   invalidateUseMatches,
 } from "../../services/queries/useMatches";
+import {
+  account,
+  center,
+  motorAngkasIcon,
+  currentLocationIndicator,
+} from "../../services/images/remote";
 import Optional from "../../components/optional";
 import { IfFeatureEnabled } from "@growthbook/growthbook-react";
 import useOnFocus from "../../services/hooks/useOnFocus";
@@ -154,8 +159,10 @@ export default function Home() {
           <Mapbox.Images
             images={{
               Angkas: motorAngkasIcon,
+              currentLocationIndicator,
             }}
           />
+
           <Mapbox.Camera
             ref={cameraRef}
             animationMode="none"
@@ -166,9 +173,46 @@ export default function Home() {
             ids={nearbyDriverIds}
             nearbyDriverLocationMap={nearbyDriverLocationMap}
           />
+
+          <DisplayLocation
+            latitude={location.latitude}
+            longitude={location.longitude}
+          />
         </Mapbox.MapView>
       </SafeAreaView>
     </View>
+  );
+}
+
+function DisplayLocation({ latitude, longitude }) {
+  const geojson = {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [longitude, latitude],
+        },
+      },
+    ],
+  };
+
+  if (!latitude || !longitude) return null;
+
+  return (
+    <Mapbox.ShapeSource id="current-location-source" shape={geojson}>
+      <Mapbox.SymbolLayer
+        id={`current-location-symbol`}
+        style={{
+          iconImage: "currentLocationIndicator",
+          iconAllowOverlap: true,
+          iconRotate: ["get", "rotation"],
+          iconRotationAlignment: "map",
+          iconSize: 0.25,
+        }}
+      />
+    </Mapbox.ShapeSource>
   );
 }
 
