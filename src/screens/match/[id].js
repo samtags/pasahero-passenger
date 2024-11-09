@@ -416,6 +416,11 @@ export default function Match() {
               profile_id={match?.profile_id}
               eta={onTheWayEta}
               match_id={match?.id}
+              onTransfer={() => {
+                setShowInstruction(true);
+                scrollRef?.current?.scrollTo({ y: 0, animated: true });
+                setScrollEnabled(false);
+              }}
             />
           </Optional>
 
@@ -1089,14 +1094,20 @@ function ArrivedPreview({
           onPress={() => onTransfer?.()}
           color={getColorByPlatform(platform)}
         >
-          Transfer to {platform || "[App]"}
+          Transfer to {platform || "App"}
         </Cta>
       </View>
     </Preview>
   );
 }
 
-function StartedPreview({ onHandlerStateChange, profile_id, eta, match_id }) {
+function StartedPreview({
+  onHandlerStateChange,
+  profile_id,
+  eta,
+  match_id,
+  onTransfer,
+}) {
   const { data: profile, isLoading: isProfileLoading } = useGetDriverProfile(profile_id); // prettier-ignore
 
   const displayName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim(); // prettier-ignore
@@ -1145,7 +1156,7 @@ function StartedPreview({ onHandlerStateChange, profile_id, eta, match_id }) {
         vehicle_make={vehicle_make}
       />
 
-      <View style={{ paddingTop: 16, backgroundColor: "#FFF" }}>
+      <View style={{ paddingTop: 16, backgroundColor: "#FFF", gap: 8 }}>
         <Cta
           disabled={isPending}
           style={{ opacity: isPending ? 0.25 : 1 }}
@@ -1163,9 +1174,17 @@ function StartedPreview({ onHandlerStateChange, profile_id, eta, match_id }) {
               ]
             );
           }}
-          color={getColorByPlatform(platform)}
+          color="transparent"
+          textColor="#D1D5DB"
         >
           Arrived at Destination
+        </Cta>
+
+        <Cta
+          onPress={() => onTransfer?.()}
+          color={getColorByPlatform(platform)}
+        >
+          Transfer to {platform || "App"}
         </Cta>
       </View>
     </Preview>
