@@ -441,7 +441,7 @@ export default function Find() {
                   condition={isLoadingJoyRide === false}
                 >
                   <Text size={22} color="white">
-                    P {joyRideMcTaxi?.fare?.estimatedPreview}
+                    P {joyRideMcTaxi?.fare?.estimatePreview}
                   </Text>
                 </Optional>
               </View>
@@ -478,7 +478,7 @@ export default function Find() {
                   condition={isLoadingAngkas === false}
                 >
                   <Text size={22} color="white">
-                    P {angkasPassenger?.fare?.estimatedPreview}
+                    P {angkasPassenger?.fare?.estimatePreview}
                   </Text>
                 </Optional>
               </View>
@@ -516,7 +516,7 @@ export default function Find() {
                   condition={isLoadingMoveIt === false}
                 >
                   <Text size={22} color="white">
-                    P {moveItMotoTaxi?.fare?.estimatedPreview}
+                    P {moveItMotoTaxi?.fare?.estimatePreview}
                   </Text>
                 </Optional>
               </View>

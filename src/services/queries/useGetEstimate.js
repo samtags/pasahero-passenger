@@ -14,14 +14,14 @@ export default function useGetEstimate(service, origin, destination) {
       const estimate = await getEstimate({ service, origin, destination });
 
       if (estimate?.fare?.minFare && estimate?.fare?.maxFare) {
-        let estimatedPreview;
+        let estimatePreview;
         let formattedMinFare = decimal.format(estimate?.fare?.minFare);
         let formattedMaxFare = decimal.format(estimate?.fare?.maxFare);
 
-        estimatedPreview = `${formattedMinFare} - ${formattedMaxFare}`;
+        estimatePreview = `${formattedMinFare} - ${formattedMaxFare}`;
 
         if (estimate?.fare) {
-          estimate.fare.estimatedPreview = estimatedPreview;
+          estimate.fare.estimatePreview = estimatePreview;
         }
       }
 
