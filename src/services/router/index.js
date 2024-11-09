@@ -4,17 +4,24 @@ import { router, useNavigation } from "expo-router";
 const routerParams = new Map();
 
 function navigate({ pathname, params = {} }) {
-  // remove slash at the beginning of the pathname
-  if (pathname.match(/^\//)) {
-    pathname = pathname.replace(/^\//, "");
-  }
+  let key = pathname;
+  if (key[0] === "/") key = key.slice(1);
 
-  routerParams.set(pathname, params);
-  router.navigate({ pathname: pathname, params });
+  routerParams.set(key, params);
+  router.navigate({ pathname: key, params });
+}
+
+function replace({ pathname, params = {} }) {
+  let key = pathname;
+  if (key[0] === "/") key = key.slice(1);
+
+  routerParams.set(key, params);
+  router.replace({ pathname: key, params });
 }
 
 export default {
   navigate,
+  replace,
 };
 
 export function useRouterParams() {
@@ -22,11 +29,17 @@ export function useRouterParams() {
   const state = navigator.getState();
   const route = state.routes[state.index];
 
+  let routeName = route?.name;
+
+  // check if routeName starts with '/'
+  // remove trailing '/'
+  if (routeName[0] === "/") routeName = routeName.slice(1);
+
   useEffect(() => {
     return () => {
-      routerParams.delete(route.name);
+      routerParams.delete(routeName);
     };
   }, []);
 
-  return routerParams.get(route.name);
+  return routerParams.get(routeName);
 }
