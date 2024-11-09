@@ -316,7 +316,7 @@ function DriverMarker({ id, initialData }) {
   const [locationString] = useMMKVString(`__tmp_location.${id}`);
   const location = JSON.parse(locationString, {});
 
-  let { latitude, longitude, heading = 0, active_profile } = location;
+  let { latitude, longitude, heading = 0 } = location;
 
   if (!latitude || !longitude) {
     if (initialData.latitude && initialData.longitude) {

@@ -11,7 +11,6 @@ import JSON from "../../services/json";
 import log from "../../services/log";
 import useOnFocus from "../../services/hooks/useOnFocus";
 import { handleSetTransitFirst } from "../transit/search/first";
-import { platform } from "@launchdarkly/react-native-client-sdk";
 
 export default function FirstLastLocation() {
   const router = useRouter();
@@ -30,7 +29,7 @@ export default function FirstLastLocation() {
 
     router.replace("/match/request");
 
-    storage.set("location.current", JSON.stringify(platform));
+    storage.set("location.current", JSON.stringify(payload));
 
     log.info("User confirmed the pickup location.", {
       actionType: "tap",
