@@ -118,7 +118,7 @@ export default function Match() {
 
   const pointerEvents = scrollEnabled ? "auto" : "box-none";
   const isCoordinatesReady = Boolean(
-    match?.first_point?.longitude && match?.first_point?.latitude
+    match?.first_point?.longitude && match?.first_point?.latitude,
   );
 
   const {
@@ -376,7 +376,7 @@ export default function Match() {
   if (driverAssignedCoordinates[0] && driverAssignedCoordinates.at(-1)) {
     driverArrivedDistance = handleGetDistance(
       driverAssignedCoordinates[0],
-      driverAssignedCoordinates.at(-1)
+      driverAssignedCoordinates.at(-1),
     );
   }
 
@@ -474,7 +474,7 @@ export default function Match() {
               showShareRide={["FOUND", "ARRIVED", "STARTED"].includes(match?.status)} // prettier-ignore
               onShareRide={() => {
                 Linking.openURL(
-                  `https://share.pasahero.app/${match.id}?isFromApp=true`
+                  `https://share.pasahero.app/${match.id}?isFromApp=true`,
                 );
               }}
               first_point={match?.first_point}
@@ -495,8 +495,8 @@ export default function Match() {
           style={[styles.map, { opacity: isMapInitialized ? 1 : 0 }]}
           // styleURL="mapbox://styles/mapbox/streets-v12"
           // styleURL="mapbox://styles/mapbox/outdoors-v12"
-          // styleURL="mapbox://styles/mapbox/light-v11"
-          styleURL="mapbox://styles/mapbox/streets-v12"
+          styleURL="mapbox://styles/mapbox/light-v11"
+          // styleURL="mapbox://styles/mapbox/streets-v12"
           logoPosition={{ top: -100, left: 0 }}
           attributionEnabled={false}
           regionDidChangeDebounceTime={1000}
@@ -579,7 +579,7 @@ export default function Match() {
                         geometry: {
                           type: "LineString",
                           coordinates: driverAssignedCoordinates?.map(
-                            (coords) => [coords.longitude, coords.latitude]
+                            (coords) => [coords.longitude, coords.latitude],
                           ),
                         },
                       }}
@@ -1171,7 +1171,7 @@ function StartedPreview({
                   style: "destructive",
                   onPress: handleArriveAtDestination,
                 },
-              ]
+              ],
             );
           }}
           color="transparent"
@@ -1619,7 +1619,7 @@ function handleChangePickupReference(coordinates) {
       ...(coordinates || {}),
       shortAddress: coordinates?.short_address,
       longAddress: coordinates?.long_address,
-    })
+    }),
   );
 }
 

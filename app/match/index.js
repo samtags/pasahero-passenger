@@ -6,7 +6,7 @@ export default function Entry(props) {
     <>
       <Stack.Screen
         options={{
-          animation: "ios",
+          // animation: "ios",
           title: "Find",
         }}
       />

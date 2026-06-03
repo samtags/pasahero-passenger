@@ -1,8 +1,22 @@
-import RNCallKeep from "react-native-callkeep";
 import log from "../../log";
 import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
 import storage from "../../storage";
+
+let cachedCallKeep = undefined;
+function getCallKeep() {
+  if (cachedCallKeep !== undefined) return cachedCallKeep;
+
+  try {
+    const module = require("react-native-callkeep");
+    cachedCallKeep = module?.default || module;
+  } catch (error) {
+    log.warn("CallKeep unavailable in incoming-call handler.", { error });
+    cachedCallKeep = null;
+  }
+
+  return cachedCallKeep;
+}
 
 /**
  *
@@ -11,11 +25,13 @@ import storage from "../../storage";
  */
 export async function handleIncomingCall(payload, ctx) {
   log.debug("Handle incoming call using fcm.", { payload, ctx });
+  const callKeep = getCallKeep();
+  if (!callKeep) return;
 
   // Shows the incoming widget in the background
   if (payload.sessionId && payload.displayName && payload.displayNumber) {
     log.debug("Opened incoming call widget.", { payload, ctx });
-    RNCallKeep.displayIncomingCall(
+    callKeep.displayIncomingCall(
       payload.sessionId,
       payload.displayName,
       payload.displayNumber,
@@ -49,11 +65,11 @@ export async function handleIncomingCall(payload, ctx) {
   }
 
   log.debug("Adding answer call event listener.");
-  RNCallKeep.addEventListener("answerCall", (callId) => {
+  callKeep.addEventListener("answerCall", (callId) => {
     log.debug("Answer call event fired.", { callId });
     removePushNotification();
-    RNCallKeep.backToForeground();
-    RNCallKeep.endCall(callId.callUUID);
+    callKeep.backToForeground();
+    callKeep.endCall(callId.callUUID);
 
     setTimeout(() => {
       const sessionIds = storage.getString("__tmp.handledCallSessionIds"); // prettier-ignore
@@ -80,7 +96,7 @@ export async function handleIncomingCall(payload, ctx) {
     });
   });
 
-  RNCallKeep.addEventListener("endCall", (callId) => {
+  callKeep.addEventListener("endCall", (callId) => {
     removePushNotification();
   });
 }

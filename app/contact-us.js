@@ -20,7 +20,7 @@ export default function Entry(props) {
           ),
           headerTitleAlign: "center",
           headerTintColor: "#757477",
-          animation: "ios",
+          // animation: "ios",
         }}
       />
 

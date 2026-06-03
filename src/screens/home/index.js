@@ -41,7 +41,7 @@ export default function Home() {
 
   const { nearbyDriverIds, nearbyDriverLocationMap } = useGetNearbyDrivers(
     location.latitude,
-    location.longitude
+    location.longitude,
   );
 
   const handleOnPressWhereTo = () => {
@@ -152,7 +152,8 @@ export default function Home() {
         <Mapbox.MapView
           scaleBarEnabled={false}
           style={styles.map}
-          styleURL="mapbox://styles/mapbox/streets-v12"
+          styleURL="mapbox://styles/mapbox/light-v11"
+          // styleURL="mapbox://styles/mapbox/streets-v12"
           logoPosition={{ top: -100, left: 0 }}
           attributionEnabled={false}
         >
@@ -296,7 +297,7 @@ function DriverDisplay({ ids, nearbyDriverLocationMap }) {
 
       log.debug(
         `[${count}/${removedIds.size}] Unsubscribing. __tmp_location.${id}`,
-        { id }
+        { id },
       );
     });
 

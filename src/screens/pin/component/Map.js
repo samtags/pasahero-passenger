@@ -49,7 +49,8 @@ export default function Map() {
         attributionEnabled={false}
         onTouchStart={(e) => handleSwipeMapStart?.(e)}
         onCameraChanged={(e) => handleOnChangeRegion?.(e)}
-        styleURL="mapbox://styles/mapbox/streets-v12"
+        styleURL="mapbox://styles/mapbox/light-v11"
+        // styleURL="mapbox://styles/mapbox/streets-v12"
       >
         <Mapbox.Camera
           ref={cameraRef}

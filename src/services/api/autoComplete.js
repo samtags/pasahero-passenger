@@ -1,20 +1,46 @@
-import axios from "axios";
-
-const key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY;
+import axios from "../axios";
 
 /**
  *s
  * @param {string} input
  */
 export default async function autoComplete(input) {
-  return await axios.get(
-    "https://maps.googleapis.com/maps/api/place/autocomplete/json",
+  const response = await axios.get(
+    "https://passenger-93954675246.asia-southeast1.run.app/locations/autocomplete",
     {
       params: {
-        key,
-        input,
-        components: "country:PH",
+        q: input,
       },
-    }
+    },
   );
+
+  const predictions = normalizePredictions(response?.data);
+
+  return {
+    ...response,
+    data: {
+      predictions,
+    },
+  };
+}
+
+function normalizePredictions(data = []) {
+  if (!Array.isArray(data)) return [];
+
+  return data.map((item) => {
+    const placeId = item?.place_id || item?.PlaceId || item?.id || "";
+    const text = item?.description || item?.Description || item?.Text || "";
+    const parts = String(text).split(",").map((part) => part.trim());
+    const mainText = item?.structured_formatting?.main_text || parts[0] || "";
+
+    return {
+      ...item,
+      place_id: placeId,
+      description: text,
+      structured_formatting: {
+        ...item?.structured_formatting,
+        main_text: mainText,
+      },
+    };
+  });
 }

@@ -22,7 +22,7 @@ function log(message, payload = {}) {
   payload.created_at = new Date().toISOString();
   payload.context = payload.context || {};
   payload.context["@service_name"] = "pasahero.passenger";
-  payload.context["@version"] = "1.0.12";
+  payload.context["@version"] = "1.1.3";
   payload.context["@environment"] = process.env.NODE_ENV;
   payload.context["@user_id"] = storage.getString("user.id");
 
@@ -31,7 +31,7 @@ function log(message, payload = {}) {
 
   // todo: remove new relic once we have centralized the logging service
   fetch("https://log-api.newrelic.com/log/v1", options);
-  fetch("https://asia-southeast2-pasahero-5c989.cloudfunctions.net/log/", options); // prettier-ignore
+  // fetch("https://asia-southeast2-pasahero-5c989.cloudfunctions.net/log/", options); // prettier-ignore
 
   console[payload.level](message, payload);
 }

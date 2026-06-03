@@ -35,7 +35,7 @@ export function Next() {
       <Stack.Screen
         options={{
           headerShown: false,
-          animation: "ios",
+          // animation: "ios",
         }}
       />
       <StatusBar backgroundColor="white" />
@@ -60,7 +60,7 @@ export function Pin() {
   const coordinates = useDelayedValue(center, 750);
   const { data, isLoading } = useReverseGeocoding(
     coordinates.latitude,
-    coordinates.longitude
+    coordinates.longitude,
   );
 
   // Sort by street address first
@@ -87,7 +87,7 @@ export function Pin() {
 
     storage.set(
       "location.current",
-      JSON.stringify({ latitude, longitude, shortAddress, longAddress })
+      JSON.stringify({ latitude, longitude, shortAddress, longAddress }),
     );
   }
 
@@ -96,7 +96,7 @@ export function Pin() {
       <Stack.Screen
         options={{
           headerShown: false,
-          animation: "ios",
+          // animation: "ios",
         }}
       />
 
@@ -132,8 +132,8 @@ export function Pin() {
           style={styles.map}
           logoPosition={{ top: -100, left: 0 }}
           scaleBarEnabled={false}
-          styleURL="mapbox://styles/mapbox/streets-v12"
-          // styleURL="mapbox://styles/mapbox/light-v11"
+          // styleURL="mapbox://styles/mapbox/streets-v12"
+          styleURL="mapbox://styles/mapbox/light-v11"
           onRegionDidChange={() => setIsDragging(true)}
           onTouchStart={() => setIsDragging(false)}
         >

@@ -12,10 +12,24 @@ import {
   handleGetRoomData,
   handleUpdateRoomStatus,
 } from "./useDial";
-import RNCallKeep from "react-native-callkeep";
 import { Alert, Linking } from "react-native";
 import { router } from "expo-router";
 import log from "../log";
+
+let cachedCallKeep = undefined;
+function getCallKeep() {
+  if (cachedCallKeep !== undefined) return cachedCallKeep;
+
+  try {
+    const module = require("react-native-callkeep");
+    cachedCallKeep = module?.default || module;
+  } catch (error) {
+    log.warn("CallKeep unavailable. Join-call setup skipped.", { error });
+    cachedCallKeep = null;
+  }
+
+  return cachedCallKeep;
+}
 
 export default function useJoin(roomId) {
   const peerConnectionRef = useRef(null);
@@ -54,15 +68,18 @@ export default function useJoin(roomId) {
     const subscriptions = [];
 
     (async () => {
-      await RNCallKeep.setup({
-        android: {
-          selfManaged: false,
-          alertTitle: "Allow incoming calls?",
-          alertDescription:
-            "This permission is require to receive incoming call from the passengers.",
-          okButton: "Allow",
-        },
-      });
+      const callKeep = getCallKeep();
+      if (callKeep?.setup) {
+        await callKeep.setup({
+          android: {
+            selfManaged: false,
+            alertTitle: "Allow incoming calls?",
+            alertDescription:
+              "This permission is require to receive incoming call from the passengers.",
+            okButton: "Allow",
+          },
+        });
+      }
 
       const userStream = await mediaDevices
         .getUserMedia({

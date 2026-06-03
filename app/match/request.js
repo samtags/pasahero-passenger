@@ -41,7 +41,7 @@ export default function Request() {
       <>
         <Stack.Screen
           options={{
-            animation: "ios",
+            // animation: "ios",
             headerTitle: () => (
               <Text size={19} weight="bold" color="#353579">
                 Request Ride
@@ -65,7 +65,7 @@ export default function Request() {
     <>
       <Stack.Screen
         options={{
-          animation: "ios",
+          // animation: "ios",
           headerShown: false,
         }}
       />

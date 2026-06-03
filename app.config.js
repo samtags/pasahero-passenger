@@ -9,11 +9,13 @@ module.exports = ({ config }) => {
       eas: {
         projectId: "2edea32b-6502-426d-bbd6-bfbe43e700a5",
       },
+      EXPO_PUBLIC_SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL,
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
     },
     updates: {
       url: "https://u.expo.dev/2edea32b-6502-426d-bbd6-bfbe43e700a5",
     },
-    runtimeVersion: "1.0.12",
+    runtimeVersion: "1.1.3",
     plugins: [
       "expo-router",
       [

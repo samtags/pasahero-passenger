@@ -10,11 +10,27 @@ import db from "../firebase/db";
 import InCallManager from "react-native-incall-manager";
 import uuidv4 from "../util/uuidv4";
 import moment from "moment";
-import RNCallKeep from "react-native-callkeep";
 import { Alert, Linking } from "react-native";
 import { router } from "expo-router";
 import log from "../log";
 import { useFeatureValue } from "@growthbook/growthbook-react";
+
+let cachedCallKeep = undefined;
+function getCallKeep() {
+  if (cachedCallKeep !== undefined) return cachedCallKeep;
+
+  try {
+    const module = require("react-native-callkeep");
+    cachedCallKeep = module?.default || module;
+  } catch (error) {
+    log.warn("CallKeep unavailable. Call feature initialization skipped.", {
+      error,
+    });
+    cachedCallKeep = null;
+  }
+
+  return cachedCallKeep;
+}
 
 export default function useDial(roomId) {
   const timeoutRef = useRef();
@@ -81,15 +97,18 @@ export default function useDial(roomId) {
       const roomRef = await db.collection("rooms").doc(roomId);
       const callerCandidatesCollection = roomRef.collection("callerCandidates");
 
-      await RNCallKeep.setup({
-        android: {
-          selfManaged: false,
-          alertTitle: "Allow incoming calls?",
-          alertDescription:
-            "This permission is require to receive incoming call from the passengers.",
-          okButton: "Allow",
-        },
-      });
+      const callKeep = getCallKeep();
+      if (callKeep?.setup) {
+        await callKeep.setup({
+          android: {
+            selfManaged: false,
+            alertTitle: "Allow incoming calls?",
+            alertDescription:
+              "This permission is require to receive incoming call from the passengers.",
+            okButton: "Allow",
+          },
+        });
+      }
 
       // create stream
       const userStream = await mediaDevices

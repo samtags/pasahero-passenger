@@ -8,14 +8,14 @@ import { useFeatureIsOn } from "@growthbook/growthbook-react";
 export default function TransitSearchFirstRoute() {
   const isEnabledGrabAutoComplete = useFeatureIsOn(
     "enable-grab-auto-complete",
-    false
+    false,
   );
 
   return (
     <>
       <Stack.Screen
         options={{
-          animation: "ios",
+          // animation: "ios",
           headerTitle: () => (
             <Text size={19} weight="bold" color="#353579">
               Meet you at?

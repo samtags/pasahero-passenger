@@ -29,7 +29,7 @@ export default function TransitSearchLastRoute() {
     <>
       <Stack.Screen
         options={{
-          animation: "ios",
+          // animation: "ios",
           headerTitle: () => (
             <Text size={19} weight="bold" color="#353579">
               Going to?

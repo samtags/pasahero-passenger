@@ -5,7 +5,7 @@ export default async function cancelMatchRequest({ id }) {
   log.debug("Initiating cancel match request.", { id });
   try {
     const res = await axios.post(
-      "https://matches-2h6pkmfalq-et.a.run.app/passenger-cancel",
+      "https://passenger-93954675246.asia-southeast1.run.app/trip-cancel",
       { id }
     );
 
