@@ -38,7 +38,7 @@ elsif podfile_properties.key?('ios.flipper') then
 end
 
 # @generated begin @rnmapbox/maps-rnmapboxmapsimpl - expo prebuild (DO NOT MODIFY) sync-3771ee8ee3e2673ecec7f9594cd41374313ef2ac
-$RNMapboxMapsDownloadToken = 'REDACTED'
+$RNMapboxMapsDownloadToken = ENV['EXPO_PUBLIC_MAPBOX_KEY'] || ENV['MAPBOX_DOWNLOADS_TOKEN'] || ''
 # @generated end @rnmapbox/maps-rnmapboxmapsimpl
 target 'PasaHero' do
   use_expo_modules!
