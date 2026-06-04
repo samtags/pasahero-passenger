@@ -24,9 +24,9 @@
 
 ## Overview
 
-PasaHero ang iyong online barker — Aggregator of leading ride-hailing platforms in the Philippines!
+PasaHero is your online barker — an aggregator of leading ride-hailing platforms in the Philippines.
 
-Ang PasaHero system ay ginawa upang hindi na mag double booking ang mga pasahero sa iba’t ibang platform upang mapabilis ang pag hanap ng driver. Sa PasaHero App i-minamatch ng system ang request ng pasahero sa mga PasaHero Driver mula sa iba’t ibang platform tulad ng Angkas, JoyRide, Move It, at iba pa. Isang request lang, kita na sa lahat!
+The PasaHero system was built so passengers no longer double-book across different platforms, making it faster to find a driver. In the PasaHero app, the system matches each passenger request with PasaHero drivers from platforms such as Angkas, JoyRide, Move It, and more. One request — visible on every platform.
 
 ## App features
 
